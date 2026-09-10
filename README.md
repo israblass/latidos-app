@@ -7,9 +7,9 @@ primer escaneo`, `plan latidos-app` y el archivo de tareas de la historia.
 
 ## Estado
 
-Implementada la **Fase 1 — Setup + Registro** (T001-T015). Las fases 2 a 6
-(instalacion PWA, onboarding, escaneo de QR, canje de Beats, QA) todavia no
-estan construidas.
+Implementadas la **Fase 1 — Setup + Registro** (T001-T015) y la **Fase 2 —
+Instalacion PWA** (T016-T022). Las fases 3 a 6 (onboarding, escaneo de QR,
+canje de Beats, QA) todavia no estan construidas.
 
 ## Requisitos
 
@@ -174,15 +174,38 @@ src/
       cuenta-lista/             Destino tras confirmar (puente, se va en Fase 3)
     auth/confirmar/             Destino del enlace del correo
     api/auth/registro/          POST que crea la cuenta
+    sin-conexion/               Pantalla que sirve el service worker sin red
+  components/instalacion/       Prompts de instalacion iOS y Android
+  components/pwa/               Registro del service worker
   components/registro/          Progreso, campo de texto, guardia de paso
+  hooks/use-plataforma.ts       Deteccion de iOS / Android / otro
   hooks/use-registro-form.ts    Estado del registro (solo en memoria)
   lib/supabase/                 Clientes de navegador, servidor y middleware
   lib/usuario/asegurar-perfil.ts Baja los datos del registro a la tabla usuarios
   lib/validacion/registro.ts    Validacion de sintaxis basica de los campos
   types/                        Usuario, TipoUsuario y tipado del esquema
+public/                         manifest.json, service worker e iconos
 supabase/migrations/            SQL del esquema
 scripts/verificar-registro.mjs  V001 contra el Supabase real
 ```
+
+## Instalacion de la PWA
+
+La app es instalable desde el navegador y funciona igual de completa sin
+instalar. Los prompts de instalacion viven sobre la bienvenida y nunca bloquean
+el registro (spec §9 regla 15):
+
+- **iOS**: Safari no expone ninguna API de instalacion, asi que se muestra un
+  modal con los pasos (Compartir -> Agregar a pantalla de inicio -> Agregar).
+- **Android y escritorio**: se captura `beforeinstallprompt` y el boton dispara
+  el dialogo nativo del sistema. Si el navegador no emite ese evento, no se
+  pinta nada: no tiene sentido ofrecer instalar algo que no se va a instalar.
+- Al cerrarlos, el descarte se recuerda una semana y queda un boton discreto
+  "Instalar la app" siempre disponible (spec §10 suposicion 3).
+
+Los iconos de `public/` son un marcador de posicion (linea de pulso amarilla
+sobre el fondo oscuro de la paleta). Hay que reemplazarlos por el arte oficial
+del branding cuando este disponible; el `manifest.json` no cambia.
 
 ## Decisiones de esta fase
 
