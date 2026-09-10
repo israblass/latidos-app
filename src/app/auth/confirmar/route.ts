@@ -17,7 +17,7 @@ import { asegurarPerfil } from "@/lib/usuario/asegurar-perfil";
  *   navegador.
  *
  * Con la sesion ya creada, baja el perfil del `user_metadata` a la tabla
- * `usuarios` y manda a la pantalla de cuenta lista.
+ * `usuarios` y manda al onboarding.
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
@@ -56,5 +56,6 @@ export async function GET(request: NextRequest) {
     return aError("perfil_no_creado");
   }
 
-  return NextResponse.redirect(`${origin}/registro/cuenta-lista`);
+  // El onboarding decide si toca mostrarse o mandar directo a Inicio.
+  return NextResponse.redirect(`${origin}/onboarding/pantalla-1`);
 }

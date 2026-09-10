@@ -7,9 +7,10 @@ primer escaneo`, `plan latidos-app` y el archivo de tareas de la historia.
 
 ## Estado
 
-Implementadas la **Fase 1 — Setup + Registro** (T001-T015) y la **Fase 2 —
-Instalacion PWA** (T016-T022). Las fases 3 a 6 (onboarding, escaneo de QR,
-canje de Beats, QA) todavia no estan construidas.
+Implementadas la **Fase 1 — Setup + Registro** (T001-T015), la **Fase 2 —
+Instalacion PWA** (T016-T022) y la **Fase 3 — Onboarding + Inicio**
+(T023-T033). Las fases 4 a 6 (escaneo de QR, canje de Beats, QA) todavia no
+estan construidas.
 
 ## Requisitos
 
@@ -98,7 +99,10 @@ paso 1..6  ->  POST /api/auth/registro  ->  /registro/confirma-tu-correo
                                             GET /auth/confirmar
                                      (verifica, crea la fila de usuarios)
                                                      v
-                                            /registro/cuenta-lista
+                                     /onboarding/pantalla-1..3
+                                  (Empezar o Saltar marcan onboarding_visto)
+                                                     v
+                                                 /inicio
 ```
 
 Con la confirmacion de correo activada, al terminar el paso 6 la cuenta existe
@@ -174,14 +178,21 @@ src/
       cuenta-lista/             Destino tras confirmar (puente, se va en Fase 3)
     auth/confirmar/             Destino del enlace del correo
     api/auth/registro/          POST que crea la cuenta
+    api/usuario/                Onboarding visto y permiso de notificaciones
+    onboarding/pantalla-1..3/   Onboarding, una sola vez por cuenta
+    inicio/                     Contador de Beats y barra de navegacion
     sin-conexion/               Pantalla que sirve el service worker sin red
   components/instalacion/       Prompts de instalacion iOS y Android
+  components/navegacion/        Barra inferior de 5 tabs
+  components/onboarding/        Carrusel, bloques e iconos del onboarding
   components/pwa/               Registro del service worker
   components/registro/          Progreso, campo de texto, guardia de paso
+  hooks/use-permiso-notificaciones.ts  Permiso de avisos push
   hooks/use-plataforma.ts       Deteccion de iOS / Android / otro
   hooks/use-registro-form.ts    Estado del registro (solo en memoria)
   lib/supabase/                 Clientes de navegador, servidor y middleware
   lib/usuario/asegurar-perfil.ts Baja los datos del registro a la tabla usuarios
+  lib/usuario/sesion.ts         Perfil de la sesion y guardias de pantalla
   lib/validacion/registro.ts    Validacion de sintaxis basica de los campos
   types/                        Usuario, TipoUsuario y tipado del esquema
 public/                         manifest.json, service worker e iconos
@@ -206,6 +217,22 @@ el registro (spec §9 regla 15):
 Los iconos de `public/` son un marcador de posicion (linea de pulso amarilla
 sobre el fondo oscuro de la paleta). Hay que reemplazarlos por el arte oficial
 del branding cuando este disponible; el `manifest.json` no cambia.
+
+## Onboarding
+
+Se muestra una sola vez por cuenta (spec §9 regla 5). Tanto "Empezar" como
+"Saltar" llaman a `/api/usuario/onboarding-completado`, que marca
+`onboarding_visto`; a partir de ahi cualquier intento de volver al onboarding,
+incluso escribiendo la URL, cae en Inicio.
+
+El permiso de notificaciones se pide en la tercera pantalla con un toque
+explicito y no al cargar: Safari exige interaccion de la persona, y un permiso
+pedido de golpe se deniega mas. Negarlo no bloquea nada. Sumar Beats al escanear
+un QR NO dispara push; esa confirmacion ocurre solo en pantalla.
+
+En la barra inferior solo Inicio esta activo. Pulso, Escanear, Beats y Perfil se
+pintan apagados y sin enlace para que la barra ya tenga su forma definitiva sin
+que ningun toque termine en un 404.
 
 ## Decisiones de esta fase
 

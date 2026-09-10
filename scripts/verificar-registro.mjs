@@ -9,7 +9,7 @@
  *      con sesion_token en null, porque el correo aun no esta confirmado.
  *   2. El mismo correo otra vez -> 409 correo_ya_registrado.
  *   3. Datos con formato invalido -> 400 datos_invalidos.
- *   4. Se confirma el correo y se abre /auth/confirmar.
+ *   4. Se confirma el correo y se abre /auth/confirmar, que lleva al onboarding.
  *   5. Queda sesion iniciada y la fila de `usuarios` existe con los datos
  *      declarados y beats_balance en 0.
  *
@@ -398,32 +398,54 @@ const confirmacion = await http(
 const destino = confirmacion.headers.get("location") ?? "";
 
 comprobar(
-  "confirmar el correo redirige a la cuenta lista",
+  "confirmar el correo lleva al onboarding",
   confirmacion.status >= 300 &&
     confirmacion.status < 400 &&
-    destino.includes("/registro/cuenta-lista"),
+    destino.includes("/onboarding/pantalla-1"),
   `se pidio ${destinoConfirmacion.href} y respondio ${confirmacion.status}` +
     (destino ? ` -> ${destino}` : ""),
 );
 
 // --- 5. Sesion y perfil ------------------------------------------------------
 
-const cuentaLista = await http("/registro/cuenta-lista");
-const html = await cuentaLista.text();
-
+const onboarding = await http("/onboarding/pantalla-1");
 comprobar(
   "la sesion queda iniciada tras confirmar",
-  cuentaLista.status === 200,
-  `recibido ${cuentaLista.status}`,
+  onboarding.status === 200,
+  `recibido ${onboarding.status}`,
 );
+
+// El onboarding aun no esta visto, asi que Inicio deberia devolver a el.
+const inicioAntes = await http("/inicio");
 comprobar(
-  "la pantalla saluda con el nombre registrado",
+  "Inicio manda al onboarding mientras no se haya visto",
+  inicioAntes.status >= 300 &&
+    inicioAntes.status < 400 &&
+    (inicioAntes.headers.get("location") ?? "").includes("/onboarding/"),
+  `recibido ${inicioAntes.status} -> ${inicioAntes.headers.get("location") ?? ""}`,
+);
+
+// Cerrar el onboarding (lo mismo que hacen "Empezar" y "Saltar").
+const cierre = await http("/api/usuario/onboarding-completado", { method: "POST" });
+const cuerpoCierre = await cierre.json().catch(() => ({}));
+comprobar(
+  "cerrar el onboarding responde { onboarding_visto: true } (plan §3)",
+  cierre.status === 200 && cuerpoCierre.onboarding_visto === true,
+  `recibido ${cierre.status}: ${JSON.stringify(cuerpoCierre)}`,
+);
+
+const inicio = await http("/inicio");
+const html = await inicio.text();
+
+comprobar("Inicio abre tras cerrar el onboarding", inicio.status === 200, `recibido ${inicio.status}`);
+comprobar(
+  "Inicio saluda con el nombre registrado",
   html.includes(datos.nombre),
 );
-comprobar("el balance arranca en 0 Beats", /empezar con[^0-9]*0[^0-9]*Beats/.test(html));
+comprobar("el balance arranca en 0 Beats", /Beats/.test(html) && />0</.test(html));
 
-// Esa pantalla lee la fila de `usuarios` con la sesion del propio usuario: si
-// el insert o RLS hubieran fallado, no habria nombre ni balance que mostrar.
+// Inicio lee la fila de `usuarios` con la sesion del propio usuario: si el
+// insert o RLS hubieran fallado, no habria nombre ni balance que mostrar.
 
 console.log(
   `\nUsuario de prueba: ${usuarioId} (${correo}).` +

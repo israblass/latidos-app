@@ -70,7 +70,7 @@ export default function PasoContrasena() {
       // es lo normal con la confirmacion activada. Con token, la sesion ya
       // quedo iniciada y se puede seguir de largo.
       router.replace(
-        sesion_token ? "/registro/cuenta-lista" : "/registro/confirma-tu-correo",
+        sesion_token ? "/onboarding/pantalla-1" : "/registro/confirma-tu-correo",
       );
       router.refresh();
     } catch {
