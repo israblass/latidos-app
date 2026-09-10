@@ -24,28 +24,69 @@ cp .env.example .env.local   # completa la URL y la anon key de Supabase
 npm run dev
 ```
 
-En el proyecto de Supabase:
+### Configuracion del proyecto de Supabase
 
-1. Aplica `supabase/migrations/20260910120000_usuarios.sql` (tabla `usuarios`,
-   enum `tipo_usuario`, triggers y politicas RLS).
-2. En **Authentication → Providers → Email**, deja *Confirm email* **encendido**.
-3. En **Authentication → URL Configuration**, pon el *Site URL* del entorno
-   (`http://localhost:3000` en local) y agrega `<site>/auth/confirmar` a las
-   *Redirect URLs*.
-4. En **Authentication → Emails → Confirm signup**, cambia el enlace de la
-   plantilla para que apunte a la ruta propia con el hash del token:
+Los cuatro pasos van por el panel. Ni la anon key ni la service-role key sirven
+para esto: cambiar ajustes de Auth y plantillas de correo requiere la
+Management API con un personal access token, y la migracion requiere acceso a
+la base. Por el panel es mas rapido y no obliga a crear tokens nuevos.
 
-   ```html
-   <a href="{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=signup">
-     Confirmar mi correo
-   </a>
-   ```
+**1. Aplicar la migracion**
 
-   La plantilla por defecto usa `{{ .ConfirmationURL }}`, que vuelve con un
-   `code` de PKCE y solo funciona en el mismo navegador donde se hizo el
-   registro. Con `{{ .TokenHash }}` la confirmacion funciona aunque la persona
-   abra el correo desde otro telefono. `/auth/confirmar` acepta las dos formas,
-   asi que la plantilla por defecto no rompe nada, pero limita el flujo.
+Panel -> **SQL Editor** -> *New query*. Pega el contenido completo de
+`supabase/migrations/20260910120000_usuarios.sql` y dale *Run*.
+
+El archivo es idempotente: si lo corres dos veces no falla ni duplica nada.
+Deberia terminar con `Success. No rows returned`. Para comprobarlo:
+
+```sql
+select tablename, policyname from pg_policies where tablename = 'usuarios';
+```
+
+Tienen que salir tres filas: `usuarios_select_propio`, `usuarios_insert_propio`
+y `usuarios_update_propio`.
+
+**2. Encender la confirmacion de correo**
+
+Panel -> **Authentication** -> **Sign In / Providers** -> **Email**.
+Enciende *Confirm email* y dale *Save*.
+
+(En paneles mas viejos el mismo interruptor esta en *Authentication ->
+Providers -> Email*.)
+
+**3. Site URL y Redirect URLs**
+
+Panel -> **Authentication** -> **URL Configuration**.
+
+- *Site URL*: `http://localhost:3000` mientras se trabaja en local. Cuando haya
+  deploy, el dominio real (`https://latidos.app`).
+- *Redirect URLs* -> *Add URL*: agrega `http://localhost:3000/auth/confirmar`.
+  Agrega tambien el del dominio real cuando exista.
+
+Sin esa entrada, Supabase ignora el `emailRedirectTo` que manda la app y
+devuelve al Site URL pelado, asi que la confirmacion no llega a la ruta.
+
+**4. Plantilla del correo con TokenHash**
+
+Panel -> **Authentication** -> **Emails** (o *Email Templates*) ->
+pestaña **Confirm signup**. Reemplaza el enlace del cuerpo por:
+
+```html
+<a href="{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=signup">
+  Confirmar mi correo
+</a>
+```
+
+Dale *Save*.
+
+Esto no es opcional. La plantilla por defecto usa `{{ .ConfirmationURL }}`, que
+vuelve con un `code` de PKCE cuyo verificador vive en una cookie del navegador
+donde se hizo el registro. Si la persona se registra en el telefono y abre el
+correo en la laptop, la confirmacion falla. La spec (§9 regla 4 y criterio 7b)
+pide explicitamente que se pueda confirmar desde otro dispositivo, y
+`{{ .TokenHash }}` es lo que lo permite. `/auth/confirmar` acepta las dos
+formas, asi que la plantilla por defecto no rompe el caso de un solo
+dispositivo, pero incumple la spec.
 
 ## Flujo de registro
 
@@ -74,9 +115,14 @@ npm run dev                    # en una terminal
 npm run verificar:registro     # en otra
 ```
 
-Recorre V001 contra el Supabase configurado: contrato del plan §3, 409 por
-correo repetido, 400 por formato invalido, confirmacion del correo, sesion
-iniciada y perfil creado con 0 Beats. Con `SUPABASE_SERVICE_ROLE_KEY` en el
+Antes de empezar comprueba que *Confirm email* este encendido y que la tabla
+`usuarios` exista, y para si falta alguna de las dos. Despues recorre V001
+contra el Supabase configurado: contrato del plan §3, 409 por correo repetido,
+400 por formato invalido, confirmacion del correo, sesion iniciada y perfil
+creado con 0 Beats.
+
+Las Redirect URLs y la plantilla del correo no se pueden comprobar por API; si
+la confirmacion falla, revisa esos dos puntos primero. Con `SUPABASE_SERVICE_ROLE_KEY` en el
 entorno pide el enlace de confirmacion por la API de admin; sin ella, se
 detiene y pide que se pegue el enlace que llego al buzon.
 

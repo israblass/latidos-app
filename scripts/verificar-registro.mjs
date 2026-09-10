@@ -138,6 +138,55 @@ console.log(`Correo de prueba: ${correo}\n`);
 
 const http = crearSesionHttp();
 
+// --- 0. Preflight: el proyecto esta configurado como espera este flujo -------
+
+async function preflight() {
+  let ajustes;
+  try {
+    const respuesta = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
+      headers: { apikey: ANON_KEY },
+    });
+    ajustes = await respuesta.json();
+  } catch (error) {
+    console.error(`No se pudo hablar con ${SUPABASE_URL}: ${error.message}`);
+    console.error("Revisa la URL, la anon key y que la red alcance el proyecto.");
+    process.exit(1);
+  }
+
+  // mailer_autoconfirm en true significa que Supabase confirma solo, es decir
+  // que "Confirm email" esta APAGADO. Este flujo lo necesita encendido.
+  if (ajustes.mailer_autoconfirm === true) {
+    console.error(
+      "Configuracion: 'Confirm email' esta apagado en Supabase Auth.\n" +
+        "Enciendelo en Authentication -> Sign In / Providers -> Email.",
+    );
+    process.exit(1);
+  }
+  console.log("PASA   preflight: 'Confirm email' esta encendido");
+
+  const tabla = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?select=id&limit=1`, {
+    headers: { apikey: ANON_KEY },
+  });
+  if (tabla.status === 404 || tabla.status === 400) {
+    const detalle = await tabla.json().catch(() => ({}));
+    console.error(
+      "Configuracion: la tabla 'usuarios' no responde.\n" +
+        "Aplica supabase/migrations/20260910120000_usuarios.sql en el SQL Editor.\n" +
+        `Detalle: ${JSON.stringify(detalle)}`,
+    );
+    process.exit(1);
+  }
+  console.log("PASA   preflight: la tabla 'usuarios' existe\n");
+
+  console.log(
+    "Nota: la API no permite comprobar las Redirect URLs ni la plantilla del\n" +
+      "correo. Si la confirmacion falla, revisa que /auth/confirmar este en las\n" +
+      "Redirect URLs y que la plantilla use {{ .TokenHash }}.\n",
+  );
+}
+
+await preflight();
+
 // --- 1. Registro -------------------------------------------------------------
 
 const registro = await http("/api/auth/registro", {

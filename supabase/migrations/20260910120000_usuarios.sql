@@ -1,10 +1,19 @@
 -- Latidos App - Fase 1
 -- Tabla de perfil de usuario final (T003) y politicas RLS basicas (T004).
 
--- Tipo de usuario autodeclarado. Exactamente tres valores (spec §9 regla 3).
-create type public.tipo_usuario as enum ('estudiante_ucv', 'egresado', 'externo');
+-- Escrita para poder pegarse tal cual en el SQL Editor del panel de Supabase
+-- mas de una vez sin romperse.
 
-create table public.usuarios (
+-- Tipo de usuario autodeclarado. Exactamente tres valores (spec §9 regla 3).
+do $$
+begin
+  create type public.tipo_usuario as enum ('estudiante_ucv', 'egresado', 'externo');
+exception
+  when duplicate_object then null;
+end;
+$$;
+
+create table if not exists public.usuarios (
   id uuid primary key references auth.users (id) on delete cascade,
 
   -- Datos autodeclarados: en esta fase no se validan contra ningun padron
@@ -34,7 +43,7 @@ create table public.usuarios (
 comment on column public.usuarios.cedula is
   'Autodeclarada, sin validacion contra padron y sin unique en Fase 1.';
 
-create index usuarios_cedula_idx on public.usuarios (cedula);
+create index if not exists usuarios_cedula_idx on public.usuarios (cedula);
 
 -- updated_at automatico
 create or replace function public.tocar_updated_at()
@@ -47,6 +56,7 @@ begin
 end;
 $$;
 
+drop trigger if exists usuarios_updated_at on public.usuarios;
 create trigger usuarios_updated_at
   before update on public.usuarios
   for each row
@@ -69,6 +79,7 @@ begin
 end;
 $$;
 
+drop trigger if exists usuarios_proteger_beats_balance on public.usuarios;
 create trigger usuarios_proteger_beats_balance
   before update on public.usuarios
   for each row
@@ -77,16 +88,19 @@ create trigger usuarios_proteger_beats_balance
 -- RLS: cada usuario solo ve y toca su propia fila (constitution §9).
 alter table public.usuarios enable row level security;
 
+drop policy if exists "usuarios_select_propio" on public.usuarios;
 create policy "usuarios_select_propio"
   on public.usuarios for select
   to authenticated
   using (auth.uid() = id);
 
+drop policy if exists "usuarios_insert_propio" on public.usuarios;
 create policy "usuarios_insert_propio"
   on public.usuarios for insert
   to authenticated
   with check (auth.uid() = id);
 
+drop policy if exists "usuarios_update_propio" on public.usuarios;
 create policy "usuarios_update_propio"
   on public.usuarios for update
   to authenticated
