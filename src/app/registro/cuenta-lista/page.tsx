@@ -4,17 +4,13 @@ import { redirect } from "next/navigation";
 import { crearClienteServidor } from "@/lib/supabase/server";
 
 /**
- * Confirmacion de cuenta creada.
+ * Destino tras confirmar el correo.
  *
- * Es una pantalla puente de Fase 1: en el flujo final (Fase 3, T023-T031) el
- * registro desemboca en el onboarding de 3 pantallas y de ahi a Inicio. Existe
- * para que el cierre del registro sea verificable end-to-end sin adelantar
- * trabajo de fases posteriores.
- *
- * Al leerse en el servidor tambien demuestra que la sesion quedo persistida en
- * cookies: sin sesion, esta ruta manda de vuelta al paso 1.
+ * Puente temporal de Fase 1: en Fase 3 (T023-T031) aqui empieza el onboarding
+ * de 3 pantallas. Existe para que el registro sea verificable de punta a punta
+ * sin adelantar trabajo de fases posteriores.
  */
-export default async function RegistroListo() {
+export default async function CuentaLista() {
   const supabase = crearClienteServidor();
 
   const {
@@ -22,7 +18,7 @@ export default async function RegistroListo() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/registro/paso-1");
+    redirect("/registro/confirma-tu-correo");
   }
 
   const { data: usuario } = await supabase
@@ -33,7 +29,7 @@ export default async function RegistroListo() {
 
   return (
     <main className="flex min-h-dvh flex-col justify-center px-5 pb-8 pt-4">
-      <p className="etiqueta">Cuenta creada</p>
+      <p className="etiqueta">Correo confirmado</p>
       <h1 className="titulo-pantalla mt-3">
         Bienvenido a Latidos{usuario?.nombre ? `, ${usuario.nombre}` : ""}
       </h1>

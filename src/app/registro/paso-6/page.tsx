@@ -10,10 +10,20 @@ import { useRegistroForm } from "@/hooks/use-registro-form";
 import { contrasenaSchema, primerError } from "@/lib/validacion/registro";
 
 interface RespuestaError {
-  codigo?: string;
+  error?: string;
   mensaje?: string;
   campos?: Record<string, string>;
 }
+
+interface RespuestaRegistro {
+  usuario_id: string;
+  sesion_token: string | null;
+}
+
+const MENSAJES_ERROR: Record<string, string> = {
+  correo_ya_registrado: "Ese correo ya tiene una cuenta en Latidos.",
+  datos_invalidos: "Revisa los datos e intenta de nuevo.",
+};
 
 export default function PasoContrasena() {
   const router = useRouter();
@@ -46,17 +56,22 @@ export default function PasoContrasena() {
       if (!respuesta.ok) {
         const detalle = (await respuesta.json()) as RespuestaError;
         setErrorGeneral(
-          detalle.mensaje ??
-            Object.values(detalle.campos ?? {})[0] ??
+          Object.values(detalle.campos ?? {})[0] ??
+            MENSAJES_ERROR[detalle.error ?? ""] ??
             "No pudimos crear tu cuenta. Intenta de nuevo.",
         );
         setEnviando(false);
         return;
       }
 
-      // La respuesta ya trae las cookies de sesion: la sesion queda iniciada.
-      // `refresh` hace que el servidor vuelva a leer la sesion recien creada.
-      router.replace("/registro/listo");
+      const { sesion_token } = (await respuesta.json()) as RespuestaRegistro;
+
+      // Sin `sesion_token` la cuenta existe pero falta confirmar el correo, que
+      // es lo normal con la confirmacion activada. Con token, la sesion ya
+      // quedo iniciada y se puede seguir de largo.
+      router.replace(
+        sesion_token ? "/registro/cuenta-lista" : "/registro/confirma-tu-correo",
+      );
       router.refresh();
     } catch {
       setErrorGeneral("Revisa tu conexion e intenta de nuevo.");
