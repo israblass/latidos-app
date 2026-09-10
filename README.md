@@ -122,7 +122,27 @@ contra el Supabase configurado: contrato del plan §3, 409 por correo repetido,
 creado con 0 Beats.
 
 Las Redirect URLs y la plantilla del correo no se pueden comprobar por API; si
-la confirmacion falla, revisa esos dos puntos primero. Con `SUPABASE_SERVICE_ROLE_KEY` en el
+la confirmacion falla, revisa esos dos puntos primero.
+
+**El correo de prueba.** Por defecto el script inventa una direccion con marca
+de tiempo, que solo sirve si el correo de verdad sale del proveedor. Resend sin
+dominio verificado unicamente entrega a la direccion con la que se abrio la
+cuenta, asi que en ese caso hay que fijar la propia en `.env.local`:
+
+```
+CORREO_PRUEBA_QA=tu-correo@dominio.com
+```
+
+Un correo fijo solo sirve una vez: en la siguiente corrida esa cuenta ya existe
+y el registro responde 409. El script lo detecta y avisa; borra el usuario en
+**Authentication -> Users** antes de repetir.
+
+**Como llega el enlace de confirmacion.** El script lo consigue de tres formas,
+en este orden: `SUPABASE_SERVICE_ROLE_KEY` en el entorno (lo pide por la API de
+admin, sin abrir el buzon), `ENLACE_CONFIRMACION` con el enlace ya copiado (util
+en CI), o preguntandolo por terminal para pegarlo a mano. Sin terminal
+interactiva y sin ninguna de las dos variables, se detiene con un mensaje en vez
+de quedarse esperando. Con `SUPABASE_SERVICE_ROLE_KEY` en el
 entorno pide el enlace de confirmacion por la API de admin; sin ella, se
 detiene y pide que se pegue el enlace que llego al buzon.
 

@@ -28,7 +28,14 @@
  *
  * Variables opcionales:
  *   BASE_URL  (default http://localhost:3000)
- *   CORREO_PRUEBA  correo a usar; si no, se genera uno con marca de tiempo
+ *   CORREO_PRUEBA_QA  correo real al que se manda la confirmacion. Hace falta
+ *     cuando el proveedor de correo solo entrega a direcciones conocidas: Resend
+ *     sin dominio verificado unicamente escribe a la direccion con la que se
+ *     abrio la cuenta, asi que un correo inventado nunca llega. Si no se define,
+ *     el script genera uno con marca de tiempo (sirve solo si el correo de
+ *     verdad sale, o en modo automatico con service-role).
+ *   ENLACE_CONFIRMACION  el enlace del correo, para correr sin terminal
+ *     interactiva (CI, o si prefieres no pegarlo a mano).
  */
 
 import { createInterface } from "node:readline/promises";
@@ -121,7 +128,9 @@ function crearSesionHttp() {
 
 // --- Datos de la prueba ------------------------------------------------------
 
-const correo = process.env.CORREO_PRUEBA ?? `qa-latidos-${Date.now()}@ejemplo.com`;
+// CORREO_PRUEBA queda como alias del nombre anterior de la variable.
+const correoFijo = process.env.CORREO_PRUEBA_QA ?? process.env.CORREO_PRUEBA ?? null;
+const correo = correoFijo ?? `qa-latidos-${Date.now()}@ejemplo.com`;
 const contrasena = "prueba-latidos-1";
 const datos = {
   cedula: "V-12345678",
@@ -134,7 +143,9 @@ const datos = {
 };
 
 console.log(`V001 contra ${BASE_URL} / ${SUPABASE_URL}`);
-console.log(`Correo de prueba: ${correo}\n`);
+console.log(
+  `Correo de prueba: ${correo}${correoFijo ? " (fijo, via CORREO_PRUEBA_QA)" : " (generado)"}\n`,
+);
 
 const http = crearSesionHttp();
 
@@ -195,6 +206,18 @@ const registro = await http("/api/auth/registro", {
   body: JSON.stringify(datos),
 });
 const cuerpoRegistro = await registro.json();
+
+// Un correo fijo solo sirve una vez: en la segunda corrida la cuenta ya existe
+// y el registro responde 409. Vale la pena decirlo claro en vez de dejar que
+// todos los chequeos siguientes fallen sin explicacion.
+if (correoFijo && registro.status === 409) {
+  console.error(
+    `El correo ${correo} ya tiene cuenta de una corrida anterior.\n` +
+      "Borra ese usuario en el panel (Authentication -> Users -> ... -> Delete user)\n" +
+      "y vuelve a correr, o usa otro correo en CORREO_PRUEBA_QA.",
+  );
+  process.exit(1);
+}
 
 comprobar(
   "el registro responde 201",
@@ -269,12 +292,35 @@ async function enlaceDeConfirmacion() {
     return `${BASE_URL}/auth/confirmar?token_hash=${hash}&type=signup`;
   }
 
+  if (process.env.ENLACE_CONFIRMACION) {
+    return process.env.ENLACE_CONFIRMACION.trim();
+  }
+
+  if (!process.stdin.isTTY) {
+    throw new Error(
+      "no hay terminal interactiva para pedir el enlace. Pasa el enlace en " +
+        "ENLACE_CONFIRMACION, o define SUPABASE_SERVICE_ROLE_KEY para obtenerlo solo.",
+    );
+  }
+
   const lectura = createInterface({ input: process.stdin, output: process.stdout });
-  const pegado = await lectura.question(
-    `\nAbre el correo enviado a ${correo} y pega aqui el enlace de confirmacion:\n> `,
-  );
-  lectura.close();
-  return pegado.trim();
+  try {
+    const pegado = await Promise.race([
+      lectura.question(
+        `\nAbre el correo enviado a ${correo} y pega aqui el enlace de confirmacion:\n> `,
+      ),
+      // Si la entrada se cierra (Ctrl-D, stdin agotado), `question` se queda
+      // colgada para siempre en vez de resolver. Esto lo convierte en un error.
+      new Promise((_, rechazar) =>
+        lectura.once("close", () =>
+          rechazar(new Error("la entrada se cerro sin recibir el enlace")),
+        ),
+      ),
+    ]);
+    return String(pegado).trim();
+  } finally {
+    lectura.close();
+  }
 }
 
 let enlace;
@@ -316,7 +362,11 @@ comprobar("el balance arranca en 0 Beats", /empezar con[^0-9]*0[^0-9]*Beats/.tes
 // el insert o RLS hubieran fallado, no habria nombre ni balance que mostrar.
 
 console.log(
-  `\nUsuario de prueba: ${usuarioId} (${correo}). Borralo desde el panel de Supabase cuando termines.`,
+  `\nUsuario de prueba: ${usuarioId} (${correo}).` +
+    (correoFijo
+      ? "\nBorralo en Authentication -> Users antes de volver a correr, o la\n" +
+        "proxima corrida chocara contra el 409 de correo ya registrado."
+      : "\nBorralo desde el panel de Supabase cuando termines."),
 );
 console.log(fallos === 0 ? "\nV001: todo pasa." : `\nV001: ${fallos} fallo(s).`);
 process.exit(fallos === 0 ? 0 : 1);
