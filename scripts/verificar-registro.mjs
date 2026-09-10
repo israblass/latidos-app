@@ -323,6 +323,49 @@ async function enlaceDeConfirmacion() {
   }
 }
 
+/**
+ * Lleva el enlace pegado a la app que se esta verificando.
+ *
+ * El enlace del correo apunta al Site URL configurado en Supabase, que no tiene
+ * por que ser el servidor local: si ahi dice `https://latidos.app` y ese dominio
+ * todavia no esta desplegado, pedirlo tal cual devuelve un 404 que no dice nada
+ * del codigo. Aqui se conserva solo la ruta y los parametros, y se apuntan a
+ * BASE_URL.
+ */
+function normalizarEnlace(pegado) {
+  const limpio = pegado.trim();
+
+  let url;
+  try {
+    url = new URL(limpio, BASE_URL);
+  } catch {
+    throw new Error(`no parece un enlace: ${limpio}`);
+  }
+
+  if (url.pathname.includes("/auth/v1/verify")) {
+    throw new Error(
+      "ese enlace es el de la plantilla por defecto de Supabase " +
+        "({{ .ConfirmationURL }}), que solo funciona en el navegador donde se " +
+        "hizo el registro.\nCambia la plantilla de 'Confirm signup' para que " +
+        "apunte a {{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=signup",
+    );
+  }
+
+  if (!url.pathname.includes("/auth/confirmar")) {
+    throw new Error(
+      `el enlace no apunta a /auth/confirmar sino a ${url.pathname}.\n` +
+        "Si tu proveedor de correo reescribe los enlaces (el click tracking de " +
+        "Resend lo hace), apagalo o copia el enlace final tras seguir el " +
+        "redirect en el navegador.",
+    );
+  }
+
+  return {
+    destino: new URL(url.pathname + url.search, BASE_URL),
+    origen: url.origin,
+  };
+}
+
 let enlace;
 try {
   enlace = await enlaceDeConfirmacion();
@@ -331,7 +374,27 @@ try {
   process.exit(1);
 }
 
-const confirmacion = await http(enlace.replace(BASE_URL, ""));
+let destinoConfirmacion;
+try {
+  const normalizado = normalizarEnlace(enlace);
+  destinoConfirmacion = normalizado.destino;
+
+  if (normalizado.origen !== new URL(BASE_URL).origin) {
+    console.log(
+      `\nAviso: el enlace apunta a ${normalizado.origen}, no a ${BASE_URL}.\n` +
+        "Se reescribio para probar contra el servidor local, pero revisa el\n" +
+        "Site URL en Authentication -> URL Configuration: tal como esta, el\n" +
+        "enlace que reciben las personas no llega a esta app.\n",
+    );
+  }
+} catch (error) {
+  comprobar("el enlace de confirmacion es utilizable", false, error.message);
+  process.exit(1);
+}
+
+const confirmacion = await http(
+  destinoConfirmacion.pathname + destinoConfirmacion.search,
+);
 const destino = confirmacion.headers.get("location") ?? "";
 
 comprobar(
@@ -339,7 +402,8 @@ comprobar(
   confirmacion.status >= 300 &&
     confirmacion.status < 400 &&
     destino.includes("/registro/cuenta-lista"),
-  `recibido ${confirmacion.status} -> ${destino}`,
+  `se pidio ${destinoConfirmacion.href} y respondio ${confirmacion.status}` +
+    (destino ? ` -> ${destino}` : ""),
 );
 
 // --- 5. Sesion y perfil ------------------------------------------------------

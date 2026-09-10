@@ -137,6 +137,13 @@ Un correo fijo solo sirve una vez: en la siguiente corrida esa cuenta ya existe
 y el registro responde 409. El script lo detecta y avisa; borra el usuario en
 **Authentication -> Users** antes de repetir.
 
+**Si la confirmacion devuelve 404.** El enlace del correo apunta al *Site URL*
+configurado en Supabase. Si ahi dice el dominio de produccion y todavia no hay
+nada desplegado, el enlace no llega a esta app: ni en la verificacion ni para
+las personas que se registren. El script reescribe el enlace al servidor local
+para poder seguir, pero avisa cuando el origen no coincide. Cuando aparezca ese
+aviso, corrige el *Site URL* en **Authentication -> URL Configuration**.
+
 **Como llega el enlace de confirmacion.** El script lo consigue de tres formas,
 en este orden: `SUPABASE_SERVICE_ROLE_KEY` en el entorno (lo pide por la API de
 admin, sin abrir el buzon), `ENLACE_CONFIRMACION` con el enlace ya copiado (util
