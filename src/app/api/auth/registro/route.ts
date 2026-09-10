@@ -64,8 +64,29 @@ export async function POST(request: Request) {
     if (yaRegistrado) {
       return NextResponse.json({ error: "correo_ya_registrado" }, { status: 409 });
     }
+
+    // Queda en el log del servidor: el cliente solo ve un mensaje corto, y sin
+    // esto no hay forma de saber que fallo realmente.
+    console.error("[registro] signUp fallo:", {
+      codigo: errorAuth.code,
+      estado: errorAuth.status,
+      mensaje: errorAuth.message,
+    });
+
+    // Supabase manda el correo de confirmacion durante el signUp. Si el
+    // proveedor de correo lo rechaza (dominio sin verificar, destinatario no
+    // permitido, credenciales SMTP mal puestas), la cuenta no se crea y el
+    // error llega aqui como un fallo generico. Vale la pena distinguirlo: no
+    // es un problema de los datos del formulario.
+    const falloElCorreo = /confirmation email|sending email|smtp/i.test(
+      errorAuth.message ?? "",
+    );
+
     return NextResponse.json(
-      { error: "error_servidor", mensaje: errorAuth.message },
+      {
+        error: falloElCorreo ? "correo_no_enviado" : "error_servidor",
+        mensaje: errorAuth.message,
+      },
       { status: 500 },
     );
   }

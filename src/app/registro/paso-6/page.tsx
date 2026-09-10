@@ -23,6 +23,8 @@ interface RespuestaRegistro {
 const MENSAJES_ERROR: Record<string, string> = {
   correo_ya_registrado: "Ese correo ya tiene una cuenta en Latidos.",
   datos_invalidos: "Revisa los datos e intenta de nuevo.",
+  correo_no_enviado:
+    "No pudimos enviarte el correo de confirmacion. Intenta mas tarde.",
 };
 
 export default function PasoContrasena() {

@@ -2,12 +2,15 @@
  * Service worker de Latidos.
  *
  * Cachea el shell de la app para que abra rapido y muestre algo util sin
- * conexion (constitution §9: "la app debe mostrar datos cacheados si no hay
- * conexion"). Deliberadamente simple: las estrategias por tipo de contenido
- * que necesitan Pulso y el escaneo llegan con sus propias fases.
+ * conexion (constitution §9). Deliberadamente simple: las estrategias por tipo
+ * de contenido que necesitan Pulso y el escaneo llegan con sus propias fases.
+ *
+ * Regla de oro: este archivo solo se mete con lo que sabe manejar. Todo lo
+ * demas pasa de largo sin tocarlo, porque un service worker que intercepta mal
+ * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 
@@ -41,51 +44,104 @@ self.addEventListener("activate", (evento) => {
   );
 });
 
-/** Peticiones que nunca deben pasar por cache. */
-function seIgnora(peticion, url) {
-  return (
-    peticion.method !== "GET" ||
-    !url.protocol.startsWith("http") ||
-    url.origin !== self.location.origin ||
-    // Nada de la API: las transacciones se validan siempre contra el servidor.
-    url.pathname.startsWith("/api/") ||
-    url.pathname.startsWith("/auth/") ||
-    // Recarga en caliente del servidor de desarrollo.
-    url.pathname.startsWith("/_next/webpack-hmr")
-  );
+/**
+ * Recursos que este service worker puede cachear sin riesgo: archivos
+ * estaticos, con nombre versionado y sin parametros.
+ *
+ * Es una lista de permitidos y no de prohibidos a proposito. Con una lista de
+ * prohibidos, cualquier cosa que no se hubiera previsto caia en la rama de
+ * cache: fue lo que paso con los payloads RSC de Next (`?_rsc=...`), que se
+ * intentaban cachear y terminaban rompiendo la navegacion entre los pasos del
+ * registro.
+ */
+function sePuedeCachear(url) {
+  // Con parametros no se cachea: distinguen contenido dinamico (los `?_rsc=`
+  // de Next, los `?v=` del servidor de desarrollo) y ensucian el cache.
+  if (url.search) return false;
+
+  if (url.pathname.startsWith("/_next/static/")) return true;
+
+  return /\.(?:png|jpg|jpeg|svg|webp|gif|ico|woff2?)$/.test(url.pathname);
+}
+
+/** Navegacion: la red manda; sin señal, la pantalla propia de sin conexion. */
+async function resolverNavegacion(peticion) {
+  try {
+    return await fetch(peticion);
+  } catch {
+    const cache = await caches.open(CACHE_SHELL);
+    const sinConexion = await cache.match(RUTA_SIN_CONEXION);
+    if (sinConexion) return sinConexion;
+
+    // Nunca `Response.error()`: el navegador lo reporta como error de red y la
+    // pestaña queda en blanco. Mejor una respuesta de verdad.
+    return new Response("Sin conexion", {
+      status: 503,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
+}
+
+/** Estatico: se sirve lo cacheado y se refresca por detras. */
+async function resolverEstatico(peticion) {
+  const cache = await caches.open(CACHE_SHELL);
+  const cacheada = await cache.match(peticion);
+
+  if (cacheada) {
+    // Refresco en segundo plano: si falla, no afecta a esta respuesta.
+    fetch(peticion)
+      .then((respuesta) => {
+        if (respuesta.ok) return cache.put(peticion, respuesta.clone());
+      })
+      .catch(() => null);
+    return cacheada;
+  }
+
+  try {
+    const respuesta = await fetch(peticion);
+    // `cache.put` puede rechazar (respuestas parciales, opacas). Que falle el
+    // guardado no puede tumbar la respuesta que ya se tiene.
+    if (respuesta.ok) {
+      cache.put(peticion, respuesta.clone()).catch(() => null);
+    }
+    return respuesta;
+  } catch {
+    return new Response("", { status: 504, statusText: "Sin conexion" });
+  }
 }
 
 self.addEventListener("fetch", (evento) => {
-  const url = new URL(evento.request.url);
-  if (seIgnora(evento.request, url)) return;
+  const peticion = evento.request;
 
-  // Navegaciones: primero la red, para no servir pantallas viejas. Si no hay
-  // señal, se responde con la pantalla de sin conexion.
-  if (evento.request.mode === "navigate") {
-    evento.respondWith(
-      fetch(evento.request).catch(async () => {
-        const cache = await caches.open(CACHE_SHELL);
-        return (
-          (await cache.match(evento.request)) ??
-          (await cache.match(RUTA_SIN_CONEXION)) ??
-          Response.error()
-        );
-      }),
-    );
+  // Escrituras (POST, PATCH, DELETE...) van directas a la red, siempre. Aqui
+  // entran /api/auth/registro y el resto de la API: son transacciones, no
+  // archivos, y el servidor tiene que verlas todas.
+  if (peticion.method !== "GET") return;
+
+  let url;
+  try {
+    url = new URL(peticion.url);
+  } catch {
     return;
   }
 
-  // Estaticos: se sirve lo cacheado y se refresca por detras.
-  evento.respondWith(
-    caches.open(CACHE_SHELL).then(async (cache) => {
-      const cacheada = await cache.match(evento.request);
-      const desdeRed = fetch(evento.request)
-        .then((respuesta) => {
-          if (respuesta.ok) cache.put(evento.request, respuesta.clone());
-          return respuesta;
-        })
-        .catch(() => cacheada);
-      return cacheada ?? desdeRed;
-    }),
-  );
+  if (url.origin !== self.location.origin) return;
+  if (!url.protocol.startsWith("http")) return;
+
+  // La API y el flujo de confirmacion nunca se cachean ni se interceptan.
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/")) {
+    return;
+  }
+
+  if (peticion.mode === "navigate") {
+    evento.respondWith(resolverNavegacion(peticion));
+    return;
+  }
+
+  if (sePuedeCachear(url)) {
+    evento.respondWith(resolverEstatico(peticion));
+  }
+
+  // Cualquier otra cosa (payloads RSC, HMR del servidor de desarrollo, lo que
+  // venga) sigue su camino sin que este archivo la toque.
 });

@@ -214,6 +214,12 @@ el registro (spec §9 regla 15):
 - Al cerrarlos, el descarte se recuerda una semana y queda un boton discreto
   "Instalar la app" siempre disponible (spec §10 suposicion 3).
 
+El service worker solo intercepta lo que sabe manejar: navegaciones y archivos
+estaticos sin parametros. Todo lo demas (escrituras, la API, los payloads RSC de
+Next) pasa de largo sin que lo toque. Es una lista de permitidos y no de
+prohibidos a proposito: con una lista de prohibidos, cualquier tipo de peticion
+no previsto caia en la rama de cache y se rompia.
+
 Los iconos de `public/` son un marcador de posicion (linea de pulso amarilla
 sobre el fondo oscuro de la paleta). Hay que reemplazarlos por el arte oficial
 del branding cuando este disponible; el `manifest.json` no cambia.
