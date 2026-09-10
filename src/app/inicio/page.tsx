@@ -7,9 +7,11 @@ import { exigirPerfil } from "@/lib/usuario/sesion";
  * Pantalla de Inicio (T032).
  *
  * El contador de Beats es la firma visual de la app (constitution §2): numero
- * grande en Anton amarillo, lo primero que se ve. Recien registrada la persona,
- * marca cero, y el onboarding que acaba de ver le dio el contexto de por que
- * ese numero va a empezar a moverse.
+ * grande en Anton amarillo, lo primero que se ve. Sobre la base clara el
+ * amarillo puro pierde contraste, asi que el numero vive dentro de una card
+ * oscura que lo sostiene. Recien registrada la persona marca cero, y el
+ * onboarding que acaba de ver le dio el contexto de por que ese numero va a
+ * empezar a moverse.
  */
 export default async function Inicio() {
   const perfil = await exigirPerfil();
@@ -31,14 +33,16 @@ export default async function Inicio() {
 
         <section
           aria-label="Tu balance de Beats"
-          className="flex flex-1 flex-col items-center justify-center text-center"
+          className="flex flex-1 flex-col items-center justify-center"
         >
-          <p className="font-display text-[72px] leading-none text-primario">
-            {perfil.beats_balance}
-          </p>
-          <p className="etiqueta mt-1">Beats</p>
+          <div className="bloque-oscuro w-full px-6 py-10 text-center shadow-elevado">
+            <p className="font-display text-[72px] leading-none text-primario">
+              {perfil.beats_balance}
+            </p>
+            <p className="etiqueta mt-1 text-white/70">Beats</p>
+          </div>
 
-          <p className="mt-6 max-w-[16rem] text-texto-secundario">
+          <p className="mt-6 max-w-[16rem] text-center text-texto-secundario">
             {perfil.beats_balance === 0
               ? "Escanea un QR de marca para empezar a sumar."
               : "Sigue participando para sumar mas."}

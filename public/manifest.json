@@ -8,9 +8,13 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0D1117",
-  "theme_color": "#0D1117",
-  "categories": ["social", "education", "lifestyle"],
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "categories": [
+    "social",
+    "education",
+    "lifestyle"
+  ],
   "icons": [
     {
       "src": "/icon-192.png",

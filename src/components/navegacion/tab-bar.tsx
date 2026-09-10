@@ -79,7 +79,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="Navegacion principal"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-sutil bg-superficie pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-40 bg-fondo shadow-barra pb-[env(safe-area-inset-bottom)]"
     >
       <ul className="mx-auto flex max-w-md items-stretch">
         {TABS.map((tab) => {
@@ -95,8 +95,8 @@ export function TabBar() {
                         // se veria como un amarillo sucio, no como un tab que
                         // todavia no esta disponible.
                         disponible
-                          ? "bg-primario text-fondo"
-                          : "bg-elevado text-texto-terciario"
+                          ? "bg-primario text-texto-principal"
+                          : "bg-fondo-alterno text-texto-secundario"
                       }`
                     : ""
                 }
@@ -110,7 +110,11 @@ export function TabBar() {
           );
 
           const clases = `flex min-h-touch flex-1 flex-col items-center justify-center gap-1 py-2 ${
-            activo ? "text-primario" : "text-texto-terciario"
+            // Tab activo en azul y no en amarillo: sobre la barra blanca el
+            // amarillo no alcanza contraste (constitution §2 lo contempla). Los
+            // inactivos en gris secundario y no terciario, que se queda en
+            // 2.5:1 y vuelve la etiqueta ilegible.
+            activo ? "text-secundario-texto" : "text-texto-secundario"
           }`;
 
           return (
@@ -127,7 +131,7 @@ export function TabBar() {
                 <span
                   aria-disabled="true"
                   title="Disponible pronto"
-                  className={`${clases} opacity-60`}
+                  className={`${clases} opacity-70`}
                 >
                   {contenido}
                 </span>

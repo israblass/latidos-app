@@ -29,12 +29,12 @@ function Contenido() {
       </p>
 
       {error ? (
-        <p role="alert" className="mt-6 text-sm text-error">
+        <p role="alert" className="mt-6 text-sm text-error-texto">
           {MENSAJES_ERROR[error] ??
             "Algo fallo al confirmar tu correo. Intenta de nuevo."}
         </p>
       ) : (
-        <p className="mt-6 text-sm text-texto-terciario">
+        <p className="mt-6 text-sm text-texto-secundario">
           Si no lo ves, revisa la carpeta de spam.
         </p>
       )}

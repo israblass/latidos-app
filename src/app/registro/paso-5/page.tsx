@@ -55,8 +55,10 @@ export default function PasoTipoUsuario() {
                 role="radio"
                 aria-checked={activo}
                 onClick={() => setSeleccion(tipo)}
-                className={`tarjeta min-h-touch text-left transition-colors ${
-                  activo ? "border-primario" : ""
+                // Seleccion en azul y no en amarillo: un borde amarillo sobre
+                // blanco no se distingue del no seleccionado.
+                className={`tarjeta min-h-touch text-left ring-2 transition-shadow ${
+                  activo ? "ring-secundario" : "ring-transparent"
                 }`}
               >
                 <span className="block text-[16px] font-medium text-texto-principal">

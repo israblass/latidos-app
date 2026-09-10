@@ -16,14 +16,20 @@ export default function PantallaCierre() {
 
   return (
     <CarruselOnboarding pantalla={3} textoAvance="Empezar">
-      <div className="rounded-card bg-superficie px-5 py-7 text-center">
+      {/* Acento amarillo y no bloque amarillo: el boton de avanzar es el unico
+          amarillo grande de la pantalla. */}
+      <div className="rounded-card bg-fondo-alterno px-5 py-7 text-center">
         <p className="etiqueta">Todo listo</p>
-        <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-primario">
+        <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-texto-principal">
           Empieza a
           <br />
           sumar
         </h1>
-        <p className="mt-3 text-[15px] text-texto-secundario">
+        <div
+          aria-hidden="true"
+          className="mx-auto mt-4 h-1.5 w-16 rounded-full bg-primario"
+        />
+        <p className="mt-4 text-[15px] text-texto-secundario">
           Tu cuenta esta activa y tu contador arranca en cero.
         </p>
       </div>
@@ -32,7 +38,7 @@ export default function PantallaCierre() {
         <div className="flex items-center gap-3">
           <span
             aria-hidden="true"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-elevado text-secundario"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-fondo-alterno text-secundario"
           >
             <IconoCampana />
           </span>
@@ -58,7 +64,7 @@ export default function PantallaCierre() {
         ) : null}
 
         {estado === "concedido" ? (
-          <p className="mt-4 text-sm text-exito">Avisos activados.</p>
+          <p className="mt-4 text-sm text-exito-texto">Avisos activados.</p>
         ) : null}
 
         {estado === "denegado" ? (

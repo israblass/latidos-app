@@ -36,7 +36,7 @@ export function CampoTexto({ etiqueta, error, ayuda, ...props }: Props) {
         </p>
       ) : null}
       {error ? (
-        <p id={idError} role="alert" className="text-xs text-error">
+        <p id={idError} role="alert" className="text-xs text-error-texto">
           {error}
         </p>
       ) : null}

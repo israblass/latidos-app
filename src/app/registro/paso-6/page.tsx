@@ -102,7 +102,7 @@ export default function PasoContrasena() {
         />
 
         {errorGeneral ? (
-          <p role="alert" className="mt-4 text-sm text-error">
+          <p role="alert" className="mt-4 text-sm text-error-texto">
             {errorGeneral}
           </p>
         ) : null}

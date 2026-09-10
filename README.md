@@ -165,6 +165,24 @@ detiene y pide que se pegue el enlace que llego al buzon.
 | `npm run build` | Build de produccion |
 | `npm run lint` | ESLint |
 
+## Design system
+
+Base clara (constitution §2, v2.1.0): fondo blanco, cards con sombra suave y la
+paleta de marca como acento. Los tokens viven en `tailwind.config.ts` y las
+clases compartidas en `src/app/globals.css` (`.tarjeta`, `.boton-primario`,
+`.bloque-oscuro`, `.bloque-amarillo`).
+
+Dos reglas que hay que respetar al agregar pantallas:
+
+- **El amarillo `#FDFB05` no se usa como color de texto sobre fondo claro.** Se
+  queda muy por debajo del contraste AA. Cuando tiene que brillar, va como
+  superficie (`.bloque-amarillo`, badges, botones primarios) o sobre una card
+  oscura (`.bloque-oscuro`), que es como se resuelve el contador de Beats.
+- **Los colores de marca y semanticos tienen variante de texto.** `#0090FF`,
+  `#2EA043`, `#D29922` y `#F85149` se quedan en ~3.3:1 contra el blanco. Para
+  texto se usan `secundario-texto`, `exito-texto`, `alerta-texto` y
+  `error-texto`; los originales quedan para rellenos, bordes e iconos.
+
 ## Estructura
 
 ```

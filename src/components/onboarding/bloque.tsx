@@ -19,7 +19,7 @@ export function Bloque({
     <li className="tarjeta flex items-center gap-3">
       <span
         aria-hidden="true"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-elevado text-secundario"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-fondo-alterno text-secundario"
       >
         {icono}
       </span>
@@ -32,7 +32,7 @@ export function Bloque({
       </span>
 
       {destacado ? (
-        <span className="shrink-0 rounded-full bg-primario px-2.5 py-1 text-[13px] font-bold text-fondo">
+        <span className="shrink-0 rounded-full bg-primario px-2.5 py-1 text-[13px] font-bold text-texto-principal">
           {destacado}
         </span>
       ) : null}

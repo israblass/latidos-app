@@ -13,9 +13,9 @@
     line-height: 1.6;
   }
 
-  /* La app es dark-only por diseno (constitution §2: fondo oscuro solido). */
+  /* Base clara (constitution §2, v2.1.0). */
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   input,
@@ -25,15 +25,19 @@
     font-family: inherit;
   }
 
+  /*
+   * El terciario de la paleta queda en 2.5:1 contra el blanco: como
+   * placeholder resulta ilegible. Se usa el secundario, que si llega a AA.
+   */
   input::placeholder,
   textarea::placeholder {
-    @apply text-texto-terciario;
+    @apply text-texto-secundario;
   }
 }
 
 @layer components {
   .titulo-pantalla {
-    @apply font-display text-[28px] uppercase leading-tight;
+    @apply font-display text-[28px] uppercase leading-tight text-texto-principal;
   }
 
   .etiqueta {
@@ -41,26 +45,45 @@
   }
 
   .boton-primario {
-    @apply flex min-h-touch w-full items-center justify-center rounded-control bg-primario px-5 text-[15px] font-medium text-fondo transition-opacity active:opacity-80 disabled:opacity-40;
+    @apply flex min-h-touch w-full items-center justify-center rounded-control bg-primario px-5 text-[15px] font-medium text-texto-principal transition-opacity active:opacity-80 disabled:opacity-40;
   }
 
   .boton-secundario {
-    @apply flex min-h-touch w-full items-center justify-center rounded-control border border-secundario bg-transparent px-5 text-[15px] font-medium text-secundario transition-opacity active:opacity-80 disabled:opacity-40;
+    @apply flex min-h-touch w-full items-center justify-center rounded-control border border-secundario bg-fondo px-5 text-[15px] font-medium text-secundario-texto transition-opacity active:opacity-80 disabled:opacity-40;
   }
 
   .boton-ghost {
-    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-secundario transition-opacity active:opacity-80;
+    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-secundario-texto transition-opacity active:opacity-80;
   }
 
   .campo {
-    @apply min-h-touch w-full rounded-control border border-elevado bg-superficie px-4 text-[16px] text-texto-principal outline-none transition-colors focus:border-secundario;
+    @apply min-h-touch w-full rounded-control border border-black/10 bg-fondo-alterno px-4 text-[16px] text-texto-principal outline-none transition-colors focus:border-secundario focus:bg-fondo;
   }
 
   .campo-error {
     @apply border-error focus:border-error;
   }
 
+  /* Card estandar: blanca con sombra suave, sin borde marcado. */
   .tarjeta {
-    @apply rounded-card border border-sutil bg-superficie p-4;
+    @apply rounded-card bg-fondo p-4 shadow-card;
+  }
+
+  /* Card plana, para bloques que ya viven dentro de otra superficie blanca. */
+  .tarjeta-plana {
+    @apply rounded-card bg-fondo-alterno p-4;
+  }
+
+  /*
+   * Bloques de contraste fuerte. El amarillo de marca no se lee como texto
+   * sobre blanco, asi que cuando tiene que brillar se le pone debajo una
+   * superficie que lo sostenga (constitution §2, firma visual).
+   */
+  .bloque-oscuro {
+    @apply rounded-card bg-oscuro text-texto-inverso;
+  }
+
+  .bloque-amarillo {
+    @apply rounded-card bg-primario text-texto-principal;
   }
 }

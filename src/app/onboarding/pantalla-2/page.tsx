@@ -67,12 +67,14 @@ const CANJES = [
 export default function PantallaComoGanarBeats() {
   return (
     <CarruselOnboarding pantalla={2} textoAvance="Siguiente">
-      <div className="rounded-card bg-superficie px-5 py-7 text-center">
-        <p className="etiqueta">Tu moneda en Latidos</p>
+      {/* Card oscura: el mismo par oscuro + amarillo del contador de Inicio, para
+          que "Beats" se lea siempre igual en toda la app. */}
+      <div className="bloque-oscuro px-5 py-7 text-center shadow-elevado">
+        <p className="etiqueta text-white/70">Tu moneda en Latidos</p>
         <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-primario">
           Beats
         </h1>
-        <p className="mt-3 text-[15px] text-texto-secundario">
+        <p className="mt-3 text-[15px] text-white/80">
           Los ganas participando y los cambias por recompensas.
         </p>
       </div>
@@ -83,7 +85,7 @@ export default function PantallaComoGanarBeats() {
           <Bloque key={forma.titulo} {...forma} />
         ))}
       </ul>
-      <p className="mt-3 text-xs text-texto-terciario">
+      <p className="mt-3 text-xs text-texto-secundario">
         Los Beats de cada accion pueden variar segun la actividad.
       </p>
 

@@ -73,8 +73,9 @@ export function CarruselOnboarding({ pantalla, textoAvance, children }: Props) {
               aria-hidden="true"
               className={`h-2 rounded-full transition-all ${
                 indice + 1 === pantalla
-                  ? "w-6 bg-primario"
-                  : "w-2 bg-elevado"
+                  // Sobre blanco el amarillo no marca el punto activo; el azul si.
+                  ? "w-6 bg-secundario"
+                  : "w-2 bg-black/10"
               }`}
             />
           ))}

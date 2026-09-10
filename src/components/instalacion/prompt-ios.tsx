@@ -31,7 +31,7 @@ export function PromptIOS({ onCerrar }: Props) {
       {/* Tocar fuera cierra. Es decorativo: los lectores de pantalla llegan al
           boton de cerrar, que hace lo mismo. */}
       <div
-        className="absolute inset-0 bg-black/60"
+        className="absolute inset-0 bg-black/40"
         onClick={onCerrar}
         aria-hidden="true"
       />
@@ -42,9 +42,9 @@ export function PromptIOS({ onCerrar }: Props) {
         aria-modal="true"
         aria-labelledby="titulo-instalacion-ios"
         tabIndex={-1}
-        className="relative w-full max-w-md rounded-t-sheet border-t border-sutil bg-superficie px-5 pb-8 pt-5 outline-none"
+        className="relative w-full max-w-md rounded-t-sheet bg-fondo px-5 pb-8 pt-5 shadow-elevado outline-none"
       >
-        <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-elevado" />
+        <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-black/15" />
 
         <div className="flex items-start justify-between gap-4">
           <h2 id="titulo-instalacion-ios" className="font-display text-[22px] uppercase">
@@ -92,7 +92,7 @@ export function PromptIOS({ onCerrar }: Props) {
             </>,
           ].map((paso, indice) => (
             <li key={indice} className="flex items-center gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primario text-[13px] font-bold text-fondo">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primario text-[13px] font-bold text-texto-principal">
                 {indice + 1}
               </span>
               <span className="text-[15px] text-texto-secundario">{paso}</span>

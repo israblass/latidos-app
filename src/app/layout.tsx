@@ -29,7 +29,8 @@ export const metadata: Metadata = {
     // "Agregar a pantalla de inicio".
     capable: true,
     title: "Latidos",
-    statusBarStyle: "black-translucent",
+    // Base clara: barra de estado con contenido oscuro sobre el fondo blanco.
+    statusBarStyle: "default",
   },
   icons: {
     icon: [
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0D1117",
+  themeColor: "#FFFFFF",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

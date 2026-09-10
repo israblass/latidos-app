@@ -9,32 +9,32 @@ import { PromptsInstalacion } from "@/components/instalacion/prompts-instalacion
  * WhatsApp, campaña o la web informativa (spec §10 suposicion 1). Sobre ella
  * aparece el prompt de instalacion, que nunca bloquea nada.
  *
- * El fondo de textura de cielo del branding (constitution §2) todavia no esta
- * en el repo; mientras tanto se usa el fondo oscuro con un resplandor amarillo,
- * que respeta la paleta.
+ * El amarillo de marca no se lee como texto sobre blanco. Tampoco funciona
+ * pintar el logotipo como un bloque amarillo entero: queda del mismo peso que
+ * el boton de registrarse y la pantalla pierde jerarquia. El amarillo entra
+ * como acento bajo el logotipo, y el unico bloque amarillo grande es el CTA.
  */
 export default function Home() {
   return (
-    <main className="relative flex min-h-dvh flex-col overflow-hidden px-5 pb-10 pt-16">
-      {/* Resplandor de marca detras del logotipo. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-[22%] h-72 w-72 -translate-x-1/2 rounded-full bg-primario/10 blur-3xl"
-      />
+    <main className="flex min-h-dvh flex-col px-5 pb-10 pt-16">
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <div className="w-full rounded-card bg-fondo-alterno px-6 py-12">
+          <h1 className="font-display text-[64px] uppercase leading-none text-texto-principal">
+            Latidos
+          </h1>
+          <div
+            aria-hidden="true"
+            className="mx-auto mt-4 h-1.5 w-20 rounded-full bg-primario"
+          />
+          <p className="etiqueta mt-4">Universidad Central de Venezuela</p>
+        </div>
 
-      <div className="relative flex flex-1 flex-col items-center justify-center text-center">
-        <h1 className="font-display text-[64px] uppercase leading-none text-primario">
-          Latidos
-        </h1>
-
-        <p className="etiqueta mt-4">Universidad Central de Venezuela</p>
-
-        <p className="mt-6 max-w-[17rem] text-texto-secundario">
+        <p className="mt-8 max-w-[17rem] text-texto-secundario">
           Participa, suma Beats y canjea recompensas del programa Latidos UCV.
         </p>
       </div>
 
-      <div className="relative flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         <Link href="/registro/paso-1" className="boton-primario">
           Registrarme
         </Link>

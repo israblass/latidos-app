@@ -49,7 +49,7 @@ export function ProgresoRegistro({ paso, titulo, children }: Props) {
         </div>
 
         <div
-          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-elevado"
+          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-black/[0.08]"
           role="progressbar"
           aria-valuenow={paso}
           aria-valuemin={1}

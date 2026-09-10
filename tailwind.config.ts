@@ -1,9 +1,11 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Tokens del design system de Latidos App (constitution §2).
- * Los nombres son en espanol para que el codigo hable el mismo idioma
- * que la constitution y el resto del producto.
+ * Tokens del design system de Latidos App (constitution §2, v2.1.0).
+ *
+ * Base clara. El amarillo de marca es muy luminoso: sirve como FONDO con texto
+ * oscuro encima, no como color de texto sobre blanco. Por eso los tokens
+ * separan los colores de relleno de sus variantes legibles como texto.
  */
 const config: Config = {
   content: [
@@ -16,20 +18,41 @@ const config: Config = {
       colors: {
         primario: "#FDFB05",
         secundario: "#0090FF",
-        fondo: "#0D1117",
-        superficie: "#161B22",
-        elevado: "#21262D",
+
+        fondo: "#FFFFFF",
+        "fondo-alterno": "#F5F7FA",
+        // Uso puntual, para bloques que necesitan contraste fuerte (el contador
+        // de Beats, el hero de Beats). Nunca como base de pantalla.
+        oscuro: "#0D1117",
+
         texto: {
-          principal: "#FFFFFF",
-          secundario: "#8B949E",
-          terciario: "#484F58",
+          principal: "#1A2332",
+          secundario: "#6B7280",
+          terciario: "#9CA3AF",
+          // Para texto sobre superficies oscuras o sobre el amarillo.
+          inverso: "#FFFFFF",
         },
+
         exito: "#2EA043",
         alerta: "#D29922",
         error: "#F85149",
+
+        // Variantes oscurecidas para TEXTO sobre fondo claro. Los colores de
+        // arriba se quedan entre 3.3:1 y 3.4:1 contra el blanco, por debajo del
+        // AA que pide la constitution §9. Se usan solo para texto; los rellenos,
+        // bordes e iconos siguen con el color de marca.
+        "secundario-texto": "#0070CC",
+        "exito-texto": "#15803D",
+        "alerta-texto": "#9A6700",
+        "error-texto": "#B3261E",
       },
       borderColor: {
-        sutil: "rgba(255,255,255,0.08)",
+        sutil: "rgba(0,0,0,0.08)",
+      },
+      boxShadow: {
+        card: "0 2px 12px rgba(0,0,0,0.06)",
+        elevado: "0 4px 20px rgba(0,0,0,0.08)",
+        barra: "0 -2px 12px rgba(0,0,0,0.06)",
       },
       fontFamily: {
         display: ["var(--font-anton)", "Impact", "sans-serif"],

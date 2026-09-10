@@ -10,7 +10,9 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v2";
+const VERSION = "v3";
+// v3: el manifest cambio de colores con el nuevo design system, asi que el
+// shell precacheado se renueva.
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 

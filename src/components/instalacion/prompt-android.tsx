@@ -58,7 +58,7 @@ export function PromptAndroid({ onCerrar }: Props) {
     // En el flujo normal de la pantalla, no flotando: un banner fijo al fondo
     // taparia el boton de registrarse, y la spec (§9 regla 15) pide que el
     // prompt no estorbe el registro.
-    <div className="rounded-card border border-sutil bg-elevado p-4">
+    <div className="tarjeta-plana">
       <div className="flex items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element -- icono estatico
             del manifest, sin necesidad de optimizacion ni layout shift */}
