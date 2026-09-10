@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-fondo text-texto-principal font-sans font-light antialiased;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* La app es dark-only por diseno (constitution §2: fondo oscuro solido). */
+  :root {
+    color-scheme: dark;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font-family: inherit;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-texto-terciario;
+  }
+}
+
+@layer components {
+  .titulo-pantalla {
+    @apply font-display text-[28px] uppercase leading-tight;
+  }
+
+  .etiqueta {
+    @apply font-sans text-[11px] font-medium uppercase tracking-etiqueta text-texto-secundario;
+  }
+
+  .boton-primario {
+    @apply flex min-h-touch w-full items-center justify-center rounded-control bg-primario px-5 text-[15px] font-medium text-fondo transition-opacity active:opacity-80 disabled:opacity-40;
+  }
+
+  .boton-secundario {
+    @apply flex min-h-touch w-full items-center justify-center rounded-control border border-secundario bg-transparent px-5 text-[15px] font-medium text-secundario transition-opacity active:opacity-80 disabled:opacity-40;
+  }
+
+  .boton-ghost {
+    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-secundario transition-opacity active:opacity-80;
+  }
+
+  .campo {
+    @apply min-h-touch w-full rounded-control border border-elevado bg-superficie px-4 text-[16px] text-texto-principal outline-none transition-colors focus:border-secundario;
+  }
+
+  .campo-error {
+    @apply border-error focus:border-error;
+  }
+
+  .tarjeta {
+    @apply rounded-card border border-sutil bg-superficie p-4;
+  }
+}
