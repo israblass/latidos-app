@@ -4,6 +4,36 @@ import { useEffect, useRef, useState } from "react";
 
 export type EstadoCamara = "iniciando" | "activa" | "sin-permiso" | "sin-camara";
 
+/**
+ * Zona del video donde se busca el codigo: el cuadrado central completo.
+ *
+ * Por defecto qr-scanner solo mira el cuadrado central de dos tercios del lado
+ * menor. Eso no coincide con lo que la persona ve: el visor es cuadrado y
+ * recorta el video con object-cover, asi que muestra justo el cuadrado central
+ * completo. Con el ajuste por defecto, un codigo que llena el visor ya se sale
+ * de la zona que se analiza y deja de leerse — y el reflejo natural cuando algo
+ * "no lee" es acercar mas el telefono, que lo empeora.
+ *
+ * Medido con camara simulada a varios tamaños: con dos tercios, un QR que ocupa
+ * el 75% del cuadro o mas no se lee; con el cuadrado completo se lee en todos
+ * los tamaños probados, con el codigo pelado y con la URL entera.
+ *
+ * Se mantiene cuadrado (el lado menor) y no el cuadro entero para no deformar
+ * la imagen al reducirla: qr-scanner la lleva a 400x400 antes de analizarla, y
+ * meterle un rectangulo 16:9 la aplastaria.
+ */
+function regionDeEscaneo(video: HTMLVideoElement) {
+  const lado = Math.min(video.videoWidth, video.videoHeight);
+  return {
+    x: Math.round((video.videoWidth - lado) / 2),
+    y: Math.round((video.videoHeight - lado) / 2),
+    width: lado,
+    height: lado,
+    downScaledWidth: 400,
+    downScaledHeight: 400,
+  };
+}
+
 interface Props {
   /** Se llama con el contenido del codigo apenas se reconoce. */
   onLeer: (contenido: string) => void;
@@ -67,6 +97,7 @@ export function LectorQR({ onLeer, activo, onEstado }: Props) {
           highlightScanRegion: true,
           highlightCodeOutline: true,
           maxScansPerSecond: 5,
+          calculateScanRegion: regionDeEscaneo,
         },
       );
 

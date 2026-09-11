@@ -83,7 +83,11 @@ export function PantallaEscaneo({ contenidoInicial }: { contenidoInicial?: strin
         : { valido: false, motivo: "qr_invalido" };
 
       if (!resultado.valido && resultado.motivo === "qr_invalido") {
-        // El escaner sigue vivo: basta con reencuadrar.
+        // Ojo con el copy de este aviso: para llegar hasta aqui la camara ya
+        // leyo el codigo y el servidor lo rechazo. Decir "no pudimos leer el
+        // codigo, enfoca mejor" seria mentir sobre la causa y mandar a la
+        // persona (o a quien depure) a perseguir un problema de camara que no
+        // existe. El escaner sigue vivo de todos modos.
         setAviso("qr_invalido");
         setEstado({ fase: "escaneando" });
         return;
@@ -180,7 +184,7 @@ export function PantallaEscaneo({ contenidoInicial }: { contenidoInicial?: strin
                 className="mt-4 rounded-control border-l-[3px] border-alerta bg-fondo-alterno px-4 py-3 text-[14px] text-texto-secundario"
               >
                 {aviso === "qr_invalido" && enLinea
-                  ? "No pudimos leer el codigo. Asegurate de enfocar bien y vuelve a intentar."
+                  ? "Ese codigo no esta activo. Busca otro QR de marca y vuelve a intentar."
                   : "Te quedaste sin señal. Intenta de nuevo cuando tengas conexion."}
               </div>
             ) : null}

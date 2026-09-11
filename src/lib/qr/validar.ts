@@ -24,7 +24,14 @@ export async function validarQR(
   const invalido: ResultadoValidacion = { valido: false, motivo: "qr_invalido" };
 
   const idQR = leerIdDeQR(contenido);
-  if (!idQR) return invalido;
+  if (!idQR) {
+    // Se registra el motivo real de cada rechazo porque desde afuera los tres
+    // caminos a `qr_invalido` son indistinguibles a proposito, y sin esto la
+    // unica forma de saber cual ocurrio es adivinar. Solo va el contenido leido,
+    // que es publico: viaja impreso en el codigo.
+    console.warn("[qr] descartado: el contenido no es un QR de Latidos:", contenido.slice(0, 120));
+    return invalido;
+  }
 
   // La policy de RLS solo deja leer los QR activos, asi que uno inactivo no
   // aparece y cae en el mismo camino que uno que no existe.
@@ -36,7 +43,13 @@ export async function validarQR(
     .eq("id", idQR)
     .maybeSingle();
 
-  if (!qr) return invalido;
+  if (!qr) {
+    // O no existe, o esta inactivo: la policy de RLS esconde los inactivos, asi
+    // que llegan por el mismo camino. Si esto aparece para un codigo del seed,
+    // lo que falta es correr supabase/seed.sql en el proyecto que la app usa.
+    console.warn("[qr] descartado: no hay QR activo con id", idQR);
+    return invalido;
+  }
 
   if (
     qr.limite_total_escaneos !== null &&

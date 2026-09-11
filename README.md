@@ -205,6 +205,7 @@ salta RLS por completo.
 | `accesibilidad.test.ts` | T065 — 13 pantallas: 48px, AA, labels, alt, un h1 |
 | `rls.test.ts` | T066 — aislamiento entre cuentas y barridos estructurales *(Postgres)* |
 | `rendimiento.test.ts` | T067 — carga en 4G |
+| `escaneo-camara.test.ts` | Lectura con camara: forma URL a varios tamaños en el visor |
 | `criterios-aceptacion.test.ts` | T068 / V026 — los 24 criterios de la spec |
 
 ### Accesibilidad
@@ -280,6 +281,33 @@ del ultimo escaneo ni a la medianoche del proceso. En Vercel el servidor corre
 en UTC, donde medianoche cae a las 8 de la noche en Venezuela: alguien que
 escanea a las 9pm veria su limite reiniciado el mismo dia. La zona se puede
 cambiar con la variable `ZONA_HORARIA`.
+
+### Si el escaner no lee un codigo
+
+El aviso que aparece **dice cual de los dos problemas es**, y conviene leerlo
+con cuidado antes de ponerse a mover la camara:
+
+- **No aparece ningun aviso** y la pantalla sigue diciendo "Enfoca el QR de la
+  marca": la camara todavia no ha decodificado nada. Ahi si es cuestion de
+  enfoque, distancia o luz.
+- **"Ese codigo no esta activo"**: la camara **si** leyo el codigo y el servidor
+  lo rechazo. No es un problema de camara. Los tres motivos posibles son que el
+  QR no exista en la base, que el admin lo haya desactivado, o que el contenido
+  no sea un QR de Latidos. Cual fue exactamente queda en el log del servidor
+  (`[qr] descartado: ...`), visible en los logs de Vercel.
+
+Para separar camara de datos sin usar la camara, basta con abrir en el
+navegador la misma URL que lleva el codigo:
+
+```
+https://<dominio>/escanear?qr=b2000000-0000-4000-8000-000000000001
+```
+
+Si esa URL tampoco funciona, el problema no esta en el escaneo: falta correr
+`supabase/seed.sql` en el proyecto de Supabase que la app esta usando.
+
+**Ojo con el QR de Movistar**: en el seed esta `inactivo` a proposito, para
+poder probar el caso del codigo desactivado. Siempre va a ser rechazado.
 
 ### QR de prueba
 
