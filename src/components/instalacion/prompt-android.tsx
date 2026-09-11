@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { ImagenMarca } from "@/components/marca/imagen-marca";
+import { ASSETS } from "@/lib/assets";
+
 /** Evento propio de Chromium, todavia fuera del estandar y sin tipos propios. */
 interface EventoInstalacion extends Event {
   prompt: () => Promise<void>;
@@ -60,15 +63,9 @@ export function PromptAndroid({ onCerrar }: Props) {
     // prompt no estorbe el registro.
     <div className="tarjeta-plana">
       <div className="flex items-center gap-3">
-        {/* eslint-disable-next-line @next/next/no-img-element -- icono estatico
-            del manifest, sin necesidad de optimizacion ni layout shift */}
-        <img
-          src="/icon-192.png"
-          alt=""
-          width={44}
-          height={44}
-          className="shrink-0 rounded-control"
-        />
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-control bg-fondo">
+          <ImagenMarca src={ASSETS.latidosHero} alt="Latidos" alto={30} />
+        </span>
 
         <div className="min-w-0 flex-1">
           <p className="text-[15px] font-medium text-texto-principal">

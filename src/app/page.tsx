@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { PromptsInstalacion } from "@/components/instalacion/prompts-instalacion";
+import { ImagenMarca } from "@/components/marca/imagen-marca";
+import { ASSETS } from "@/lib/assets";
 
 /**
  * Pantalla de bienvenida (T018).
@@ -9,24 +11,25 @@ import { PromptsInstalacion } from "@/components/instalacion/prompts-instalacion
  * WhatsApp, campaña o la web informativa (spec §10 suposicion 1). Sobre ella
  * aparece el prompt de instalacion, que nunca bloquea nada.
  *
- * El amarillo de marca no se lee como texto sobre blanco. Tampoco funciona
- * pintar el logotipo como un bloque amarillo entero: queda del mismo peso que
- * el boton de registrarse y la pantalla pierde jerarquia. El amarillo entra
- * como acento bajo el logotipo, y el unico bloque amarillo grande es el CTA.
+ * El logotipo es el arte oficial servido desde el Storage compartido con la
+ * web. El amarillo entra como acento bajo el logo: el unico bloque amarillo
+ * grande de la pantalla es el CTA, para que la jerarquia quede clara.
  */
 export default function Home() {
   return (
-    <main className="flex min-h-dvh flex-col px-5 pb-10 pt-16">
+    <main className="flex min-h-dvh flex-col px-5 pb-8 pt-16">
       <div className="flex flex-1 flex-col items-center justify-center text-center">
-        <div className="w-full rounded-card bg-fondo-alterno px-6 py-12">
-          <h1 className="font-display text-[64px] uppercase leading-none text-texto-principal">
-            Latidos
-          </h1>
+        <div className="flex w-full flex-col items-center rounded-card bg-fondo-alterno px-6 py-12">
+          <ImagenMarca
+            src={ASSETS.latidosHero}
+            alt="Latidos"
+            alto={96}
+            prioritaria
+          />
           <div
             aria-hidden="true"
-            className="mx-auto mt-4 h-1.5 w-20 rounded-full bg-primario"
+            className="mt-5 h-1.5 w-20 rounded-full bg-primario"
           />
-          <p className="etiqueta mt-4">Universidad Central de Venezuela</p>
         </div>
 
         <p className="mt-8 max-w-[17rem] text-texto-secundario">
@@ -41,6 +44,19 @@ export default function Home() {
 
         <PromptsInstalacion />
       </div>
+
+      {/* Credito institucional: quien organiza el programa y donde ocurre. */}
+      <footer className="mt-8 flex flex-col items-center gap-3">
+        <p className="etiqueta">Un programa de</p>
+        <div className="flex items-center gap-6">
+          <ImagenMarca src={ASSETS.flame} alt="The Flame Creative Lab" alto={28} />
+          <ImagenMarca
+            src={ASSETS.ucv}
+            alt="Universidad Central de Venezuela"
+            alto={32}
+          />
+        </div>
+      </footer>
     </main>
   );
 }

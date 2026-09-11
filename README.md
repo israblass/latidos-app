@@ -165,6 +165,23 @@ detiene y pide que se pegue el enlace que llego al buzon.
 | `npm run build` | Build de produccion |
 | `npm run lint` | ESLint |
 
+## Imagenes de marca
+
+El arte oficial (logotipo, logos institucionales, lettering de cada fase) vive
+en el Supabase Storage compartido con la web, bucket `imagenes-landing-ucv`, y
+se consume por URL publica sin copiarlo al repo. Las URLs estan centralizadas en
+`src/lib/assets.ts`, igual que en la web: un cambio de arte se refleja en ambos
+productos sin tocar codigo.
+
+Se renderizan con `ImagenMarca` (`src/components/marca/`), que usa `img` y no
+`next/image` porque las piezas son remotas y no se conocen sus dimensiones —
+`next/image` las exige para remotas, e inventarlas deformaria el arte. Fijando
+solo el alto, cada pieza conserva su proporcion real. Si una imagen no carga,
+el componente cae al texto del `alt`: se pierde el arte, nunca el contenido.
+
+Los iconos de PWA (`public/icon-*.png`) NO salen de este bucket; se generan
+aparte.
+
 ## Design system
 
 Base clara (constitution §2, v2.1.0): fondo blanco, cards con sombra suave y la
