@@ -1,4 +1,6 @@
 import Image from "next/image";
+
+import { ContadorBeats } from "@/components/marca/contador-beats";
 import { redirect } from "next/navigation";
 
 import { TabBar } from "@/components/navegacion/tab-bar";
@@ -39,11 +41,8 @@ export default async function Inicio() {
           aria-label="Tu balance de Beats"
           className="flex flex-1 flex-col items-center justify-center"
         >
-          <div className="vidrio-oscuro w-full px-6 py-10 text-center">
-            <p className="font-display text-[72px] leading-none text-primario">
-              {perfil.beats_balance}
-            </p>
-            <p className="etiqueta mt-1 text-white/70">Beats</p>
+          <div className="vidrio-medio w-full px-6 py-10 text-center">
+            <ContadorBeats valor={perfil.beats_balance} />
           </div>
 
           {/*

@@ -4,6 +4,7 @@ import { CarruselOnboarding } from "@/components/onboarding/carrusel-onboarding"
 import { ImagenMarca } from "@/components/marca/imagen-marca";
 import { ASSETS } from "@/lib/assets";
 import { IlustracionOnboarding } from "@/components/onboarding/ilustracion";
+import { TituloConAcento } from "@/components/marca/titulo-con-acento";
 
 /**
  * Pantalla 1: que es Latidos.
@@ -53,20 +54,15 @@ export default function PantallaQueEsLatidos() {
         descripcion="Tres personas de la comunidad UCV llevando cajas de donaciones"
       />
 
-      <div className="vidrio-medio mt-2 px-5 py-7 text-center">
-        <p className="etiqueta">Programa UCV</p>
-        <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-texto-principal">
+      <div className="vidrio-medio mt-3 px-5 py-7 text-center">
+        <TituloConAcento
+          etiqueta="Programa UCV"
+          detalle="Un programa en tres fases, de septiembre a marzo."
+        >
           Seis meses
           <br />
           de Latidos
-        </h1>
-        <div
-          aria-hidden="true"
-          className="mx-auto mt-4 h-1.5 w-16 rounded-full bg-primario"
-        />
-        <p className="mt-4 text-[15px] text-texto-secundario">
-          Un programa en tres fases, de septiembre a marzo.
-        </p>
+        </TituloConAcento>
       </div>
 
       <ul className="mt-4 flex flex-col gap-3">

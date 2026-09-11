@@ -485,6 +485,27 @@ telefono de verdad. Estan marcadas como PARCIAL en `criterios-aceptacion.test.ts
   `getUserMedia`, que es lo que dispara el dialogo; el dialogo lo pinta el
   sistema operativo y no se ve desde una prueba.
 
+## Cambios de design system no reflejados en la constitution
+
+La constitution vive fuera de este repo, asi que estos dos cambios se registran
+aqui. **Importan**: si el documento sigue diciendo lo anterior, la proxima
+revision de estilos los revierte sin que nadie lo note.
+
+**v2.1.2**
+
+- **Ninguna card lleva fondo oscuro.** `#0D1117` deja de usarse como superficie.
+  El amarillo `#FDFB05` deja de ser color de texto y pasa a acento: una barra
+  corta bajo el titulo en navy (`TituloConAcento`). Era el amarillo sobre claro
+  lo que obligaba a las cards oscuras, y resuelto eso dejan de hacer falta. Los
+  tokens `.vidrio-oscuro` y `.bloque-oscuro` quedan definidos pero sin uso,
+  anotados como tales en globals.css.
+- **Texto secundario pasa de `#6B7280` a `#565E6D`.** El de la paleta da 4.29:1
+  sobre vidrio sutil en la zona oscura del backdrop, por debajo del AA que la
+  propia constitution exige en su §9. Subir el velo del fondo, que es lo que
+  menos toca la paleta, exigiria llevarlo a 0.86 y a ese nivel el desenfoque se
+  queda sin variacion que difuminar. El tono nuevo da 5.79:1 ahi y 6.53:1 sobre
+  blanco, asi que mejora el contraste en toda la app.
+
 ## Cabos sueltos
 
 - **El limite diario es por QR, no por marca.** La spec (§9 regla 10) y la

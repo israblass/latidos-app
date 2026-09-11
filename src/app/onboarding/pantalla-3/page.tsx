@@ -3,6 +3,7 @@
 import { CarruselOnboarding } from "@/components/onboarding/carrusel-onboarding";
 import { IconoCampana } from "@/components/onboarding/iconos";
 import { usePermisoNotificaciones } from "@/hooks/use-permiso-notificaciones";
+import { TituloConAcento } from "@/components/marca/titulo-con-acento";
 
 /**
  * Pantalla 3: cierre del onboarding.
@@ -27,19 +28,11 @@ export default function PantallaCierre() {
         arriba, con mt-2 en la card de abajo, igual que en las otras dos.
       */}
       <div className="vidrio-medio px-5 py-7 text-center">
-        <p className="etiqueta">Todo listo</p>
-        <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-texto-principal">
+        <TituloConAcento etiqueta="Todo listo" detalle="Tu cuenta esta activa y tu contador arranca en cero.">
           Empieza a
           <br />
           sumar
-        </h1>
-        <div
-          aria-hidden="true"
-          className="mx-auto mt-4 h-1.5 w-16 rounded-full bg-primario"
-        />
-        <p className="mt-4 text-[15px] text-texto-secundario">
-          Tu cuenta esta activa y tu contador arranca en cero.
-        </p>
+        </TituloConAcento>
       </div>
 
       <div className="vidrio-medio mt-4 p-4">

@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { MensajeSinConexion } from "@/components/escaneo/mensaje-sin-conexion";
 import { TarjetaExito } from "@/components/escaneo/tarjeta-exito";
+import { BarraAcento } from "@/components/marca/titulo-con-acento";
 import { useConexion } from "@/hooks/use-conexion";
 import type { MotivoCanjeFallido, ResultadoCanje } from "@/types/configuracion";
 
@@ -171,11 +172,14 @@ export function PantallaConfirmar({ idQR, marca, beatsEnJuego, balanceActual }: 
         {marca}
       </h2>
 
-      <div className="bloque-oscuro mt-6 w-full px-5 py-6 shadow-elevado">
-        <p className="font-display text-[48px] leading-none text-primario">
+      {/* Mismo patron que el contador de Inicio: numero en navy, amarillo como
+          acento. Ninguna card de la app lleva fondo oscuro. */}
+      <div className="tarjeta-plana mt-6 w-full px-5 py-6">
+        <p className="font-display text-[48px] leading-none text-texto-principal">
           +{beatsEnJuego}
         </p>
-        <p className="etiqueta mt-1 text-white/70">Beats</p>
+        <BarraAcento className="mt-3" />
+        <p className="etiqueta mt-3 text-texto-secundario">Beats</p>
       </div>
 
       {!enLinea ? (

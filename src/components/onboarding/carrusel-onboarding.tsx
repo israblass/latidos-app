@@ -47,7 +47,11 @@ export function CarruselOnboarding({ pantalla, textoAvance, children }: Props) {
   };
 
   return (
-    <div className="flex min-h-dvh flex-col px-5 pb-8 pt-4">
+    // Alto fijo y no minimo: con `min-h-dvh` el contenedor crece con el
+    // contenido y el pie baja con el, asi que en una pantalla corta el boton de
+    // avanzar termina debajo del pliegue. Con alto fijo, el pie se queda donde
+    // esta y lo que scrollea es el contenido.
+    <div className="flex h-dvh flex-col px-5 pb-8 pt-4">
       <header className="flex justify-end">
         <button
           type="button"
@@ -59,7 +63,16 @@ export function CarruselOnboarding({ pantalla, textoAvance, children }: Props) {
         </button>
       </header>
 
-      <div className="flex flex-1 flex-col overflow-y-auto">{children}</div>
+      {/*
+        `min-h-0` no es decorativo: un hijo de flex trae `min-height: auto`, asi
+        que no se encoge por debajo de su contenido y el `overflow-y-auto` nunca
+        llega a activarse. Sin esto, en una pantalla corta el contenido empuja
+        el pie y el boton de avanzar se sale de la vista en vez de que el
+        contenido scrollee.
+      */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        {children}
+      </div>
 
       <footer className="pt-6">
         <div

@@ -163,6 +163,21 @@
     @apply rounded-card bg-fondo p-4 shadow-card;
   }
 
+  /*
+   * Halo del contador de Beats. Es el amarillo de marca como luz detras del
+   * numero, no como color del numero: a esta opacidad no compite con el texto
+   * navy que va encima, y por eso el contraste no depende de en que momento del
+   * ciclo se mire.
+   */
+  .halo-beats {
+    background: radial-gradient(
+      circle at center,
+      rgba(253, 251, 5, 0.18) 0%,
+      rgba(253, 251, 5, 0.1) 45%,
+      rgba(253, 251, 5, 0) 72%
+    );
+  }
+
   /* Card que tiene que leerse como el elemento principal de la pantalla. */
   .tarjeta-elevada {
     @apply rounded-card bg-fondo p-4 shadow-elevado;
@@ -254,7 +269,13 @@
     box-shadow: 0 8px 32px rgba(26, 35, 50, 0.08);
   }
 
-  /* Para lo que tiene que sostener el amarillo de marca. */
+  /*
+   * SIN USO desde v2.1.2. Ninguna card de la app lleva fondo oscuro: el
+   * amarillo de marca ya no se sostiene con una superficie oscura debajo, sino
+   * que deja de ser color de texto y pasa a acento (ver TituloConAcento). Se
+   * deja definido porque la constitution todavia contempla el oscuro como uso
+   * puntual, pero si nada lo usa en la proxima fase, se puede borrar.
+   */
   .vidrio-oscuro {
     background: rgba(13, 17, 23, 0.82);
     -webkit-backdrop-filter: blur(32px) saturate(140%);
@@ -307,6 +328,7 @@
    * sobre blanco, asi que cuando tiene que brillar se le pone debajo una
    * superficie que lo sostenga (constitution §2, firma visual).
    */
+  /* SIN USO desde v2.1.2, misma razon que .vidrio-oscuro. */
   .bloque-oscuro {
     @apply rounded-card bg-oscuro text-texto-inverso;
   }

@@ -4,6 +4,7 @@ import { Bloque, TituloSeccion } from "@/components/onboarding/bloque";
 import { CarruselOnboarding } from "@/components/onboarding/carrusel-onboarding";
 import { IconoAsset } from "@/components/onboarding/icono-asset";
 import { IlustracionOnboarding } from "@/components/onboarding/ilustracion";
+import { TituloConAcento } from "@/components/marca/titulo-con-acento";
 
 /**
  * Pantalla 2: como se ganan Beats y en que se canjean.
@@ -67,14 +68,13 @@ export default function PantallaComoGanarBeats() {
         descripcion="Una persona escaneando el codigo QR de una marca con su telefono"
       />
 
-      <div className="vidrio-oscuro mt-2 px-5 py-7 text-center">
-        <p className="etiqueta text-white/70">Tu moneda en Latidos</p>
-        <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-primario">
+      <div className="vidrio-medio mt-3 px-5 py-7 text-center">
+        <TituloConAcento
+          etiqueta="Tu moneda en Latidos"
+          detalle="Los ganas participando y los cambias por recompensas."
+        >
           Beats
-        </h1>
-        <p className="mt-3 text-[15px] text-white/80">
-          Los ganas participando y los cambias por recompensas.
-        </p>
+        </TituloConAcento>
       </div>
 
       <TituloSeccion>Como los ganas</TituloSeccion>

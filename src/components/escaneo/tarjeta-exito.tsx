@@ -2,6 +2,7 @@
 
 import { ContadorAnimado } from "@/components/escaneo/contador-animado";
 import { IconoEstado } from "@/components/escaneo/icono-estado";
+import { BarraAcento } from "@/components/marca/titulo-con-acento";
 
 /**
  * Cierre de un canje confirmado (T053, T054).
@@ -41,13 +42,14 @@ export function TarjetaExito({
         Sumaste {beatsOtorgados} Beats de {marca}
       </h2>
 
-      <div className="bloque-oscuro mt-6 w-full px-5 py-7 shadow-elevado">
+      <div className="tarjeta-plana mt-6 w-full px-5 py-7">
         <ContadorAnimado
           desde={balanceAnterior}
           hasta={balanceNuevo}
-          className="font-display block text-[56px] leading-none text-primario"
+          className="font-display block text-[56px] leading-none text-texto-principal"
         />
-        <p className="etiqueta mt-1 text-white/70">Beats</p>
+        <BarraAcento className="mt-3" />
+        <p className="etiqueta mt-3 text-texto-secundario">Beats</p>
       </div>
 
       {modoEventoActivo ? (

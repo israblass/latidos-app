@@ -93,12 +93,22 @@ const config: Config = {
         girar: {
           to: { transform: "rotate(360deg)" },
         },
+        // El latido detras del contador de Beats: respira en escala y opacidad.
+        // Las dos curvas van juntas para que se lea como un pulso y no como un
+        // parpadeo, y el minimo no baja a cero para que nunca desaparezca del
+        // todo.
+        latido: {
+          "0%, 100%": { transform: "scale(0.88)", opacity: "0.45" },
+          "50%": { transform: "scale(1.06)", opacity: "1" },
+        },
       },
       animation: {
         "entrar-pantalla": "entrar-pantalla 260ms cubic-bezier(0.22,1,0.36,1) both",
         "aparecer-check": "aparecer-check 520ms cubic-bezier(0.34,1.56,0.64,1) 80ms both",
         "entrar-tarjeta": "entrar-tarjeta 340ms cubic-bezier(0.22,1,0.36,1) both",
         girar: "girar 700ms linear infinite",
+        latido: "latido 3.6s ease-in-out infinite",
+        "latido-rapido": "latido 900ms ease-in-out 2",
       },
       fontFamily: {
         display: ["var(--font-anton)", "Impact", "sans-serif"],
