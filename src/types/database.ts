@@ -4,6 +4,7 @@
  * con `supabase gen types typescript`.
  */
 
+import type { Escaneo, EstadoQR, Marca, QRMarca } from "@/types/qr";
 import type { TipoUsuario, Usuario } from "@/types/usuario";
 
 export type Database = {
@@ -28,11 +29,32 @@ export type Database = {
         Update: Partial<Omit<Usuario, "id" | "created_at">>;
         Relationships: [];
       };
+      marcas: {
+        Row: Marca;
+        Insert: Omit<Marca, "id" | "created_at"> & Partial<Pick<Marca, "id">>;
+        Update: Partial<Omit<Marca, "id" | "created_at">>;
+        Relationships: [];
+      };
+      qr_marca: {
+        Row: QRMarca;
+        Insert: Omit<QRMarca, "id" | "created_at" | "updated_at"> &
+          Partial<Pick<QRMarca, "id" | "escaneos_totales_contador" | "estado">>;
+        Update: Partial<Omit<QRMarca, "id" | "created_at">>;
+        Relationships: [];
+      };
+      escaneos: {
+        Row: Escaneo;
+        Insert: Omit<Escaneo, "id" | "created_at" | "confirmado_en"> &
+          Partial<Pick<Escaneo, "id" | "confirmado_en">>;
+        Update: Partial<Omit<Escaneo, "id" | "created_at">>;
+        Relationships: [];
+      };
     };
     Views: { [_ in never]: never };
     Functions: { [_ in never]: never };
     Enums: {
       tipo_usuario: TipoUsuario;
+      estado_qr: EstadoQR;
     };
     CompositeTypes: { [_ in never]: never };
   };

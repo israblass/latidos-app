@@ -8,9 +8,9 @@ primer escaneo`, `plan latidos-app` y el archivo de tareas de la historia.
 ## Estado
 
 Implementadas la **Fase 1 — Setup + Registro** (T001-T015), la **Fase 2 —
-Instalacion PWA** (T016-T022) y la **Fase 3 — Onboarding + Inicio**
-(T023-T033). Las fases 4 a 6 (escaneo de QR, canje de Beats, QA) todavia no
-estan construidas.
+Instalacion PWA** (T016-T022), la **Fase 3 — Onboarding + Inicio** (T023-T033)
+y la **Fase 4 — Escaneo y validacion de QR** (T034-T045). Las fases 5 y 6
+(canje de Beats y QA) todavia no estan construidas.
 
 ## Requisitos
 
@@ -181,6 +181,37 @@ el componente cae al texto del `alt`: se pierde el arte, nunca el contenido.
 
 Los iconos de PWA (`public/icon-*.png`) NO salen de este bucket; se generan
 aparte.
+
+## Escaneo de QR
+
+La Fase 4 llega hasta la validacion: al enfocar un codigo, la app dice si sirve,
+de que marca es y cuantos Beats estarian en juego. **No otorga Beats ni mueve
+ningun contador** — el canje es de la Fase 5.
+
+El contenido del QR es el id del registro de `qr_marca`. Se aceptan dos formas:
+el UUID pelado, o una URL de la app que lo lleve
+(`https://<dominio>/escanear?qr=<uuid>`). La segunda existe porque la camara
+nativa del telefono tambien la reconoce y abre la app directo. Los Beats nunca
+van en el codigo: se resuelven en el servidor, para que el admin los pueda
+cambiar sin reimprimir nada.
+
+**El limite diario** corta a medianoche de `America/Caracas`, no a las 24 horas
+del ultimo escaneo ni a la medianoche del proceso. En Vercel el servidor corre
+en UTC, donde medianoche cae a las 8 de la noche en Venezuela: alguien que
+escanea a las 9pm veria su limite reiniciado el mismo dia. La zona se puede
+cambiar con la variable `ZONA_HORARIA`.
+
+### QR de prueba
+
+Mientras no exista la pantalla de admin, los codigos de prueba viven en
+`supabase/seed.sql` con ids fijos. Para generar las imagenes:
+
+```bash
+npm run qr:prueba -- --url https://tu-dominio.vercel.app
+```
+
+Salen en `qr-prueba/` (PNG y SVG, ignorados por git). Sin `--url` el QR lleva el
+id pelado, que solo sirve escaneando desde dentro de la app.
 
 ## Design system
 

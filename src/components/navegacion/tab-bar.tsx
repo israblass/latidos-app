@@ -8,9 +8,9 @@ import type { ReactNode } from "react";
  * Barra de navegacion inferior: 5 tabs, con "Escanear" destacado al centro
  * (constitution §8).
  *
- * Solo Inicio existe en esta fase. El resto se pinta apagado y sin enlace en
- * vez de omitirse: asi la barra ya tiene su forma definitiva y ningun toque
- * termina en un 404. Cada tab se enciende cuando llegue su fase.
+ * Inicio y Escanear ya existen. Pulso, Beats y Perfil se pintan apagados y sin
+ * enlace en vez de omitirse: asi la barra ya tiene su forma definitiva y ningun
+ * toque termina en un 404. Cada tab se enciende cuando llegue su fase.
  */
 
 const iconoBase = {
@@ -68,7 +68,7 @@ interface Tab {
 const TABS: Tab[] = [
   { etiqueta: "Inicio", icono: <IconoInicio />, href: "/inicio" },
   { etiqueta: "Pulso", icono: <IconoPulso /> },
-  { etiqueta: "Escanear", icono: <IconoEscanear />, destacado: true },
+  { etiqueta: "Escanear", icono: <IconoEscanear />, href: "/escanear", destacado: true },
   { etiqueta: "Beats", icono: <IconoBeats /> },
   { etiqueta: "Perfil", icono: <IconoPerfil /> },
 ];
