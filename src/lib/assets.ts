@@ -15,13 +15,6 @@ export const ASSETS = {
   /** Logotipo principal de Latidos. */
   latidosHero: `${BUCKET}/Latidos-hero.png`,
 
-  /**
-   * Textura de cielo del branding, la misma que la web usa de fondo global.
-   * Aqui va detras de un velo blanco: es lo que le da material al frosted
-   * glass, que sobre un color plano no tiene nada que difuminar.
-   */
-  fondoCielo: `${BUCKET}/fondo-cielo.png`,
-
   /** Logos institucionales, para creditos. */
   flame: `${BUCKET}/flame-logo.png`,
   ucv: `${BUCKET}/Logo-UCV.png`,

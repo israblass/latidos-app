@@ -69,6 +69,12 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
+    /*
+     * Capa propia de composicion. En Safari iOS el backdrop-filter sobre un
+     * position:fixed se rompe con el rebote del scroll; promoverlo a su propia
+     * capa lo evita. No he podido comprobarlo en un iOS real desde aqui.
+     */
+    transform: translateZ(0);
   }
 
   .fondo-app__cielo,

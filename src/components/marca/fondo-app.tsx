@@ -1,5 +1,3 @@
-import { ASSETS } from "@/lib/assets";
-
 /**
  * Lienzo de la app: la capa que hace posible el vidrio esmerilado.
  *
@@ -10,7 +8,7 @@ import { ASSETS } from "@/lib/assets";
  *
  * Son tres capas apiladas:
  *
- * 1. El cielo del branding, la misma imagen que usa la web.
+ * 1. El cielo del branding (fondos/fondo-splash.webp).
  * 2. Un velo blanco, que baja el contraste del cielo para que el texto navy
  *    siga legible encima, pero deja pasar suficiente variacion.
  * 3. El degradado de marca en `soft-light`, que tiñe el conjunto con el azul y
@@ -29,9 +27,17 @@ export function FondoApp() {
     <div aria-hidden="true" className="fondo-app">
       {/* El cielo. Si no carga, debajo queda el blanco del body y la app sigue
           perfectamente legible: el vidrio se vera plano, nada mas. */}
+      {/*
+        Version reducida del splash. El original es 1920x3428 y pesa 467 KB;
+        aqui vive detras de un velo al 0.72 y de un desenfoque de 32px, asi que
+        esa resolucion no se puede ver. La copia de 600px pesa 24 KB y se
+        carga en todas las pantallas: la diferencia importa mas que el detalle
+        que nadie llega a mirar. El original se conserva para el splash
+        screen, donde si se ve a tamaño completo.
+      */}
       <div
         className="fondo-app__cielo"
-        style={{ backgroundImage: `url(${ASSETS.fondoCielo})` }}
+        style={{ backgroundImage: "url(/assets/fondos/fondo-splash-backdrop.webp)" }}
       />
       <div className="fondo-app__velo" />
       <div
