@@ -49,16 +49,19 @@ export default function Home() {
         <PromptsInstalacion />
       </div>
 
-      {/* Credito institucional: quien organiza el programa y donde ocurre. */}
+      {/* Credito institucional: los tres organizadores del programa. */}
       <footer className="mt-8 flex flex-col items-center gap-3">
         <p className="etiqueta">Un programa de</p>
-        <div className="flex items-center gap-6">
+        {/* Se envuelve para que en pantallas angostas los tres logos bajen de
+            linea en vez de encogerse hasta volverse ilegibles. */}
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
           <ImagenMarca src={ASSETS.flame} alt="The Flame Creative Lab" alto={28} />
           <ImagenMarca
             src={ASSETS.ucv}
             alt="Universidad Central de Venezuela"
             alto={32}
           />
+          <ImagenMarca src={ASSETS.munUcv} alt="MUN UCV" alto={32} />
         </div>
       </footer>
     </main>
