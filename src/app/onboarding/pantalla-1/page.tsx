@@ -3,6 +3,7 @@
 import { CarruselOnboarding } from "@/components/onboarding/carrusel-onboarding";
 import { ImagenMarca } from "@/components/marca/imagen-marca";
 import { ASSETS } from "@/lib/assets";
+import { IlustracionOnboarding } from "@/components/onboarding/ilustracion";
 
 /**
  * Pantalla 1: que es Latidos.
@@ -47,7 +48,12 @@ export default function PantallaQueEsLatidos() {
     <CarruselOnboarding pantalla={1} textoAvance="Siguiente">
       {/* Acento amarillo y no bloque amarillo: el boton de avanzar es el unico
           amarillo grande de la pantalla. */}
-      <div className="vidrio-medio px-5 py-7 text-center">
+      <IlustracionOnboarding
+        nombre="onboarding-1-comunidad"
+        descripcion="Tres personas de la comunidad UCV llevando cajas de donaciones"
+      />
+
+      <div className="vidrio-medio mt-2 px-5 py-7 text-center">
         <p className="etiqueta">Programa UCV</p>
         <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-texto-principal">
           Seis meses

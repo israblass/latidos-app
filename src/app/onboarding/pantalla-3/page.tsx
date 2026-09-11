@@ -18,6 +18,14 @@ export default function PantallaCierre() {
     <CarruselOnboarding pantalla={3} textoAvance="Empezar">
       {/* Acento amarillo y no bloque amarillo: el boton de avanzar es el unico
           amarillo grande de la pantalla. */}
+      {/*
+        TODO(assets): falta la tercera ilustracion del onboarding. El zip trae
+        `onboarding-1-comunidad` y `onboarding-2-escanear`, pero no la de esta
+        pantalla, y el encargo describe tres slides. No se pone nada en su
+        lugar: un dibujo de libreria desentonaria con el par que si existe. Al
+        recibirla: <IlustracionOnboarding nombre="onboarding-3-..." /> aqui
+        arriba, con mt-2 en la card de abajo, igual que en las otras dos.
+      */}
       <div className="vidrio-medio px-5 py-7 text-center">
         <p className="etiqueta">Todo listo</p>
         <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-texto-principal">
@@ -42,6 +50,14 @@ export default function PantallaCierre() {
             // seguidos de vidrio-medio (el desenfoque es caro y se acumula).
             className="vidrio-sutil flex h-10 w-10 shrink-0 items-center justify-center rounded-control text-secundario"
           >
+            {/*
+              TODO(assets): falta `iconos/icono-notificacion.webp`. El encargo
+              lo asigna a esta card, pero no venia en el zip de recursos (trae
+              13 de los 15 iconos). Mientras tanto se deja la campana dibujada
+              a mano que ya estaba, no un icono de libreria. Al recibirlo:
+              sustituir por <IconoAsset nombre="icono-notificacion" /> y borrar
+              IconoCampana de components/onboarding/iconos.
+            */}
             <IconoCampana />
           </span>
           <div className="min-w-0 flex-1">

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { TabBar } from "@/components/navegacion/tab-bar";
@@ -45,7 +46,24 @@ export default async function Inicio() {
             <p className="etiqueta mt-1 text-white/70">Beats</p>
           </div>
 
-          <p className="mt-6 max-w-[16rem] text-center text-texto-secundario">
+          {/*
+            Con cero Beats la pantalla es un estado vacio, y el microcopy guia a
+            la accion en vez de disculparse (constitution §3). La ilustracion
+            solo aparece aqui: en cuanto hay saldo, el numero es el protagonista
+            y una ilustracion debajo le competiria.
+          */}
+          {perfil.beats_balance === 0 ? (
+            <Image
+              src="/assets/estados-vacios/vacio-sin-beats.webp"
+              alt=""
+              aria-hidden="true"
+              width={150}
+              height={150}
+              className="mt-6"
+            />
+          ) : null}
+
+          <p className="mt-4 max-w-[16rem] text-center text-texto-secundario">
             {perfil.beats_balance === 0
               ? "Escanea un QR de marca para empezar a sumar."
               : "Sigue participando para sumar mas."}

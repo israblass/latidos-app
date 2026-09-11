@@ -27,3 +27,28 @@ export const ASSETS = {
 } as const;
 
 export type ClaveAsset = keyof typeof ASSETS;
+
+/*
+ * Assets de marca que ya estan en public/assets pero todavia no tienen pantalla
+ * donde vivir. Se anotan aqui para que no se pierdan de vista al construir las
+ * fases que faltan:
+ *
+ * - fondos/fondo-header-perfil       -> cabecera de Perfil (tab aun sin pantalla)
+ * - fondos/fondo-banner-publicitario -> slot de banner en Inicio (Fase 1 constitution)
+ * - fondos/fondo-notificacion        -> arte de las push (Fase 2)
+ * - fondos/fondo-feature-graphic     -> ficha de las tiendas, no va dentro de la app
+ * - badges/*                         -> niveles de logro (sistema aun no construido)
+ * - iconos/icono-canjear, icono-qr-personal, icono-centro-acopio,
+ *   icono-configuracion, icono-cerrar-sesion -> Perfil, Pulso y canje (fases 2 y 3)
+ * - iconos/icono-exito-check, icono-codigo-inactivo, icono-ya-escaneado,
+ *   icono-marco-escaneo-solido -> pantallas de escaneo; hoy usan SVG en linea
+ *   que ya pasan contraste. Sustituirlos es cosmetico y se hara en el Frente 3.
+ * - estados-vacios/vacio-sin-jornadas, -sin-escaneos, -sin-notificaciones,
+ *   -sin-conexion -> pantallas de lista que aun no existen.
+ *
+ * Y lo que falta y hace falta:
+ *
+ * - TODO(assets) iconos/icono-notificacion    -> card "Avisos del programa"
+ * - TODO(assets) ilustraciones/onboarding-3-* -> tercera pantalla del onboarding
+ * - TODO(assets) el sexto estado vacio        -> sin asignar
+ */

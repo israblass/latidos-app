@@ -2,15 +2,8 @@
 
 import { Bloque, TituloSeccion } from "@/components/onboarding/bloque";
 import { CarruselOnboarding } from "@/components/onboarding/carrusel-onboarding";
-import {
-  IconoBolso,
-  IconoCaja,
-  IconoCalendario,
-  IconoEntrada,
-  IconoLibro,
-  IconoManos,
-  IconoQR,
-} from "@/components/onboarding/iconos";
+import { IconoAsset } from "@/components/onboarding/icono-asset";
+import { IlustracionOnboarding } from "@/components/onboarding/ilustracion";
 
 /**
  * Pantalla 2: como se ganan Beats y en que se canjean.
@@ -22,25 +15,25 @@ import {
  */
 const FORMAS_DE_GANAR = [
   {
-    icono: <IconoQR />,
+    icono: <IconoAsset nombre="icono-escanear-qr" />,
     titulo: "Escanea QR de marcas",
     detalle: "En los stands de las marcas patrocinantes.",
     destacado: "+5",
   },
   {
-    icono: <IconoCaja />,
+    icono: <IconoAsset nombre="icono-donar" />,
     titulo: "Dona insumos",
     detalle: "En cualquier centro de acopio del programa.",
     destacado: "+10",
   },
   {
-    icono: <IconoManos />,
+    icono: <IconoAsset nombre="icono-voluntariado" />,
     titulo: "Haz voluntariado",
     detalle: "Suma trabajando en las jornadas.",
     destacado: "+15",
   },
   {
-    icono: <IconoCalendario />,
+    icono: <IconoAsset nombre="icono-actividad-curso" />,
     titulo: "Asiste a actividades",
     detalle: "Cada actividad del programa suma.",
   },
@@ -48,17 +41,17 @@ const FORMAS_DE_GANAR = [
 
 const CANJES = [
   {
-    icono: <IconoEntrada />,
+    icono: <IconoAsset nombre="recompensa-entrada-concierto" carpeta="recompensas" />,
     titulo: "Entradas al concierto",
     detalle: "Zona general, media o frente de tarima.",
   },
   {
-    icono: <IconoBolso />,
+    icono: <IconoAsset nombre="recompensa-merch" carpeta="recompensas" />,
     titulo: "Merch de Latidos",
     detalle: "Bolsos, gorras y mas. Tambien puedes donarlo.",
   },
   {
-    icono: <IconoLibro />,
+    icono: <IconoAsset nombre="recompensa-curso" carpeta="recompensas" />,
     titulo: "Cursos universitarios",
     detalle: "Oratoria y otros, por convenio con la UCV.",
   },
@@ -69,7 +62,12 @@ export default function PantallaComoGanarBeats() {
     <CarruselOnboarding pantalla={2} textoAvance="Siguiente">
       {/* Card oscura: el mismo par oscuro + amarillo del contador de Inicio, para
           que "Beats" se lea siempre igual en toda la app. */}
-      <div className="vidrio-oscuro px-5 py-7 text-center">
+      <IlustracionOnboarding
+        nombre="onboarding-2-escanear"
+        descripcion="Una persona escaneando el codigo QR de una marca con su telefono"
+      />
+
+      <div className="vidrio-oscuro mt-2 px-5 py-7 text-center">
         <p className="etiqueta text-white/70">Tu moneda en Latidos</p>
         <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-primario">
           Beats
