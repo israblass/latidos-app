@@ -151,7 +151,7 @@
   }
 
   .campo {
-    @apply min-h-touch w-full rounded-control border border-black/10 bg-fondo-alterno px-4 text-[16px] text-texto-principal outline-none transition-colors focus:border-secundario focus:bg-fondo;
+    @apply min-h-touch w-full rounded-control border border-black/[0.12] bg-fondo-alterno px-4 text-[16px] text-texto-principal outline-none transition-colors focus:border-secundario focus:bg-fondo;
   }
 
   .campo-error {

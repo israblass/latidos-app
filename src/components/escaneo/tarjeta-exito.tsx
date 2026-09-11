@@ -1,6 +1,7 @@
 "use client";
 
 import { ContadorAnimado } from "@/components/escaneo/contador-animado";
+import { IconoEstado } from "@/components/escaneo/icono-estado";
 
 /**
  * Cierre de un canje confirmado (T053, T054).
@@ -31,26 +32,12 @@ export function TarjetaExito({
     <div className="tarjeta-elevada animate-entrar-tarjeta flex flex-col items-center px-5 py-8 text-center">
       {/* El check entra pasado de tamaño y asienta: es el momento que la
           persona vino a ver, y aparecer sin mas lo deja en nada. */}
-      <span
-        aria-hidden="true"
-        className="animate-aparecer-check flex h-16 w-16 items-center justify-center rounded-full bg-exito/10 text-exito-texto shadow-[0_0_0_6px_rgba(46,160,67,0.06)]"
-      >
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M20 6L9 17l-5-5" />
-        </svg>
-      </span>
+      <IconoEstado
+        nombre="icono-exito-check"
+        className="animate-aparecer-check"
+      />
 
-      <h2 className="font-display mt-5 text-[24px] uppercase leading-tight text-texto-principal">
+      <h2 className="font-display mt-4 text-[24px] uppercase leading-tight text-texto-principal">
         Sumaste {beatsOtorgados} Beats de {marca}
       </h2>
 

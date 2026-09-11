@@ -19,14 +19,9 @@ export function MensajeFriccion({
 }) {
   return (
     <div className="tarjeta flex flex-col items-center px-5 py-8 text-center">
-      <span
-        aria-hidden="true"
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-fondo-alterno text-secundario"
-      >
-        {icono}
-      </span>
+      {icono}
 
-      <h2 className="font-display mt-5 text-[22px] uppercase leading-tight text-texto-principal">
+      <h2 className="font-display mt-4 text-[22px] uppercase leading-tight text-texto-principal">
         {titulo}
       </h2>
       <p className="mt-2 text-[15px] text-texto-secundario">{detalle}</p>
