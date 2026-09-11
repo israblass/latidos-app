@@ -128,13 +128,17 @@ export function TabBar() {
                   {contenido}
                 </Link>
               ) : (
-                <span
-                  aria-disabled="true"
+                // Un boton deshabilitado y no un span: el lector de pantalla lo
+                // anuncia como control no disponible, mientras que un span se
+                // lee como texto suelto y no da ninguna pista de que va a llegar.
+                <button
+                  type="button"
+                  disabled
                   title="Disponible pronto"
                   className={`${clases} opacity-70`}
                 >
                   {contenido}
-                </span>
+                </button>
               )}
             </li>
           );

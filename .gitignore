@@ -42,3 +42,9 @@ next-env.d.ts
 
 # QR de prueba generados localmente
 qr-prueba/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

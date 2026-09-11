@@ -7,10 +7,11 @@ primer escaneo`, `plan latidos-app` y el archivo de tareas de la historia.
 
 ## Estado
 
-Implementadas la **Fase 1 — Setup + Registro** (T001-T015), la **Fase 2 —
-Instalacion PWA** (T016-T022), la **Fase 3 — Onboarding + Inicio** (T023-T033),
-la **Fase 4 — Escaneo y validacion de QR** (T034-T045) y la **Fase 5 — Canje y
-otorgamiento de Beats** (T046-T058). Falta la Fase 6 (QA y pulido).
+Completas las seis fases de la historia "registro y primer escaneo":
+**Fase 1 — Setup + Registro** (T001-T015), **Fase 2 — Instalacion PWA**
+(T016-T022), **Fase 3 — Onboarding + Inicio** (T023-T033), **Fase 4 — Escaneo y
+validacion de QR** (T034-T045), **Fase 5 — Canje y otorgamiento de Beats**
+(T046-T058) y **Fase 6 — Polish y QA** (T059-T068).
 
 ## Requisitos
 
@@ -157,12 +158,90 @@ de quedarse esperando. Con `SUPABASE_SERVICE_ROLE_KEY` en el
 entorno pide el enlace de confirmacion por la API de admin; sin ella, se
 detiene y pide que se pegue el enlace que llego al buzon.
 
+## Pruebas
+
+```bash
+npm test                 # suite completa (levanta mock + app)
+npm run test:ui          # la misma suite en modo interactivo
+npm run test:bd          # solo las que necesitan Postgres
+npm run rendimiento      # solo las de rendimiento (ver mas abajo)
+```
+
+La suite vive en `tests/integracion/` y se apoya en dos piezas de
+`tests/servidor-mock/`: un mock del API de Supabase y `supabase-shim.sql`, que
+reproduce lo minimo de Supabase (esquema `auth`, roles, `auth.uid()` y los
+grants por defecto) para poder correr las migraciones contra un Postgres pelado.
+
+**Por que hay un mock.** El Supabase real no es alcanzable desde CI, y una suite
+que depende de una base compartida se vuelve inestable en cuanto dos corridas se
+cruzan. El mock reimplementa lo justo del API para ejercitar el cableado del
+cliente de punta a punta.
+
+**Lo que el mock NO prueba, y por que hay una segunda capa.** La atomicidad del
+canje, el bloqueo de fila que serializa dos confirmaciones simultaneas y las
+politicas RLS son comportamiento de Postgres. Probarlos contra el mock no
+probaria nada: ahi esa logica esta reescrita en JavaScript, y una
+reimplementacion no es evidencia de que el original funcione. Esas pruebas
+corren contra un Postgres de verdad y se **saltan con un aviso** si no hay
+`DATABASE_URL`, en vez de pasar en falso:
+
+```bash
+DATABASE_URL=postgres://postgres@localhost:5432/postgres npm run test:bd
+```
+
+Crean su propia base, aplican las migraciones y el seed, y consultan siempre con
+el rol `authenticated` y el claim `sub` puesto — que es el contexto real del
+cliente. Consultar como dueño de la base no probaria nada, porque el dueño se
+salta RLS por completo.
+
+| Archivo | Cubre |
+|---|---|
+| `registro.test.ts` | T059 — los 6 pasos, sin guardado parcial, validacion de sintaxis |
+| `onboarding.test.ts` | T060 — 3 pantallas, salto, permiso de avisos, no se repite |
+| `escaneo-exitoso.test.ts` | T061 — confirmar, cancelar, modo evento, historico |
+| `escaneo-friccion.test.ts` | T062 — ya usado, limite alcanzado, invalido, sin conexion |
+| `qr-concurrencia.test.ts` | T063 — carrera sobre un QR de cupo 1 *(Postgres)* |
+| `limite-diario.test.ts` | T064 — reinicio a medianoche de Caracas *(Postgres)* |
+| `accesibilidad.test.ts` | T065 — 13 pantallas: 48px, AA, labels, alt, un h1 |
+| `rls.test.ts` | T066 — aislamiento entre cuentas y barridos estructurales *(Postgres)* |
+| `rendimiento.test.ts` | T067 — carga en 4G |
+| `criterios-aceptacion.test.ts` | T068 / V026 — los 24 criterios de la spec |
+
+### Accesibilidad
+
+`accesibilidad.test.ts` mide cada pantalla renderizada, no el codigo fuente:
+contraste real de cada texto sobre su fondo efectivo, alto de cada control
+interactivo, etiqueta accesible de cada input, texto alternativo de cada imagen
+y presencia de un unico `h1`. Las 13 pantallas pasan.
+
+### Rendimiento
+
+```bash
+npm run build && npm run start   # en una terminal
+URL_BASE=http://localhost:3000 npm run rendimiento
+```
+
+Solo tiene sentido contra un build de produccion: `next dev` compila cada ruta
+la primera vez que se pide y sirve el bundle sin minificar, asi que daria
+numeros mucho peores que los reales. Se mide con la cache vacia y la red frenada
+a un perfil 4G conservador (4 Mbps, 70 ms de ida y vuelta).
+
+Ultima medicion: **pantalla de escaneo lista en ~1,1 s** bajando ~159 KB en 12
+recursos, contra un objetivo de 3 s (constitution §9).
+
+Dos tramos que esta medicion **no** cubre y hay que comprobar en el telefono: el
+encendido fisico de la camara (aqui la camara es falsa y arranca al instante) y
+la descarga de las imagenes de marca, que vienen del Storage de Supabase.
+
 ## Scripts
 
 | Comando | Que hace |
 |---|---|
 | `npm run dev` | Servidor de desarrollo |
 | `npm run build` | Build de produccion |
+| `npm test` | Suite de integracion completa |
+| `npm run test:bd` | Pruebas que requieren Postgres |
+| `npm run rendimiento` | Medicion de carga en 4G |
 | `npm run lint` | ESLint |
 
 ## Imagenes de marca
@@ -314,6 +393,9 @@ public/                         manifest.json, service worker e iconos
 supabase/migrations/            SQL del esquema
 scripts/verificar-registro.mjs  V001 contra el Supabase real
 scripts/generar-qr-prueba.mjs   Imagenes de los QR del seed
+tests/integracion/              Suite de integracion (ver "Pruebas")
+tests/ayudantes/                Registro de cuentas, ganchos del mock, auditor a11y
+tests/servidor-mock/            Mock de Supabase y shim SQL para Postgres
 ```
 
 ## Instalacion de la PWA
@@ -356,6 +438,37 @@ En la barra inferior solo Inicio esta activo. Pulso, Escanear, Beats y Perfil se
 pintan apagados y sin enlace para que la barra ya tenga su forma definitiva sin
 que ningun toque termine en un 404.
 
+## Comprobacion manual pendiente
+
+Tres cosas no se pueden cerrar con pruebas automatizadas y hay que verlas en un
+telefono de verdad. Estan marcadas como PARCIAL en `criterios-aceptacion.test.ts`:
+
+- **Criterio 2 — instalacion en iOS.** Safari no expone API de instalacion; lo
+  que se prueba aqui es nuestro modal con el user agent de iOS, no el flujo
+  nativo de "Compartir -> Agregar a pantalla de inicio".
+- **Criterio 3 — instalacion en Android.** Chromium headless no emite
+  `beforeinstallprompt`; la prueba emite el evento igual que lo haria el
+  navegador para comprobar nuestra reaccion, pero el dialogo del sistema no.
+- **Criterio 13 — permiso de camara.** Se comprueba que la app llama a
+  `getUserMedia`, que es lo que dispara el dialogo; el dialogo lo pinta el
+  sistema operativo y no se ve desde una prueba.
+
+## Cabos sueltos
+
+- **El limite diario es por QR, no por marca.** La spec (§9 regla 10) y la
+  constitution (§6) dicen "una vez por **marca** por dia", pero el plan (§2,
+  validaciones de Escaneo) lo define por QRMarca, y asi esta implementado: el
+  indice unico es sobre `(usuario_id, qr_marca_id, dia_local)`. Con una marca que
+  reparta varios codigos distintos —stickers, habladores de mesa, el del stand—
+  la misma persona puede sumar Beats de esa marca varias veces el mismo dia. Hay
+  una prueba que documenta el comportamiento actual en `limite-diario.test.ts`.
+  Cerrarlo es cambiar el indice a `(usuario_id, marca_id, dia_local)`, pero es
+  una decision de negocio: afecta a como se reparten los codigos impresos.
+- **Next 14.2.35 arrastra vulnerabilidades sin parche en su tren.** `npm audit`
+  reporta varias de severidad alta y critica, y el arreglo solo existe en Next 15
+  o 16; 14.2.35 ya es la ultima de la linea 14. Subir de major es un cambio con
+  ruptura y no entraba en esta historia.
+
 ## Decisiones de esta fase
 
 - **El registro no se guarda de forma parcial.** El estado vive solo en memoria
@@ -382,6 +495,16 @@ que ningun toque termine en un 404.
   a estar "ya escaneado hoy"; un `router.refresh()` en esa ruta la renderiza de
   nuevo en el servidor y reemplaza el exito por el rechazo delante de la
   persona. El refresh va despues de navegar a Inicio, nunca antes.
+- **Las pruebas de base de datos no se fingen.** Lo que es comportamiento de
+  Postgres (atomicidad, bloqueo de fila, RLS) se prueba contra Postgres, y si no
+  hay `DATABASE_URL` esas pruebas se saltan con un aviso en vez de pasar en
+  falso. Ver "Pruebas".
+- **La revision de RLS incluye barridos estructurales**, no solo casos concretos:
+  toda tabla de `public` con RLS activo y con al menos una politica, ninguna
+  politica de escritura fuera de `usuarios`, y ninguna funcion `security definer`
+  sin `search_path` fijo, con retorno de trigger, o ejecutable por `PUBLIC`. Son
+  los que atrapan el agujero que nadie penso en probar — el de Fase 5 tenia
+  exactamente esa forma.
 - **La confirmacion de correo esta activada.** El contrato del plan §3 devuelve
   `{ usuario_id, sesion_token }`; con la confirmacion activa no hay sesion al
   terminar el paso 6, asi que `sesion_token` viaja en null y el cliente manda a

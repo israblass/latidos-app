@@ -20,12 +20,16 @@ export default function Home() {
     <main className="flex min-h-dvh flex-col px-5 pb-8 pt-16">
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         <div className="flex w-full flex-col items-center rounded-card bg-fondo-alterno px-6 py-12">
-          <ImagenMarca
-            src={ASSETS.latidosHero}
-            alt="Latidos"
-            alto={96}
-            prioritaria
-          />
+          {/* El logo es el titulo de la pantalla: dentro de un h1, su texto
+              alternativo es lo que anuncia un lector de pantalla al entrar. */}
+          <h1>
+            <ImagenMarca
+              src={ASSETS.latidosHero}
+              alt="Latidos"
+              alto={96}
+              prioritaria
+            />
+          </h1>
           <div
             aria-hidden="true"
             className="mt-5 h-1.5 w-20 rounded-full bg-primario"

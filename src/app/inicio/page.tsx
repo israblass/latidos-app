@@ -23,6 +23,9 @@ export default async function Inicio() {
     <>
       <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
         <header className="flex items-center justify-between gap-3">
+          {/* El diseño no lleva titulo visible (el contador es el heroe), pero
+              sin un h1 un lector de pantalla no sabe anunciar donde esta. */}
+          <h1 className="sr-only">Inicio</h1>
           <p className="text-[15px] text-texto-secundario">
             Hola,{" "}
             <span className="font-medium text-texto-principal">

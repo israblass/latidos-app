@@ -72,6 +72,15 @@ export function LectorQR({ onLeer, activo, onEstado }: Props) {
 
       try {
         await escaner.start();
+
+        // qr-scanner inyecta su propio overlay (el recuadro de la zona de
+        // escaneo y el contorno del codigo). Es decorativo, pero el markup no
+        // es nuestro y viene sin aria-hidden, asi que un lector de pantalla lo
+        // anunciaria como contenido. Se marca aqui, tras montarlo.
+        video.current?.parentElement
+          ?.querySelectorAll<SVGElement>("svg:not([aria-hidden])")
+          .forEach((overlay) => overlay.setAttribute("aria-hidden", "true"));
+
         cambiar("activa");
       } catch {
         // Negar el permiso y no tener camara llegan igual; se informa el caso
