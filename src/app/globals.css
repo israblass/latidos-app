@@ -11,6 +11,22 @@
     @apply bg-fondo text-texto-principal font-sans font-light antialiased;
     font-size: 15px;
     line-height: 1.6;
+
+    /*
+     * Lienzo de marca detras de todo. No es decoracion: el frosted glass
+     * necesita algo con variacion detras para que se note, y sobre el blanco
+     * plano de la base no se veria mas que una mancha gris. El degradado es el
+     * aprobado por el cliente (amarillo y azul de marca en version clara), y
+     * pesa menos de 4 KB.
+     *
+     * El color de fondo se mantiene debajo: si la imagen no carga, la pantalla
+     * sigue siendo blanca y legible, no queda transparente.
+     */
+    background-image: url("/fondo-latidos.jpg");
+    background-size: cover;
+    background-position: center;
+    /* Fijo para que no se arrastre con el scroll ni con la entrada de pantalla. */
+    background-attachment: fixed;
   }
 
   /* Base clara (constitution §2, v2.1.0). */
@@ -119,6 +135,42 @@
   /* Card que tiene que leerse como el elemento principal de la pantalla. */
   .tarjeta-elevada {
     @apply rounded-card bg-fondo p-4 shadow-elevado;
+  }
+
+  /*
+   * Frosted glass, con los valores aprobados en la web de Latidos, invertidos
+   * para base clara: alli el velo es oscuro sobre cielo, aqui es claro sobre
+   * el degradado. El desenfoque y la sombra se mantienen igual.
+   */
+  .vidrio {
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border-color: rgba(255, 255, 255, 0.55);
+    /* Le pide al navegador su propia capa: sin esto el desenfoque se recalcula
+       en cada cuadro de scroll y se nota el tiron. */
+    will-change: backdrop-filter;
+    transform: translateZ(0);
+  }
+
+  /*
+   * En pantallas chicas el desenfoque se baja, igual criterio que la web
+   * (globals.css, breakpoint 767px): a 24px el scroll da tirones en telefonos
+   * de gama media, que son la mayoria en el evento.
+   */
+  @media (max-width: 767px) {
+    .vidrio {
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      backdrop-filter: blur(14px) saturate(180%);
+    }
+  }
+
+  /* Donde el navegador no soporta backdrop-filter, el velo se vuelve opaco
+     para que el texto encima no pierda contraste. */
+  @supports not (backdrop-filter: blur(1px)) {
+    .vidrio {
+      background: rgba(255, 255, 255, 0.95);
+    }
   }
 
   /* Card plana, para bloques que ya viven dentro de otra superficie blanca. */

@@ -30,8 +30,11 @@ export function PromptIOS({ onCerrar }: Props) {
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       {/* Tocar fuera cierra. Es decorativo: los lectores de pantalla llegan al
           boton de cerrar, que hace lo mismo. */}
+      {/* El desenfoque va en el velo, no en la hoja: una hoja translucida con
+          texto oscuro encima pierde contraste segun lo que pase por detras, y
+          asi el efecto se ve igual sin arriesgar la legibilidad. */}
       <div
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/40 backdrop-blur-[14px] backdrop-saturate-150"
         onClick={onCerrar}
         aria-hidden="true"
       />
