@@ -19,7 +19,7 @@ export default function Home() {
   return (
     <main className="flex min-h-dvh flex-col px-5 pb-8 pt-16">
       <div className="flex flex-1 flex-col items-center justify-center text-center">
-        <div className="flex w-full flex-col items-center rounded-card bg-fondo-alterno px-6 py-12">
+        <div className="vidrio-medio flex w-full flex-col items-center px-6 py-12">
           {/* El logo es el titulo de la pantalla: dentro de un h1, su texto
               alternativo es lo que anuncia un lector de pantalla al entrar. */}
           <h1>

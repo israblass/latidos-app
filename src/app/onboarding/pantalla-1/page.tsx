@@ -47,7 +47,7 @@ export default function PantallaQueEsLatidos() {
     <CarruselOnboarding pantalla={1} textoAvance="Siguiente">
       {/* Acento amarillo y no bloque amarillo: el boton de avanzar es el unico
           amarillo grande de la pantalla. */}
-      <div className="rounded-card bg-fondo-alterno px-5 py-7 text-center">
+      <div className="vidrio-medio px-5 py-7 text-center">
         <p className="etiqueta">Programa UCV</p>
         <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-texto-principal">
           Seis meses
@@ -67,7 +67,7 @@ export default function PantallaQueEsLatidos() {
         {FASES.map((fase) => (
           <li
             key={fase.nombre}
-            className={`tarjeta border-l-4 ${fase.acento}`}
+            className={`vidrio-medio overflow-hidden border-l-4 p-4 ${fase.acento}`}
           >
             <div className="flex items-center justify-between gap-3">
               <h3 className="flex min-w-0 items-center">

@@ -11,22 +11,6 @@
     @apply bg-fondo text-texto-principal font-sans font-light antialiased;
     font-size: 15px;
     line-height: 1.6;
-
-    /*
-     * Lienzo de marca detras de todo. No es decoracion: el frosted glass
-     * necesita algo con variacion detras para que se note, y sobre el blanco
-     * plano de la base no se veria mas que una mancha gris. El degradado es el
-     * aprobado por el cliente (amarillo y azul de marca en version clara), y
-     * pesa menos de 4 KB.
-     *
-     * El color de fondo se mantiene debajo: si la imagen no carga, la pantalla
-     * sigue siendo blanca y legible, no queda transparente.
-     */
-    background-image: url("/fondo-latidos.jpg");
-    background-size: cover;
-    background-position: center;
-    /* Fijo para que no se arrastre con el scroll ni con la entrada de pantalla. */
-    background-attachment: fixed;
   }
 
   /* Base clara (constitution §2, v2.1.0). */
@@ -77,6 +61,47 @@
 }
 
 @layer components {
+  /*
+   * Capa de fondo fija. Detras de todo el contenido y sin capturar toques.
+   */
+  .fondo-app {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .fondo-app__cielo,
+  .fondo-app__velo,
+  .fondo-app__tinte {
+    position: absolute;
+    inset: 0;
+  }
+
+  .fondo-app__cielo {
+    background-size: cover;
+    background-position: center;
+  }
+
+  /*
+   * Velo blanco. Baja el contraste del cielo lo justo para que el texto navy
+   * siga legible encima del vidrio, sin aplanarlo del todo: si se sube
+   * demasiado, el desenfoque se vuelve a quedar sin material.
+   */
+  .fondo-app__velo {
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  /*
+   * Tinte de marca. En soft-light el degradado colorea lo que hay debajo en
+   * vez de taparlo, asi que el cielo sigue aportando su variacion.
+   */
+  .fondo-app__tinte {
+    background-size: cover;
+    background-position: center;
+    opacity: 0.35;
+    mix-blend-mode: soft-light;
+  }
   .titulo-pantalla {
     @apply font-display text-[28px] uppercase leading-tight text-texto-principal;
   }
@@ -138,38 +163,131 @@
   }
 
   /*
-   * Frosted glass, con los valores aprobados en la web de Latidos, invertidos
-   * para base clara: alli el velo es oscuro sobre cielo, aqui es claro sobre
-   * el degradado. El desenfoque y la sombra se mantienen igual.
+   * Vidrio esmerilado, en tres niveles.
+   *
+   * Solo funcionan sobre la capa .fondo-app: el desenfoque necesita algo con
+   * variacion detras. Sobre un color plano los tres se ven igual, como un
+   * rectangulo gris.
    */
-  .vidrio {
-    background: rgba(255, 255, 255, 0.72);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
-    border-color: rgba(255, 255, 255, 0.55);
-    /* Le pide al navegador su propia capa: sin esto el desenfoque se recalcula
-       en cada cuadro de scroll y se nota el tiron. */
-    will-change: backdrop-filter;
+  .vidrio-sutil,
+  .vidrio-medio,
+  .vidrio-oscuro {
+    position: relative;
+    border-radius: theme("borderRadius.card");
+    /* El desenfoque se calcula en su propia capa: sin esto el navegador lo
+       rehace en cada cuadro de scroll y se nota el tiron. */
     transform: translateZ(0);
   }
 
   /*
-   * En pantallas chicas el desenfoque se baja, igual criterio que la web
-   * (globals.css, breakpoint 767px): a 24px el scroll da tirones en telefonos
-   * de gama media, que son la mayoria en el evento.
+   * El canto iluminado es lo que de verdad vende el efecto: un borde plano se
+   * lee como un rectangulo translucido, no como un canto de vidrio. Se hace
+   * con un anillo de un pixel recortado por mascara, porque un borde con
+   * degradado de verdad exigiria pintar el fondo del elemento y eso taparia el
+   * desenfoque.
+   */
+  .vidrio-sutil::after,
+  .vidrio-medio::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.95),
+      rgba(255, 255, 255, 0.25) 45%,
+      rgba(255, 255, 255, 0.12)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .vidrio-oscuro::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.28),
+      rgba(255, 255, 255, 0.06)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Nivel menor: para lo que ya vive dentro de otra pieza de vidrio. */
+  .vidrio-sutil {
+    background: rgba(255, 255, 255, 0.55);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: 0 4px 24px rgba(26, 35, 50, 0.06);
+  }
+
+  /* Nivel principal: contenedores de primer nivel. */
+  .vidrio-medio {
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    backdrop-filter: blur(32px) saturate(180%);
+    box-shadow: 0 8px 32px rgba(26, 35, 50, 0.08);
+  }
+
+  /* Para lo que tiene que sostener el amarillo de marca. */
+  .vidrio-oscuro {
+    background: rgba(13, 17, 23, 0.82);
+    -webkit-backdrop-filter: blur(32px) saturate(140%);
+    backdrop-filter: blur(32px) saturate(140%);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+    @apply text-texto-inverso;
+  }
+
+  /*
+   * En pantallas chicas el desenfoque se baja, mismo criterio que el
+   * globals.css de la web (breakpoint 767px): a 32px el scroll da tirones en
+   * telefonos de gama media, que son la mayoria en el evento.
    */
   @media (max-width: 767px) {
-    .vidrio {
-      -webkit-backdrop-filter: blur(14px) saturate(180%);
-      backdrop-filter: blur(14px) saturate(180%);
+    .vidrio-sutil {
+      -webkit-backdrop-filter: blur(12px) saturate(160%);
+      backdrop-filter: blur(12px) saturate(160%);
+    }
+
+    .vidrio-medio,
+    .vidrio-oscuro {
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      backdrop-filter: blur(18px) saturate(180%);
     }
   }
 
-  /* Donde el navegador no soporta backdrop-filter, el velo se vuelve opaco
-     para que el texto encima no pierda contraste. */
-  @supports not (backdrop-filter: blur(1px)) {
-    .vidrio {
-      background: rgba(255, 255, 255, 0.95);
+  /*
+   * Sin backdrop-filter (Safari viejo, Firefox sin la bandera) el fondo se
+   * vuelve casi opaco: translucido y sin desenfoque, el texto quedaria sobre
+   * el cielo a pelo y perderia contraste.
+   */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .vidrio-sutil,
+    .vidrio-medio {
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .vidrio-oscuro {
+      background: rgba(13, 17, 23, 0.95);
     }
   }
 

@@ -27,7 +27,22 @@ const config: Config = {
 
         texto: {
           principal: "#1A2332",
-          secundario: "#6B7280",
+          /*
+           * Un paso mas oscuro que el #6B7280 de la constitution. Aquel da
+           * 4.83:1 sobre blanco puro, apenas por encima del AA, y esa holgura
+           * se consume en cuanto el texto cae sobre una superficie translucida:
+           * sobre vidrio, con el cielo oscuro detras, bajaba a 3.63:1.
+           *
+           * Se probo primero subir el velo del fondo, que es lo que menos toca
+           * la paleta, pero hacia falta llevarlo a 0.94 para recuperar el AA, y
+           * a ese nivel el desenfoque se queda sin variacion que difuminar: se
+           * perderia justo el efecto que el velo existe para permitir.
+           *
+           * Este tono da 4.90:1 en el peor caso posible sobre vidrio y 6.53:1
+           * sobre blanco, asi que mejora el contraste en toda la app, no solo
+           * donde hay vidrio.
+           */
+          secundario: "#565E6D",
           terciario: "#9CA3AF",
           // Para texto sobre superficies oscuras o sobre el amarillo.
           inverso: "#FFFFFF",

@@ -69,7 +69,7 @@ export default function PantallaComoGanarBeats() {
     <CarruselOnboarding pantalla={2} textoAvance="Siguiente">
       {/* Card oscura: el mismo par oscuro + amarillo del contador de Inicio, para
           que "Beats" se lea siempre igual en toda la app. */}
-      <div className="bloque-oscuro px-5 py-7 text-center shadow-elevado">
+      <div className="vidrio-oscuro px-5 py-7 text-center">
         <p className="etiqueta text-white/70">Tu moneda en Latidos</p>
         <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-primario">
           Beats

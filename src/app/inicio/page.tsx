@@ -38,7 +38,7 @@ export default async function Inicio() {
           aria-label="Tu balance de Beats"
           className="flex flex-1 flex-col items-center justify-center"
         >
-          <div className="bloque-oscuro w-full px-6 py-10 text-center shadow-elevado">
+          <div className="vidrio-oscuro w-full px-6 py-10 text-center">
             <p className="font-display text-[72px] leading-none text-primario">
               {perfil.beats_balance}
             </p>

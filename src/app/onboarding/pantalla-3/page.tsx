@@ -18,7 +18,7 @@ export default function PantallaCierre() {
     <CarruselOnboarding pantalla={3} textoAvance="Empezar">
       {/* Acento amarillo y no bloque amarillo: el boton de avanzar es el unico
           amarillo grande de la pantalla. */}
-      <div className="rounded-card bg-fondo-alterno px-5 py-7 text-center">
+      <div className="vidrio-medio px-5 py-7 text-center">
         <p className="etiqueta">Todo listo</p>
         <h1 className="font-display mt-2 text-[34px] uppercase leading-none text-texto-principal">
           Empieza a
@@ -34,11 +34,13 @@ export default function PantallaCierre() {
         </p>
       </div>
 
-      <div className="tarjeta mt-4">
+      <div className="vidrio-medio mt-4 p-4">
         <div className="flex items-center gap-3">
           <span
             aria-hidden="true"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-fondo-alterno text-secundario"
+            // Dentro de una card que ya es vidrio: baja un nivel, nunca dos
+            // seguidos de vidrio-medio (el desenfoque es caro y se acumula).
+            className="vidrio-sutil flex h-10 w-10 shrink-0 items-center justify-center rounded-control text-secundario"
           >
             <IconoCampana />
           </span>

@@ -82,7 +82,7 @@ export function TabBar() {
       // Vidrio y no blanco solido: es una barra fija con el contenido pasando
       // por debajo, que es justo donde el desenfoque tiene algo que desenfocar
       // (la card oscura de Beats, el degradado de fondo).
-      className="vidrio fixed inset-x-0 bottom-0 z-40 border-t shadow-barra pb-[env(safe-area-inset-bottom)]"
+      className="vidrio-medio fixed inset-x-0 bottom-0 z-40 rounded-none pb-[env(safe-area-inset-bottom)]"
     >
       <ul className="mx-auto flex max-w-md items-stretch">
         {TABS.map((tab) => {

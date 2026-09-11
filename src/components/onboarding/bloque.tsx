@@ -16,10 +16,12 @@ export function Bloque({
   destacado?: string;
 }) {
   return (
-    <li className="tarjeta flex items-center gap-3">
+    <li className="vidrio-medio flex items-center gap-3 p-4">
       <span
         aria-hidden="true"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-fondo-alterno text-secundario"
+        // Un nivel por debajo de la card que lo contiene: dos vidrio-medio
+        // anidados cuestan el doble de desenfoque y se ven casi igual.
+        className="vidrio-sutil flex h-10 w-10 shrink-0 items-center justify-center rounded-control text-secundario"
       >
         {icono}
       </span>

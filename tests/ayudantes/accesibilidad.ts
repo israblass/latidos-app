@@ -46,16 +46,47 @@ export async function auditar(page: Page): Promise<Hallazgo[]> {
       );
     };
 
-    // Color de fondo efectivo, subiendo por los ancestros hasta uno opaco.
+    /*
+     * Color de fondo efectivo bajo un texto.
+     *
+     * Los fondos translucidos no se saltan: se apilan y se componen. Saltarlos
+     * daba falsos positivos groseros en cuanto aparecio el vidrio esmerilado —
+     * una card con alpha 0.82 se ignoraba y el texto blanco encima se medida
+     * contra el blanco del body, dando 1:1 donde en realidad hay 13:1.
+     *
+     * Lo que esto NO puede ver es lo que hay detras de un backdrop-filter: la
+     * capa de cielo es un hermano fijo, no un ancestro. Para esas superficies
+     * el limite real se calcula aparte, acotando el peor caso posible del
+     * fondo (negro puro y blanco puro).
+     */
     const fondoDe = (el: Element): string => {
+      const capas: number[][] = [];
       let nodo: Element | null = el;
+
       while (nodo && nodo !== document.documentElement) {
         const fondo = getComputedStyle(nodo).backgroundColor;
         const canales = (fondo.match(/[\d.]+/g) || []).map(Number);
-        if (canales.length >= 3 && (canales.length < 4 || canales[3] > 0.9)) return fondo;
+        if (canales.length >= 3) {
+          const alfa = canales.length > 3 ? canales[3] : 1;
+          if (alfa > 0) {
+            capas.push([canales[0], canales[1], canales[2], alfa]);
+            if (alfa >= 0.999) break; // opaco: lo de abajo ya no se ve
+          }
+        }
         nodo = nodo.parentElement;
       }
-      return "rgb(255, 255, 255)";
+
+      // Se compone de la capa mas profunda hacia la mas superficial.
+      let resultado = [255, 255, 255];
+      for (let i = capas.length - 1; i >= 0; i -= 1) {
+        const [r, g, b, a] = capas[i];
+        resultado = [
+          Math.round(r * a + resultado[0] * (1 - a)),
+          Math.round(g * a + resultado[1] * (1 - a)),
+          Math.round(b * a + resultado[2] * (1 - a)),
+        ];
+      }
+      return `rgb(${resultado[0]}, ${resultado[1]}, ${resultado[2]})`;
     };
 
     const textos: {
