@@ -8,9 +8,9 @@ primer escaneo`, `plan latidos-app` y el archivo de tareas de la historia.
 ## Estado
 
 Implementadas la **Fase 1 — Setup + Registro** (T001-T015), la **Fase 2 —
-Instalacion PWA** (T016-T022), la **Fase 3 — Onboarding + Inicio** (T023-T033)
-y la **Fase 4 — Escaneo y validacion de QR** (T034-T045). Las fases 5 y 6
-(canje de Beats y QA) todavia no estan construidas.
+Instalacion PWA** (T016-T022), la **Fase 3 — Onboarding + Inicio** (T023-T033),
+la **Fase 4 — Escaneo y validacion de QR** (T034-T045) y la **Fase 5 — Canje y
+otorgamiento de Beats** (T046-T058). Falta la Fase 6 (QA y pulido).
 
 ## Requisitos
 
@@ -184,9 +184,10 @@ aparte.
 
 ## Escaneo de QR
 
-La Fase 4 llega hasta la validacion: al enfocar un codigo, la app dice si sirve,
-de que marca es y cuantos Beats estarian en juego. **No otorga Beats ni mueve
-ningun contador** — el canje es de la Fase 5.
+Al enfocar un codigo valido, la app lleva a la pantalla de confirmacion, que
+dice de que marca es y cuantos Beats estan en juego. Los Beats **solo se
+acreditan si la persona toca "Confirmar canje"**: cancelar no escribe nada y no
+gasta cupo del QR.
 
 El contenido del QR es el id del registro de `qr_marca`. Se aceptan dos formas:
 el UUID pelado, o una URL de la app que lo lleve
@@ -212,6 +213,45 @@ npm run qr:prueba -- --url https://tu-dominio.vercel.app
 
 Salen en `qr-prueba/` (PNG y SVG, ignorados por git). Sin `--url` el QR lleva el
 id pelado, que solo sirve escaneando desde dentro de la app.
+
+## Canje de Beats
+
+Confirmar es la unica accion que escribe. Todo ocurre dentro de una funcion de
+Postgres (`confirmar_canje_qr`, `security definer`) que en una sola transaccion
+revalida el QR, reserva el cupo, crea el Escaneo y suma el balance. Si algo no
+cuadra, no queda nada a medias.
+
+**El cupo se reserva con un UPDATE condicional**, no leyendo y despues
+escribiendo:
+
+```sql
+update public.qr_marca
+   set escaneos_totales_contador = escaneos_totales_contador + 1
+ where id = p_qr_marca_id
+   and estado = 'activo'
+   and (limite_total_escaneos is null
+        or escaneos_totales_contador < limite_total_escaneos)
+```
+
+Postgres bloquea la fila durante el update, asi que dos personas que confirmen
+el mismo QR en el mismo instante se serializan: la segunda ve el contador ya
+movido, no cumple la condicion y recibe `limite_alcanzado`. Esta verificado
+contra un Postgres real con dos conexiones sincronizadas al mismo instante de
+arranque — pasa exactamente una.
+
+**El limite de uno por dia por marca** lo sostiene un indice unico sobre
+`(usuario_id, qr_marca_id, dia_local)`, no un `select` previo. La violacion del
+indice aborta la transaccion completa, de modo que el contador del QR tampoco
+queda movido.
+
+**Los Beats se copian al Escaneo**, no se referencian (plan, Decision Tecnica
+4). Si manana el admin sube ese QR de 10 a 50 Beats, quien canjeo ayer conserva
+los 10 que gano: el historico no se reescribe solo.
+
+**`modo_evento_activo`** vive en `configuracion_app` (una sola fila, forzada por
+un unique) y solo cambia el cierre de la pantalla de exito: encendido invita a
+seguir escaneando, apagado deja unicamente volver a Inicio. Viene apagado en el
+seed.
 
 ## Design system
 
@@ -240,30 +280,40 @@ src/
     registro/
       layout.tsx                Proveedor del estado en memoria del formulario
       paso-1..paso-6/           Los 6 pasos del registro
-      confirma-tu-correo/       Espera de confirmacion (puente, se va en Fase 3)
-      cuenta-lista/             Destino tras confirmar (puente, se va en Fase 3)
+      confirma-tu-correo/       Espera de confirmacion del correo
     auth/confirmar/             Destino del enlace del correo
     api/auth/registro/          POST que crea la cuenta
     api/usuario/                Onboarding visto y permiso de notificaciones
+    api/qr/validar/             POST que valida un QR sin escribir nada
+    api/qr/confirmar-canje/     POST que otorga los Beats (la unica escritura)
+    escanear/                   Lector de QR con la camara
+    escanear/confirmar/         Confirmar o cancelar el canje
     onboarding/pantalla-1..3/   Onboarding, una sola vez por cuenta
     inicio/                     Contador de Beats y barra de navegacion
     sin-conexion/               Pantalla que sirve el service worker sin red
+  components/escaneo/           Lector, confirmacion, exito y mensajes de fallo
   components/instalacion/       Prompts de instalacion iOS y Android
   components/navegacion/        Barra inferior de 5 tabs
   components/onboarding/        Carrusel, bloques e iconos del onboarding
   components/pwa/               Registro del service worker
   components/registro/          Progreso, campo de texto, guardia de paso
+  hooks/use-conexion.ts         Estado de red, para avisar antes de intentar
   hooks/use-permiso-notificaciones.ts  Permiso de avisos push
   hooks/use-plataforma.ts       Deteccion de iOS / Android / otro
   hooks/use-registro-form.ts    Estado del registro (solo en memoria)
+  lib/fecha/limite-diario.ts    Medianoche de America/Caracas
+  lib/qr/contenido.ts           Lee el id del QR (uuid pelado o URL)
+  lib/qr/validar.ts             Validacion compartida por API y pantalla
+  lib/qr/confirmar-canje-transaccion.ts  Llamada a la funcion de Postgres
   lib/supabase/                 Clientes de navegador, servidor y middleware
   lib/usuario/asegurar-perfil.ts Baja los datos del registro a la tabla usuarios
   lib/usuario/sesion.ts         Perfil de la sesion y guardias de pantalla
   lib/validacion/registro.ts    Validacion de sintaxis basica de los campos
-  types/                        Usuario, TipoUsuario y tipado del esquema
+  types/                        Usuario, QR, configuracion y tipado del esquema
 public/                         manifest.json, service worker e iconos
 supabase/migrations/            SQL del esquema
 scripts/verificar-registro.mjs  V001 contra el Supabase real
+scripts/generar-qr-prueba.mjs   Imagenes de los QR del seed
 ```
 
 ## Instalacion de la PWA
@@ -319,6 +369,19 @@ que ningun toque termine en un 404.
   `egresado` y `externo`.
 - **El balance de Beats no lo escribe el cliente.** Un trigger rechaza cualquier
   update de `beats_balance` que llegue con el rol `authenticated`.
+- **El canje es atomico y el cupo se reserva con un UPDATE condicional**, no con
+  un `select` seguido de un `insert`. Ver "Canje de Beats".
+- **Cancelar no deja rastro.** No se crea Escaneo ni se toca el contador del QR
+  (spec §5, flujo alternativo 5): nada se escribe hasta confirmar.
+- **El trigger que protege `beats_balance` no es `security definer`.** Lo fue
+  por un momento durante la Fase 5 y eso lo desactivaba por completo: con
+  `security definer` el `current_user` que compara pasa a ser el dueno de la
+  funcion y nunca el rol del cliente. Sin `security definer` el trigger corre
+  con el rol de quien escribe, que es justo lo que hay que revisar.
+- **La pantalla de exito no se refresca a si misma.** Tras confirmar, el QR pasa
+  a estar "ya escaneado hoy"; un `router.refresh()` en esa ruta la renderiza de
+  nuevo en el servidor y reemplaza el exito por el rechazo delante de la
+  persona. El refresh va despues de navegar a Inicio, nunca antes.
 - **La confirmacion de correo esta activada.** El contrato del plan §3 devuelve
   `{ usuario_id, sesion_token }`; con la confirmacion activa no hay sesion al
   terminar el paso 6, asi que `sesion_token` viaja en null y el cliente manda a

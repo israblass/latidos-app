@@ -17,6 +17,14 @@ on conflict (id) do update
   set nombre = excluded.nombre,
       logo_url = excluded.logo_url;
 
+-- -------------------------------------------------------- Configuracion -----
+
+-- Fila singleton. El modo evento arranca apagado; lo enciende el admin cuando
+-- toca (spec §9 regla 13).
+insert into public.configuracion_app (id, modo_evento_activo)
+values ('c0000000-0000-4000-8000-000000000001', false)
+on conflict (fila_unica) do nothing;
+
 -- ------------------------------------------------------------ QR de marca ---
 
 insert into public.qr_marca

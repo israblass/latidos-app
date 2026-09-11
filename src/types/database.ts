@@ -4,6 +4,7 @@
  * con `supabase gen types typescript`.
  */
 
+import type { ConfiguracionApp } from "@/types/configuracion";
 import type { Escaneo, EstadoQR, Marca, QRMarca } from "@/types/qr";
 import type { TipoUsuario, Usuario } from "@/types/usuario";
 
@@ -42,6 +43,12 @@ export type Database = {
         Update: Partial<Omit<QRMarca, "id" | "created_at">>;
         Relationships: [];
       };
+      configuracion_app: {
+        Row: ConfiguracionApp;
+        Insert: Partial<ConfiguracionApp>;
+        Update: Partial<Omit<ConfiguracionApp, "id">>;
+        Relationships: [];
+      };
       escaneos: {
         Row: Escaneo;
         Insert: Omit<Escaneo, "id" | "created_at" | "confirmado_en"> &
@@ -51,7 +58,16 @@ export type Database = {
       };
     };
     Views: { [_ in never]: never };
-    Functions: { [_ in never]: never };
+    Functions: {
+      confirmar_canje_qr: {
+        Args: {
+          p_qr_marca_id: string;
+          p_inicio_del_dia: string;
+          p_dia_local: string;
+        };
+        Returns: unknown;
+      };
+    };
     Enums: {
       tipo_usuario: TipoUsuario;
       estado_qr: EstadoQR;

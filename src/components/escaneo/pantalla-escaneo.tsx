@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { LectorQR } from "@/components/escaneo/lector-qr";
 import { MensajeLimiteAlcanzado } from "@/components/escaneo/mensaje-limite-alcanzado";
 import { MensajeYaEscaneado } from "@/components/escaneo/mensaje-ya-escaneado";
+import { useConexion } from "@/hooks/use-conexion";
+import { PARAMETRO_QR } from "@/lib/qr/contenido";
 import type { ResultadoValidacion } from "@/types/qr";
 
 type Estado =
@@ -29,11 +32,13 @@ const ESPERA_MISMA_LECTURA_MS = 3000;
 /**
  * Escaneo de QR de marca (T039, T043).
  *
- * Fase 4 llega hasta la validacion: dice si el codigo sirve, de que marca es y
- * cuantos Beats estarian en juego. Ni otorga Beats ni mueve contadores; la
- * pantalla de confirmacion y el canje son de la Fase 5.
+ * Al reconocer un codigo lo valida contra el servidor. Si sirve, lleva a la
+ * pantalla de confirmacion, que es donde la persona decide si canjea; aqui no
+ * se otorga nada.
  */
 export function PantallaEscaneo({ contenidoInicial }: { contenidoInicial?: string }) {
+  const router = useRouter();
+  const enLinea = useConexion();
   const [estado, setEstado] = useState<Estado>({ fase: "escaneando" });
   const [aviso, setAviso] = useState<Aviso>(null);
 
@@ -56,6 +61,14 @@ export function PantallaEscaneo({ contenidoInicial }: { contenidoInicial?: strin
 
     validando.current = true;
     setAviso(null);
+
+    // Sin red no se intenta nada en segundo plano (spec, flujo alternativo 4).
+    if (!navigator.onLine) {
+      setAviso("sin-conexion");
+      validando.current = false;
+      return;
+    }
+
     setEstado({ fase: "validando" });
 
     try {
@@ -76,6 +89,15 @@ export function PantallaEscaneo({ contenidoInicial }: { contenidoInicial?: strin
         return;
       }
 
+      if (resultado.valido) {
+        // El codigo sirve: la decision de canjear se toma en su propia
+        // pantalla, y los Beats solo se otorgan si se confirma alli.
+        router.push(
+          `/escanear/confirmar?${PARAMETRO_QR}=${resultado.qr_marca_id}`,
+        );
+        return;
+      }
+
       setEstado({ fase: "resuelto", resultado });
     } catch {
       // Sin red no se intenta nada en segundo plano: se avisa y se espera a que
@@ -85,7 +107,7 @@ export function PantallaEscaneo({ contenidoInicial }: { contenidoInicial?: strin
     } finally {
       validando.current = false;
     }
-  }, []);
+  }, [router]);
 
   // Un QR impreso como URL puede abrir la app directamente con el codigo ya
   // puesto; en ese caso no hace falta pasar por la camara.
@@ -152,42 +174,16 @@ export function PantallaEscaneo({ contenidoInicial }: { contenidoInicial?: strin
                 : "Enfoca el QR de la marca."}
             </p>
 
-            {aviso ? (
+            {aviso || !enLinea ? (
               <div
                 role="status"
                 className="mt-4 rounded-control border-l-[3px] border-alerta bg-fondo-alterno px-4 py-3 text-[14px] text-texto-secundario"
               >
-                {aviso === "qr_invalido"
+                {aviso === "qr_invalido" && enLinea
                   ? "No pudimos leer el codigo. Asegurate de enfocar bien y vuelve a intentar."
                   : "Te quedaste sin señal. Intenta de nuevo cuando tengas conexion."}
               </div>
             ) : null}
-          </div>
-        ) : null}
-
-        {estado.fase === "resuelto" && estado.resultado.valido ? (
-          <div className="tarjeta flex flex-col items-center px-5 py-8 text-center">
-            <p className="etiqueta">Codigo valido</p>
-            <h2 className="font-display mt-2 text-[26px] uppercase leading-tight text-texto-principal">
-              {estado.resultado.marca.nombre}
-            </h2>
-
-            <div className="bloque-oscuro mt-6 w-full px-5 py-6">
-              <p className="font-display text-[48px] leading-none text-primario">
-                +{estado.resultado.beats_en_juego}
-              </p>
-              <p className="etiqueta mt-1 text-white/70">Beats en juego</p>
-            </div>
-
-            {/* Fase 4 valida, no otorga. El canje llega en la Fase 5. */}
-            <p className="mt-5 text-[15px] text-texto-secundario">
-              Todavia no sumaste estos Beats: falta confirmar el canje.
-            </p>
-
-            <div className="mt-7 flex w-full flex-col gap-3">
-              {botonReintentar}
-              {botonInicio}
-            </div>
           </div>
         ) : null}
 
