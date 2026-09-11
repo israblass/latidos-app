@@ -13,6 +13,10 @@ Completas las seis fases de la historia "registro y primer escaneo":
 validacion de QR** (T034-T045), **Fase 5 — Canje y otorgamiento de Beats**
 (T046-T058) y **Fase 6 — Polish y QA** (T059-T068).
 
+El ciclo completo esta verificado en produccion con un telefono real: registro,
+onboarding, escaneo del QR de KFC, confirmacion previa, canje otorgado y el QR
+inactivo correctamente rechazado.
+
 ## Requisitos
 
 - Node.js 20 o superior
