@@ -165,13 +165,13 @@ export function PantallaConfirmar({ idQR, marca, beatsEnJuego, balanceActual }: 
   const enviando = estado.fase === "enviando";
 
   return (
-    <div className="tarjeta flex flex-col items-center px-5 py-8 text-center">
+    <div className="tarjeta-elevada flex flex-col items-center px-5 py-8 text-center">
       <p className="etiqueta">Vas a canjear el QR de</p>
       <h2 className="font-display mt-2 text-[26px] uppercase leading-tight text-texto-principal">
         {marca}
       </h2>
 
-      <div className="bloque-oscuro mt-6 w-full px-5 py-6">
+      <div className="bloque-oscuro mt-6 w-full px-5 py-6 shadow-elevado">
         <p className="font-display text-[48px] leading-none text-primario">
           +{beatsEnJuego}
         </p>
@@ -191,7 +191,14 @@ export function PantallaConfirmar({ idQR, marca, beatsEnJuego, balanceActual }: 
           disabled={enviando}
           className="boton-primario"
         >
-          {enviando ? "Confirmando..." : "Confirmar canje"}
+          {enviando ? (
+            <>
+              <span className="girador mr-2" aria-hidden="true" />
+              Confirmando...
+            </>
+          ) : (
+            "Confirmar canje"
+          )}
         </button>
 
         {/* Cancelar no escribe nada: simplemente se vuelve al escaner. */}

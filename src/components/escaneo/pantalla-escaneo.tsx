@@ -171,11 +171,18 @@ export function PantallaEscaneo({ contenidoInicial }: { contenidoInicial?: strin
 
             <p
               aria-live="polite"
-              className="mt-5 text-center text-[15px] text-texto-secundario"
+              className="mt-5 flex items-center justify-center gap-2 text-center text-[15px] text-texto-secundario"
             >
-              {estado.fase === "validando"
-                ? "Validando el codigo..."
-                : "Enfoca el QR de la marca."}
+              {estado.fase === "validando" ? (
+                <>
+                  {/* Sin el giro, el cambio de texto parece que la pantalla se
+                      colgo justo en el momento de mas tension del flujo. */}
+                  <span className="girador" aria-hidden="true" />
+                  Validando el codigo...
+                </>
+              ) : (
+                "Enfoca el QR de la marca."
+              )}
             </p>
 
             {aviso || !enLinea ? (

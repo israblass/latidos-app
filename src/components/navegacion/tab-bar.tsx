@@ -109,7 +109,7 @@ export function TabBar() {
             </>
           );
 
-          const clases = `flex min-h-touch flex-1 flex-col items-center justify-center gap-1 py-2 ${
+          const clases = `flex min-h-touch flex-1 flex-col items-center justify-center gap-1 py-2 transition-[color,transform] duration-200 ease-out active:scale-95 ${
             // Tab activo en azul y no en amarillo: sobre la barra blanca el
             // amarillo no alcanza contraste (constitution §2 lo contempla). Los
             // inactivos en gris secundario y no terciario, que se queda en

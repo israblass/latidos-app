@@ -28,14 +28,16 @@ export function TarjetaExito({
   onVolverAInicio: () => void;
 }) {
   return (
-    <div className="tarjeta flex flex-col items-center px-5 py-8 text-center">
+    <div className="tarjeta-elevada animate-entrar-tarjeta flex flex-col items-center px-5 py-8 text-center">
+      {/* El check entra pasado de tamaño y asienta: es el momento que la
+          persona vino a ver, y aparecer sin mas lo deja en nada. */}
       <span
         aria-hidden="true"
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-fondo-alterno text-exito-texto"
+        className="animate-aparecer-check flex h-16 w-16 items-center justify-center rounded-full bg-exito/10 text-exito-texto shadow-[0_0_0_6px_rgba(46,160,67,0.06)]"
       >
         <svg
-          width="28"
-          height="28"
+          width="32"
+          height="32"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

@@ -33,6 +33,31 @@
   textarea::placeholder {
     @apply text-texto-secundario;
   }
+
+  /*
+   * Entrada de pantalla. Cada ruta monta su propio <main>, asi que al navegar
+   * el elemento es nuevo y la animacion corre sola: no hace falta envolver la
+   * app en nada ni tocar las paginas una por una.
+   */
+  main {
+    @apply animate-entrar-pantalla;
+  }
+
+  /*
+   * Quien pidio menos movimiento no recibe ninguno. No es opcional: el
+   * movimiento puede producir mareo real, y aqui no aporta informacion que se
+   * pierda al quitarlo.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
@@ -44,16 +69,38 @@
     @apply font-sans text-[11px] font-medium uppercase tracking-etiqueta text-texto-secundario;
   }
 
+  /*
+   * Respuesta al toque: el boton se hunde un poco ademas de bajar de opacidad.
+   * En un telefono no hay hover, y sin este hundido el toque se siente como un
+   * enlace de pagina web y no como un boton de app. El transform se anima
+   * aparte porque es lo unico que el navegador puede mover sin repintar.
+   */
+  .boton-primario,
+  .boton-secundario,
+  .boton-ghost {
+    @apply transition-[transform,opacity,box-shadow] duration-150 ease-out active:scale-[0.97] active:opacity-90;
+    touch-action: manipulation;
+  }
+
   .boton-primario {
-    @apply flex min-h-touch w-full items-center justify-center rounded-control bg-primario px-5 text-[15px] font-medium text-texto-principal transition-opacity active:opacity-80 disabled:opacity-40;
+    @apply flex min-h-touch w-full items-center justify-center rounded-control bg-primario px-5 text-[15px] font-medium text-texto-principal shadow-[0_2px_8px_rgba(16,24,40,0.10)] active:shadow-none disabled:opacity-40 disabled:shadow-none;
   }
 
   .boton-secundario {
-    @apply flex min-h-touch w-full items-center justify-center rounded-control border border-secundario bg-fondo px-5 text-[15px] font-medium text-secundario-texto transition-opacity active:opacity-80 disabled:opacity-40;
+    @apply flex min-h-touch w-full items-center justify-center rounded-control border border-secundario bg-fondo px-5 text-[15px] font-medium text-secundario-texto disabled:opacity-40;
   }
 
   .boton-ghost {
-    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-secundario-texto transition-opacity active:opacity-80;
+    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-secundario-texto;
+  }
+
+  /*
+   * Indicador de carga. Se usa donde antes solo cambiaba el texto: un cambio
+   * de texto a secas parece que la pantalla se congelo, y el giro dice que
+   * algo sigue ocurriendo.
+   */
+  .girador {
+    @apply inline-block h-4 w-4 shrink-0 animate-girar rounded-full border-2 border-current border-t-transparent align-[-2px];
   }
 
   .campo {
@@ -67,6 +114,11 @@
   /* Card estandar: blanca con sombra suave, sin borde marcado. */
   .tarjeta {
     @apply rounded-card bg-fondo p-4 shadow-card;
+  }
+
+  /* Card que tiene que leerse como el elemento principal de la pantalla. */
+  .tarjeta-elevada {
+    @apply rounded-card bg-fondo p-4 shadow-elevado;
   }
 
   /* Card plana, para bloques que ya viven dentro de otra superficie blanca. */

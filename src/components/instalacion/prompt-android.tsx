@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { ImagenMarca } from "@/components/marca/imagen-marca";
-import { ASSETS } from "@/lib/assets";
 
 /** Evento propio de Chromium, todavia fuera del estandar y sin tipos propios. */
 interface EventoInstalacion extends Event {
@@ -63,8 +61,11 @@ export function PromptAndroid({ onCerrar }: Props) {
     // prompt no estorbe el registro.
     <div className="tarjeta-plana">
       <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-control bg-fondo">
-          <ImagenMarca src={ASSETS.latidosHero} alt="Latidos" alto={30} />
+        {/* El icono de la app, no el logotipo: es exactamente lo que va a
+            quedar en la pantalla de inicio si acepta instalar. */}
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-control">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icon-192.png" alt="" width={44} height={44} className="h-11 w-11 rounded-control" />
         </span>
 
         <div className="min-w-0 flex-1">
