@@ -125,20 +125,83 @@
   .boton-primario,
   .boton-secundario,
   .boton-ghost {
-    @apply transition-[transform,opacity,box-shadow] duration-150 ease-out active:scale-[0.97] active:opacity-90;
+    @apply transition-[transform,opacity,box-shadow] duration-150 ease-out;
     touch-action: manipulation;
   }
 
+  /*
+   * Elevacion. Un objeto apoyado sobre la pantalla proyecta mas de una sombra:
+   * una corta y oscura justo debajo, que es el contacto, y otra larga y difusa
+   * que es la que cuenta la altura. Con una sola sombra corta el elemento se lee
+   * pintado sobre el fondo en vez de encima de el, que era la sensacion de
+   * "pegado a la pantalla".
+   *
+   * Hay dos niveles a proposito. El alto es para lo que manda en su pantalla —
+   * el CTA y las cards que sostienen el contenido principal—, y el bajo para lo
+   * secundario. Si todo flotara igual, nada destacaria y el efecto se volveria
+   * ruido.
+   */
+  .elevado-alto {
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.12),
+      0 10px 20px -6px rgba(16, 24, 40, 0.22),
+      0 22px 40px -12px rgba(16, 24, 40, 0.18);
+  }
+
+  .elevado-bajo {
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.08),
+      0 4px 10px -3px rgba(16, 24, 40, 0.12),
+      0 10px 20px -8px rgba(16, 24, 40, 0.10);
+  }
+
+  /*
+   * Al tocar, el elemento baja y sus sombras se acortan a la vez. Lo segundo es
+   * lo que hace leer el gesto: bajar sin acortar la sombra se ve como si el
+   * objeto se moviera en el aire, porque la distancia al fondo no cambia.
+   */
+  .elevado-alto:active,
+  .elevado-bajo:active {
+    transform: translateY(2px) scale(0.985);
+    box-shadow:
+      0 1px 1px rgba(16, 24, 40, 0.14),
+      0 2px 4px -1px rgba(16, 24, 40, 0.16);
+  }
+
   .boton-primario {
-    @apply flex min-h-touch w-full items-center justify-center rounded-control bg-primario px-5 text-[15px] font-medium text-texto-principal shadow-[0_2px_8px_rgba(16,24,40,0.10)] active:shadow-none disabled:opacity-40 disabled:shadow-none;
+    @apply elevado-alto flex min-h-touch w-full items-center justify-center rounded-control bg-primario px-5 text-[15px] font-medium text-texto-principal disabled:opacity-40 disabled:shadow-none;
+    /*
+     * El amarillo deja de ser plano: mas claro arriba y mas asentado abajo, como
+     * una superficie que recibe luz cenital. El rango es corto a proposito — el
+     * amarillo de marca se ensucia enseguida al oscurecerlo, y pasaria de verse
+     * con volumen a verse gastado.
+     */
+    background-image: linear-gradient(180deg, #fefd63 0%, #fdfb05 42%, #ece90a 100%);
   }
 
+  .boton-primario:active {
+    /* Invertido al hundirse: la luz que antes daba arriba ya no llega. */
+    background-image: linear-gradient(180deg, #f2f005 0%, #fdfb05 100%);
+  }
+
+  .boton-primario:disabled {
+    /* Apagado no flota: sin sombra ni relieve no invita a tocarlo. */
+    background-image: none;
+    transform: none;
+  }
+
+  /*
+   * El secundario se eleva menos, no igual. Con la misma sombra que el primario
+   * los dos pesarian lo mismo y se perderia cual es la accion y cual la salida.
+   */
   .boton-secundario {
-    @apply flex min-h-touch w-full items-center justify-center rounded-control border border-secundario bg-fondo px-5 text-[15px] font-medium text-secundario-texto disabled:opacity-40;
+    @apply elevado-bajo flex min-h-touch w-full items-center justify-center rounded-control border border-secundario px-5 text-[15px] font-medium text-secundario-texto disabled:opacity-40 disabled:shadow-none;
+    background-image: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
   }
 
+  /* El ghost es texto que se toca: no es una superficie y no se eleva. */
   .boton-ghost {
-    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-secundario-texto;
+    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-secundario-texto active:scale-[0.97] active:opacity-80;
   }
 
   /*
@@ -150,68 +213,11 @@
     @apply inline-block h-4 w-4 shrink-0 animate-girar rounded-full border-2 border-current border-t-transparent align-[-2px];
   }
 
-  /*
-   * PILOTO DE ELEVACION. Solo en la pantalla de confirmacion de canje, para
-   * decidir la direccion antes de extenderlo al resto de la app. Si se aprueba,
-   * esto se pliega dentro de .boton-primario y .tarjeta-plana; si no, se borran
-   * estas dos reglas y nada mas queda tocado.
-   *
-   * La idea: un objeto apoyado sobre la pantalla proyecta dos sombras, no una.
-   * Una corta y oscura justo debajo, que es el contacto, y otra larga y difusa
-   * que es la que da la altura. Con una sola sombra corta el elemento se lee
-   * pintado sobre el fondo; con las dos, apoyado encima.
-   */
-  .elevado-piloto {
-    box-shadow:
-      0 1px 2px rgba(16, 24, 40, 0.12),
-      0 10px 20px -6px rgba(16, 24, 40, 0.22),
-      0 22px 40px -12px rgba(16, 24, 40, 0.18);
-    transition:
-      transform 130ms cubic-bezier(0.2, 0, 0.2, 1),
-      box-shadow 130ms cubic-bezier(0.2, 0, 0.2, 1);
-  }
-
-  /*
-   * Al tocar, el elemento baja y sus sombras se acortan a la vez. Bajar sin
-   * acortar la sombra se ve como si el objeto se moviera en el aire; lo que
-   * hace leer el gesto como "se hundio" es que la distancia al fondo se
-   * reduzca, y eso lo cuenta la sombra.
-   */
-  .elevado-piloto:active {
-    transform: translateY(2px) scale(0.985);
-    box-shadow:
-      0 1px 1px rgba(16, 24, 40, 0.14),
-      0 2px 4px -1px rgba(16, 24, 40, 0.16);
-  }
-
-  /*
-   * El amarillo deja de ser plano: un poco mas claro arriba y mas asentado
-   * abajo, como una superficie que recibe luz cenital. El rango es corto a
-   * proposito — el amarillo de marca se ensucia enseguida si se oscurece, y
-   * pasaria de verse con volumen a verse gastado.
-   */
-  .boton-primario.elevado-piloto {
-    background-image: linear-gradient(
-      180deg,
-      #fefd63 0%,
-      #fdfb05 42%,
-      #ece90a 100%
-    );
-  }
-
-  .boton-primario.elevado-piloto:active {
-    /* Invertido al hundirse: la luz que antes daba arriba ahora no llega. */
-    background-image: linear-gradient(180deg, #f2f005 0%, #fdfb05 100%);
-  }
-
-  /* La misma superficie, en la card clara de los Beats en juego. */
-  .tarjeta-plana.elevado-piloto {
-    background-image: linear-gradient(180deg, #ffffff 0%, #f2f5f9 100%);
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .elevado-piloto,
-    .elevado-piloto:active {
+    .elevado-alto,
+    .elevado-bajo,
+    .elevado-alto:active,
+    .elevado-bajo:active {
       transition: none;
     }
   }
@@ -224,9 +230,9 @@
     @apply border-error focus:border-error;
   }
 
-  /* Card estandar: blanca con sombra suave, sin borde marcado. */
+  /* Card estandar: blanca, elevada, sin borde marcado. */
   .tarjeta {
-    @apply rounded-card bg-fondo p-4 shadow-card;
+    @apply elevado-bajo rounded-card bg-fondo p-4;
   }
 
   /*
@@ -246,7 +252,7 @@
 
   /* Card que tiene que leerse como el elemento principal de la pantalla. */
   .tarjeta-elevada {
-    @apply rounded-card bg-fondo p-4 shadow-elevado;
+    @apply elevado-alto rounded-card bg-fondo p-4;
   }
 
   /*
@@ -324,7 +330,9 @@
     background: rgba(255, 255, 255, 0.55);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
     backdrop-filter: blur(20px) saturate(160%);
-    box-shadow: 0 4px 24px rgba(26, 35, 50, 0.06);
+    box-shadow:
+      0 1px 2px rgba(26, 35, 50, 0.06),
+      0 4px 12px -3px rgba(26, 35, 50, 0.10);
   }
 
   /* Nivel principal: contenedores de primer nivel. */
@@ -332,7 +340,16 @@
     background: rgba(255, 255, 255, 0.72);
     -webkit-backdrop-filter: blur(32px) saturate(180%);
     backdrop-filter: blur(32px) saturate(180%);
-    box-shadow: 0 8px 32px rgba(26, 35, 50, 0.08);
+    /*
+     * Menos sombra que una card opaca, aunque el resto de la app suba. Una
+     * sombra oscura debajo de una superficie translucida se ve a traves del
+     * propio vidrio y lo ensucia: deja de leerse como cristal y empieza a
+     * leerse como plastico gris.
+     */
+    box-shadow:
+      0 1px 2px rgba(26, 35, 50, 0.07),
+      0 8px 20px -5px rgba(26, 35, 50, 0.14),
+      0 18px 34px -12px rgba(26, 35, 50, 0.10);
   }
 
   /*
@@ -384,9 +401,14 @@
     }
   }
 
-  /* Card plana, para bloques que ya viven dentro de otra superficie blanca. */
+  /*
+   * Card interior, dentro de otra superficie clara. Se eleva poco y con un
+   * degradado suave: es una pieza apoyada sobre la card que la contiene, no una
+   * que flote por su cuenta sobre el fondo.
+   */
   .tarjeta-plana {
-    @apply rounded-card bg-fondo-alterno p-4;
+    @apply elevado-bajo rounded-card p-4;
+    background-image: linear-gradient(180deg, #ffffff 0%, #f2f5f9 100%);
   }
 
   /*

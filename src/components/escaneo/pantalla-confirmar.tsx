@@ -174,7 +174,7 @@ export function PantallaConfirmar({ idQR, marca, beatsEnJuego, balanceActual }: 
 
       {/* Mismo patron que el contador de Inicio: numero en navy, amarillo como
           acento. Ninguna card de la app lleva fondo oscuro. */}
-      <div className="tarjeta-plana elevado-piloto mt-6 w-full px-5 py-6">
+      <div className="tarjeta-plana mt-6 w-full px-5 py-6">
         <p className="font-display text-[48px] leading-none text-texto-principal">
           +{beatsEnJuego}
         </p>
@@ -193,7 +193,7 @@ export function PantallaConfirmar({ idQR, marca, beatsEnJuego, balanceActual }: 
           type="button"
           onClick={() => void confirmar()}
           disabled={enviando}
-          className="boton-primario elevado-piloto"
+          className="boton-primario"
         >
           {enviando ? (
             <>

@@ -82,7 +82,13 @@ export function TabBar() {
               <span
                 className={
                   tab.destacado
-                    ? `flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-200 ${
+                    ? `flex h-11 w-11 items-center justify-center rounded-full transition-[colors,transform,box-shadow] duration-200 ${
+                        // Se eleva el circulo, no la barra: la barra es vidrio
+                        // esmerilado, y una sombra marcada debajo se ve a traves
+                        // y lo ensucia. El circulo si es una pieza solida que
+                        // puede flotar sobre ella.
+                        disponible ? "elevado-bajo" : ""
+                      } ${
                         // El amarillo de marca no se muestra atenuado: apagado
                         // se veria como un amarillo sucio, no como un tab que
                         // todavia no esta disponible.
