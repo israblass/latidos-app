@@ -150,6 +150,72 @@
     @apply inline-block h-4 w-4 shrink-0 animate-girar rounded-full border-2 border-current border-t-transparent align-[-2px];
   }
 
+  /*
+   * PILOTO DE ELEVACION. Solo en la pantalla de confirmacion de canje, para
+   * decidir la direccion antes de extenderlo al resto de la app. Si se aprueba,
+   * esto se pliega dentro de .boton-primario y .tarjeta-plana; si no, se borran
+   * estas dos reglas y nada mas queda tocado.
+   *
+   * La idea: un objeto apoyado sobre la pantalla proyecta dos sombras, no una.
+   * Una corta y oscura justo debajo, que es el contacto, y otra larga y difusa
+   * que es la que da la altura. Con una sola sombra corta el elemento se lee
+   * pintado sobre el fondo; con las dos, apoyado encima.
+   */
+  .elevado-piloto {
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.12),
+      0 10px 20px -6px rgba(16, 24, 40, 0.22),
+      0 22px 40px -12px rgba(16, 24, 40, 0.18);
+    transition:
+      transform 130ms cubic-bezier(0.2, 0, 0.2, 1),
+      box-shadow 130ms cubic-bezier(0.2, 0, 0.2, 1);
+  }
+
+  /*
+   * Al tocar, el elemento baja y sus sombras se acortan a la vez. Bajar sin
+   * acortar la sombra se ve como si el objeto se moviera en el aire; lo que
+   * hace leer el gesto como "se hundio" es que la distancia al fondo se
+   * reduzca, y eso lo cuenta la sombra.
+   */
+  .elevado-piloto:active {
+    transform: translateY(2px) scale(0.985);
+    box-shadow:
+      0 1px 1px rgba(16, 24, 40, 0.14),
+      0 2px 4px -1px rgba(16, 24, 40, 0.16);
+  }
+
+  /*
+   * El amarillo deja de ser plano: un poco mas claro arriba y mas asentado
+   * abajo, como una superficie que recibe luz cenital. El rango es corto a
+   * proposito — el amarillo de marca se ensucia enseguida si se oscurece, y
+   * pasaria de verse con volumen a verse gastado.
+   */
+  .boton-primario.elevado-piloto {
+    background-image: linear-gradient(
+      180deg,
+      #fefd63 0%,
+      #fdfb05 42%,
+      #ece90a 100%
+    );
+  }
+
+  .boton-primario.elevado-piloto:active {
+    /* Invertido al hundirse: la luz que antes daba arriba ahora no llega. */
+    background-image: linear-gradient(180deg, #f2f005 0%, #fdfb05 100%);
+  }
+
+  /* La misma superficie, en la card clara de los Beats en juego. */
+  .tarjeta-plana.elevado-piloto {
+    background-image: linear-gradient(180deg, #ffffff 0%, #f2f5f9 100%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .elevado-piloto,
+    .elevado-piloto:active {
+      transition: none;
+    }
+  }
+
   .campo {
     @apply min-h-touch w-full rounded-control border border-black/[0.12] bg-fondo-alterno px-4 text-[16px] text-texto-principal outline-none transition-colors focus:border-secundario focus:bg-fondo;
   }
