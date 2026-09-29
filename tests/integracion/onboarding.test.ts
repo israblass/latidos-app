@@ -49,14 +49,14 @@ test("saltar desde la pantalla 1 lleva directo a Inicio", async ({ page }) => {
   await expect(page).toHaveURL(/\/inicio/);
 });
 
-test("Inicio arranca con el contador de Beats en cero", async ({ page }) => {
+test("Inicio arranca con el bono de bienvenida en el contador", async ({ page }) => {
   // Criterio 12.
   const datos = await reciénRegistrada(page);
   await page.getByRole("button", { name: "Saltar" }).click();
   await page.waitForURL("**/inicio");
 
-  const contador = page.locator("section[aria-label='Tu balance de Beats']");
-  await expect(contador).toContainText("0");
+  const contador = page.locator("section[aria-label='Tu balance de Beats'] p.font-display");
+  await expect(contador).toHaveText("5");
   await expect(page.getByText(datos.nombre)).toBeVisible();
 });
 

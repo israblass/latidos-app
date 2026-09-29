@@ -90,6 +90,10 @@ test.describe("el indice unico sostiene el limite en la base", () => {
   });
 
   test.beforeEach(async () => {
+    // Los escaneos con movimiento en el libro no se borran sueltos (borrado
+    // restringido): primero sus movimientos, como hace el script de limpieza.
+    // Cada prueba usa cuentas nuevas, asi que no hace falta recalcular saldos.
+    await pool.query(`delete from public.movimientos_beats where escaneo_id is not null`);
     await pool.query(`delete from public.escaneos`);
     await pool.query(`delete from public.qr_marca where id = $1`, [QR]);
     await pool.query(`delete from public.marcas where id = $1`, [MARCA]);
@@ -128,8 +132,17 @@ test.describe("el indice unico sostiene el limite en la base", () => {
     // V024: el reinicio es por dia calendario, no por ventana de 24 horas.
     const usuario = await crearUsuario(pool, `dia-b-${Date.now()}@ejemplo.com`);
 
-    expect((await confirmar(usuario, "2026-09-15")).ok).toBe(true);
-    expect((await confirmar(usuario, "2026-09-16")).ok).toBe(true);
+    // Hoy y mañana de verdad, no fechas fijas: el escaneo guarda `now()` como
+    // confirmado_en, y con un "mañana" que ya paso en el calendario real la
+    // comprobacion previa lo toma como de hoy y lo rechaza. Con fechas fijas
+    // esta prueba solo pasaba antes del 16 de septiembre de 2026.
+    const enCaracas = (fecha: Date) =>
+      new Intl.DateTimeFormat("en-CA", { timeZone: "America/Caracas" }).format(fecha);
+    const hoy = enCaracas(new Date());
+    const manana = enCaracas(new Date(Date.now() + 24 * 60 * 60 * 1000));
+
+    expect((await confirmar(usuario, hoy)).ok).toBe(true);
+    expect((await confirmar(usuario, manana)).ok).toBe(true);
 
     const { rows } = await pool.query(
       `select count(*)::int as total, coalesce(sum(beats_otorgados),0)::int as beats

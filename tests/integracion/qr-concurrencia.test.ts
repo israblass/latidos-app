@@ -35,6 +35,10 @@ test.describe("condicion de carrera al confirmar el canje", () => {
 
   test.beforeEach(async () => {
     // Un QR con un solo cupo: el escenario exacto de la verificacion.
+    // Los escaneos con movimiento en el libro no se borran sueltos (borrado
+    // restringido): primero sus movimientos, como hace el script de limpieza.
+    // Cada prueba usa cuentas nuevas, asi que no hace falta recalcular saldos.
+    await pool.query(`delete from public.movimientos_beats where escaneo_id is not null`);
     await pool.query(`delete from public.escaneos`);
     await pool.query(`delete from public.qr_marca where id = $1`, [QR]);
     await pool.query(`delete from public.marcas where id = $1`, [MARCA]);
@@ -110,7 +114,9 @@ test.describe("condicion de carrera al confirmar el canje", () => {
          from public.usuarios where id in ($1, $2)`,
       [primera, segunda],
     );
-    expect(balances[0].total).toBe(7);
+    // Las dos cuentas nacen con el bono de bienvenida (5 cada una); de los
+    // Beats del QR solo entro un canje.
+    expect(balances[0].total).toBe(5 + 5 + 7);
   });
 
   test("el cupo rechazado no queda consumido: nadie mas pierde su turno", async () => {

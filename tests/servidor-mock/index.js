@@ -101,19 +101,6 @@ const servidor = http.createServer((req, res) => {
 
     if (url.pathname === "/prueba/reiniciar" && req.method === "POST") {
       reiniciar();
-
-/**
- * Espejo del libro de movimientos: todo lo que mueve Beats pasa por aqui, como
- * en la base pasa por el disparador de movimientos_beats. El saldo del perfil
- * nunca se escribe por otro lado.
- */
-function registrarMovimiento(usuarioId, tipo, beats, extra = {}) {
-  const perfil = perfiles.get(usuarioId);
-  if (perfil.beats_balance + beats < 0) throw new Error("saldo negativo");
-  movimientos.push({ id: crypto.randomUUID(), usuario_id: usuarioId, tipo, beats,
-                     ocurrido_en: new Date().toISOString(), ...extra });
-  perfil.beats_balance += beats;
-}
       return json(200, { ok: true });
     }
     // El enlace de confirmacion que Supabase mandaria por correo.

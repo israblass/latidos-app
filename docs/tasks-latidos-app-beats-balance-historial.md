@@ -87,7 +87,7 @@ Depende de: ninguna
   - crear `src/types/beats.ts` con los tipos de dominio TipoMovimiento, Movimiento, DiaHistorial, ResumenBeats y CacheBeats.
 - [X] T012 [P] Revisar `src/lib/qr/confirmar-canje-transaccion.ts` y `src/app/api/qr/confirmar-canje/route.ts` para que sigan leyendo `beats_balance_actualizado` del resultado de la funcion recreada, sin cambiar el contrato publico.
 - [X] T013 [P] Quitar de `src/app/inicio/page.tsx` la ilustracion `vacio-sin-beats` y el texto del caso cero, y dejar solo "Sigue participando para sumar mas." (spec de registro §9.16, criterio 12).
-- [ ] T014 Escribir `tests/integracion/libro-movimientos.test.ts`, que cubre:
+- [X] T014 Escribir `tests/integracion/libro-movimientos.test.ts`, que cubre:
   - bienvenida unica al crear el perfil, incluso reintentando;
   - monto configurable;
   - candado del saldo frente a un update directo;

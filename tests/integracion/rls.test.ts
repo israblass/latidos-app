@@ -35,7 +35,8 @@ test.describe("RLS", () => {
     ana = await crearUsuario(pool, "ana@ejemplo.com");
     beto = await crearUsuario(pool, "beto@ejemplo.com");
     // Beto ya tiene Beats e historial: hay algo concreto que Ana podria espiar.
-    await pool.query(`update public.usuarios set beats_balance = 500 where id = $1`, [beto]);
+    // El saldo ya no se edita a mano (candado del libro): se le da con un regalo.
+    await pool.query(`select public.registrar_movimiento_latidos($1, 'regalo', 500)`, [beto]);
     await pool.query(
       `insert into public.escaneos (usuario_id, qr_marca_id, beats_otorgados, confirmado_en, dia_local)
        values ($1, 'b2000000-0000-4000-8000-000000000001', 500, now(), current_date)`,
@@ -110,7 +111,7 @@ test.describe("RLS", () => {
 
       const { rows } = await pool.query(
         `select beats_balance from public.usuarios where id = $1`, [ana]);
-      expect(rows[0].beats_balance).toBe(0);
+      expect(rows[0].beats_balance).toBe(5); // solo el bono de bienvenida
     });
 
     test("tampoco colando el balance junto a un campo legitimo", async () => {
@@ -121,7 +122,7 @@ test.describe("RLS", () => {
       expect(error).toBeTruthy();
       const { rows } = await pool.query(
         `select beats_balance from public.usuarios where id = $1`, [ana]);
-      expect(rows[0].beats_balance).toBe(0);
+      expect(rows[0].beats_balance).toBe(5); // solo el bono de bienvenida
     });
 
     test("los campos que si le tocan si se pueden actualizar", async () => {

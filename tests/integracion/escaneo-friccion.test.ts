@@ -71,7 +71,10 @@ test.describe("2. el QR alcanzo su limite total", () => {
     const despues = await estadoDelQR(QR.agotado);
     expect(despues.qr.escaneos_totales_contador).toBe(antes.qr.escaneos_totales_contador);
     await page.goto("/inicio");
-    await expect(page.locator("section[aria-label='Tu balance de Beats']")).toContainText("0");
+    // Sigue en el bono de bienvenida: el QR agotado no sumo nada.
+    await expect(
+      page.locator("section[aria-label='Tu balance de Beats'] p.font-display"),
+    ).toHaveText("5");
   });
 });
 
