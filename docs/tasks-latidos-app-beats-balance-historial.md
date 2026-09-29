@@ -59,11 +59,11 @@ Depende de: ninguna
 - [X] T004 [P] Crear `supabase/migrations/20260929120200_bono_bienvenida.sql`, que:
   - agrega `beats_bienvenida` (entero mayor que 0, por defecto 5) a `configuracion_app`;
   - crea el disparador que, al insertar en `usuarios`, inserta un movimiento de tipo bienvenida con el monto configurado (5 si no hay configuracion), de forma idempotente.
-- [ ] T005 [P] Crear `supabase/migrations/20260929120300_canje_con_libro.sql`, que recrea `confirmar_canje_qr`:
+- [X] T005 [P] Crear `supabase/migrations/20260929120300_canje_con_libro.sql`, que recrea `confirmar_canje_qr`:
   - conserva la firma, las revalidaciones y los motivos de error;
   - reemplaza el update directo del saldo por la insercion del escaneo seguida de un movimiento de tipo escaneo (marca_id, escaneo_id, ocurrido_en = confirmado_en, dia_local);
   - devuelve el saldo leido de `usuarios` despues del disparador.
-- [ ] T006 [P] Crear `supabase/migrations/20260929120400_ajustes_latidos.sql` con la funcion `registrar_movimiento_latidos(usuario_id, tipo, beats)`:
+- [X] T006 [P] Crear `supabase/migrations/20260929120400_ajustes_latidos.sql` con la funcion `registrar_movimiento_latidos(usuario_id, tipo, beats)`:
   - solo acepta ajuste o regalo, rechaza beats = 0 y regalos negativos;
   - devuelve movimiento_id y saldo_resultante;
   - revoca la ejecucion a `anon` y `authenticated`;
