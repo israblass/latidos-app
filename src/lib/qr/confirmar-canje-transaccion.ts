@@ -9,9 +9,13 @@ import type { MotivoCanjeFallido } from "@/types/configuracion";
  *
  * Todo el trabajo ocurre dentro de la funcion `confirmar_canje_qr` de Postgres,
  * en una sola transaccion: revalida el QR, reserva el cupo, crea el registro de
- * Escaneo y suma los Beats al balance. Partirlo en varias llamadas desde aqui
- * dejaria huecos donde dos personas podrian pasar el mismo ultimo cupo, o donde
- * el contador subiria sin que llegue a existir el escaneo.
+ * Escaneo y su movimiento en el libro de Beats, cuyo disparador suma al saldo.
+ * El `beats_balance_actualizado` que devuelve se lee de `usuarios` despues de
+ * ese disparador, asi que es el saldo autoritativo.
+ *
+ * Partirlo en varias llamadas desde aqui dejaria huecos donde dos personas
+ * podrian pasar el mismo ultimo cupo, o donde el contador subiria sin que
+ * llegue a existir el escaneo.
  *
  * Los Beats que quedan en el Escaneo son los del QR en este instante, copiados
  * a la fila (plan, Decision Tecnica 4): si el admin los cambia mañana, el
