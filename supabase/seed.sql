@@ -6,6 +6,10 @@
 -- imagen del codigo sin volver a consultar la base.
 --
 -- Correr en el SQL Editor de Supabase. Es idempotente: se puede repetir.
+--
+-- No borra nada: desde la Fase 1 de Beats, lo que tiene escaneos no se borra
+-- (borrado restringido). Para quitar datos de prueba esta
+-- scripts/sql/limpiar-datos-prueba.sql.
 
 -- ---------------------------------------------------------------- Marcas ----
 
@@ -20,9 +24,11 @@ on conflict (id) do update
 -- -------------------------------------------------------- Configuracion -----
 
 -- Fila singleton. El modo evento arranca apagado; lo enciende el admin cuando
--- toca (spec §9 regla 13).
-insert into public.configuracion_app (id, modo_evento_activo)
-values ('c0000000-0000-4000-8000-000000000001', false)
+-- toca (spec §9 regla 13). La bienvenida arranca en 5 Beats (spec de registro
+-- §9.16). Si la fila ya existe no se toca: repetir la semilla no debe pisar lo
+-- que el admin haya cambiado.
+insert into public.configuracion_app (id, modo_evento_activo, beats_bienvenida)
+values ('c0000000-0000-4000-8000-000000000001', false, 5)
 on conflict (fila_unica) do nothing;
 
 -- ------------------------------------------------------------ QR de marca ---

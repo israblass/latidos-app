@@ -79,7 +79,7 @@ Depende de: ninguna
   - borra en orden los movimientos de escaneo, los escaneos, los QR y las marcas indicadas en una lista editable al inicio del archivo (o todo lo de prueba);
   - recalcula los saldos y conserva las bienvenidas;
   - termina ejecutando la reconciliacion.
-- [ ] T010 Actualizar los datos de prueba:
+- [X] T010 Actualizar los datos de prueba:
   - `supabase/seed.sql`: `beats_bienvenida` en la fila de configuracion, sin borrados en cascada;
   - `tests/servidor-mock/supabase-shim.sql`: el enum, la tabla, los disparadores y las funciones nuevas, para que los tests corran contra el mock.
 - [ ] T011 Regenerar los tipos:

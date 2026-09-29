@@ -33,20 +33,34 @@ const SEMILLA = {
   ],
 };
 
-let marcas, qrs, escaneos, configuracion, usuariosAuth, perfiles, tokens, ultimoEnlace;
+let marcas, qrs, escaneos, movimientos, configuracion, usuariosAuth, perfiles, tokens, ultimoEnlace;
 
 /** Devuelve el mock al estado semilla. Las pruebas lo llaman antes de cada caso. */
 function reiniciar() {
   marcas = SEMILLA.marcas.map((m) => ({ ...m }));
   qrs = SEMILLA.qrs.map((q) => ({ ...q }));
   escaneos = [];
-  configuracion = { modo_evento_activo: false };
+  movimientos = [];
+  configuracion = { modo_evento_activo: false, beats_bienvenida: 5 };
   usuariosAuth = new Map(); // correo -> registro de auth
   perfiles = new Map();     // id -> fila de la tabla usuarios
   tokens = new Map();       // token_hash -> correo
   ultimoEnlace = null;
 }
 reiniciar();
+
+/**
+ * Espejo del libro de movimientos: todo lo que mueve Beats pasa por aqui, como
+ * en la base pasa por el disparador de movimientos_beats. El saldo del perfil
+ * nunca se escribe por otro lado.
+ */
+function registrarMovimiento(usuarioId, tipo, beats, extra = {}) {
+  const perfil = perfiles.get(usuarioId);
+  if (perfil.beats_balance + beats < 0) throw new Error("saldo negativo");
+  movimientos.push({ id: crypto.randomUUID(), usuario_id: usuarioId, tipo, beats,
+                     ocurrido_en: new Date().toISOString(), ...extra });
+  perfil.beats_balance += beats;
+}
 
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
 
@@ -87,6 +101,19 @@ const servidor = http.createServer((req, res) => {
 
     if (url.pathname === "/prueba/reiniciar" && req.method === "POST") {
       reiniciar();
+
+/**
+ * Espejo del libro de movimientos: todo lo que mueve Beats pasa por aqui, como
+ * en la base pasa por el disparador de movimientos_beats. El saldo del perfil
+ * nunca se escribe por otro lado.
+ */
+function registrarMovimiento(usuarioId, tipo, beats, extra = {}) {
+  const perfil = perfiles.get(usuarioId);
+  if (perfil.beats_balance + beats < 0) throw new Error("saldo negativo");
+  movimientos.push({ id: crypto.randomUUID(), usuario_id: usuarioId, tipo, beats,
+                     ocurrido_en: new Date().toISOString(), ...extra });
+  perfil.beats_balance += beats;
+}
       return json(200, { ok: true });
     }
     // El enlace de confirmacion que Supabase mandaria por correo.
@@ -114,6 +141,14 @@ const servidor = http.createServer((req, res) => {
     if (url.pathname === "/prueba/ultimo-usuario" && req.method === "GET") {
       const ids = [...perfiles.keys()];
       return json(200, { id: ids[ids.length - 1] || null });
+    }
+    if (url.pathname === "/prueba/beats-bienvenida" && req.method === "POST") {
+      configuracion.beats_bienvenida = JSON.parse(cuerpo).beats;
+      return json(200, configuracion);
+    }
+    if (url.pathname === "/prueba/movimientos" && req.method === "GET") {
+      const id = url.searchParams.get("id");
+      return json(200, movimientos.filter((m) => m.usuario_id === id));
     }
     if (url.pathname === "/prueba/balance" && req.method === "GET") {
       const p = perfiles.get(url.searchParams.get("id"));
@@ -202,6 +237,9 @@ const servidor = http.createServer((req, res) => {
         if (fila.id !== id) return json(403, { code: "42501", message: "RLS" });
         if (perfiles.has(id)) return json(409, { code: "23505", message: "duplicate key" });
         perfiles.set(id, { ...fila, beats_balance: 0, onboarding_visto: false, notificaciones_habilitadas: false });
+        // Espeja el disparador de bienvenida: el perfil nace en 0 y el bono
+        // llega como movimiento, una sola vez.
+        registrarMovimiento(id, "bienvenida", configuracion.beats_bienvenida ?? 5);
         return json(201, perfiles.get(id));
       }
       if (req.method === "PATCH") {
@@ -237,10 +275,13 @@ const servidor = http.createServer((req, res) => {
       }
 
       qr.escaneos_totales_contador += 1;
-      escaneos.push({ usuario_id: id, qr_marca_id: qr.id, beats_otorgados: qr.beats_otorgados,
-                      confirmado_en: new Date().toISOString(), dia_local: p_dia_local });
+      const escaneo = { id: crypto.randomUUID(), usuario_id: id, qr_marca_id: qr.id,
+                        beats_otorgados: qr.beats_otorgados,
+                        confirmado_en: new Date().toISOString(), dia_local: p_dia_local };
+      escaneos.push(escaneo);
+      registrarMovimiento(id, "escaneo", qr.beats_otorgados,
+                          { marca_id: qr.marca_id, escaneo_id: escaneo.id, dia_local: p_dia_local });
       const perfil = perfiles.get(id);
-      perfil.beats_balance = (perfil.beats_balance || 0) + qr.beats_otorgados;
       return json(200, { ok: true, beats_otorgados: qr.beats_otorgados,
                          beats_balance_actualizado: perfil.beats_balance });
     }
