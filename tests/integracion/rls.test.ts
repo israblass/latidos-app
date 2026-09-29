@@ -321,6 +321,30 @@ test.describe("RLS", () => {
       ).toEqual([]);
     });
 
+    test("por RPC el cliente solo alcanza el canje y el calculo del dia", async () => {
+      // PostgREST expone como RPC toda funcion de `public` que el rol pueda
+      // ejecutar. Esta lista es esa superficie completa para la app: ninguna
+      // de estas funciones pone la marca del libro ni toca el saldo salvo
+      // el canje, que lo hace por el libro. `set_config` y `interno.*` no
+      // estan en `public`, asi que PostgREST no los expone.
+      // Una funcion nueva ejecutable por el cliente tiene que agregarse aqui a
+      // conciencia, no colarse por los permisos por defecto de Supabase.
+      const { rows } = await pool.query<{ rol: string; nombre: string }>(
+        `select r.rol, p.proname as nombre
+           from pg_proc p
+           join pg_namespace n on n.oid = p.pronamespace
+           cross join (values ('anon'), ('authenticated')) as r(rol)
+          where n.nspname = 'public'
+            and p.prorettype <> 'trigger'::regtype
+            and has_function_privilege(r.rol, p.oid, 'execute')
+          order by 1, 2`);
+      expect(rows.map((r) => `${r.rol}: ${r.nombre}`)).toEqual([
+        "anon: dia_local_latidos",
+        "authenticated: confirmar_canje_qr",
+        "authenticated: dia_local_latidos",
+      ]);
+    });
+
     test("las funciones security definer no quedan ejecutables por todo el mundo", async () => {
       const { rows } = await pool.query<{ nombre: string }>(
         `select p.proname as nombre

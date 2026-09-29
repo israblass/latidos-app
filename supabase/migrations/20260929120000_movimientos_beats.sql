@@ -173,8 +173,16 @@ create trigger movimientos_beats_aplicar
  * despues como movimiento. Sin esto el cliente podria crear su fila con el
  * saldo que quisiera, porque la policy de insert solo mira el id.
  *
+ * La marca sola no basta: `set_config` lo puede llamar cualquier rol, asi que
+ * una sesion `authenticated` o `anon` que la pusiera a mano se saltaria el
+ * candado. Por eso la marca solo cuenta si quien escribe no es un rol de la
+ * app. El disparador del libro nunca corre con esos roles: el cliente no puede
+ * insertar en el libro, y todo lo que si inserta (canje, bienvenida, ajustes)
+ * es security definer y corre como dueño de la base.
+ *
  * Sigue sin ser security definer, por lo mismo que en la Fase 5 (ver el barrido
- * estructural de tests/integracion/rls.test.ts).
+ * estructural de tests/integracion/rls.test.ts): si lo fuera, `current_user`
+ * seria siempre el dueño y la comprobacion de arriba no serviria.
  */
 create or replace function public.proteger_beats_balance()
 returns trigger
@@ -182,7 +190,8 @@ language plpgsql
 set search_path = public
 as $$
 begin
-  if coalesce(current_setting('latidos.desde_libro', true), '') = 'si' then
+  if coalesce(current_setting('latidos.desde_libro', true), '') = 'si'
+     and current_user not in ('authenticated', 'anon') then
     return new;
   end if;
 

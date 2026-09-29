@@ -216,6 +216,75 @@ test.describe("libro de movimientos de Beats", () => {
       expect(errorInsert).toMatch(/perfil nuevo empieza en 0/);
     });
 
+    test("el cliente no puede activar la marca del libro para cambiar su saldo", async () => {
+      // La marca de transaccion es un ajuste de sesion, y `set_config` lo puede
+      // llamar cualquier rol. Si el candado solo mirara la marca, una sesion
+      // `authenticated` se la pondria y se subiria el saldo a mano.
+      const id = await crearUsuario(pool, nuevoCorreo("marca"));
+
+      const intentos = [
+        `update public.usuarios set beats_balance = 99999 where id = $1`,
+        `update public.usuarios set nombre = 'Marca', beats_balance = 99999 where id = $1`,
+      ];
+      for (const sql of intentos) {
+        let error: string | null = null;
+        try {
+          await comoUsuario(pool, id, async (consultar) => {
+            await consultar(`select set_config('latidos.desde_libro', 'si', true)`);
+            await consultar(sql, [id]);
+          });
+        } catch (e) {
+          error = (e as Error).message;
+        }
+        expect(error, sql).toMatch(/solo cambia con un movimiento del libro/);
+      }
+
+      // Tampoco creando el perfil con la marca puesta.
+      const correo = nuevoCorreo("marca-alta");
+      const { rows } = await pool.query<{ id: string }>(
+        `insert into auth.users (id, email) values (gen_random_uuid(), $1) returning id`,
+        [correo],
+      );
+      let errorAlta: string | null = null;
+      try {
+        await comoUsuario(pool, rows[0].id, async (consultar) => {
+          await consultar(`select set_config('latidos.desde_libro', 'si', true)`);
+          await consultar(
+            `insert into public.usuarios
+               (id, cedula, nombre, apellido, telefono, correo, tipo_usuario, beats_balance)
+             values ($1, 'V-4', 'Marca', 'Alta', '0414', $2, 'externo', 100000)`,
+            [rows[0].id, correo],
+          );
+        });
+      } catch (e) {
+        errorAlta = (e as Error).message;
+      }
+      expect(errorAlta).toMatch(/perfil nuevo empieza en 0/);
+
+      expect(await saldoDe(id)).toBe(5);
+      expect((await movimientosDe(id)).map((m) => m.tipo)).toEqual(["bienvenida"]);
+    });
+
+    test("anon con la marca puesta tampoco toca ningun saldo", async () => {
+      const id = await crearUsuario(pool, nuevoCorreo("anon"));
+      const conexion = await pool.connect();
+      try {
+        await conexion.query("begin");
+        await conexion.query("set local role anon");
+        await conexion.query(`select set_config('latidos.desde_libro', 'si', true)`);
+        // anon no tiene policy de update: la fila ni siquiera es visible.
+        const { rowCount } = await conexion.query(
+          `update public.usuarios set beats_balance = 99999 where id = $1`,
+          [id],
+        );
+        expect(rowCount).toBe(0);
+        await conexion.query("rollback");
+      } finally {
+        conexion.release();
+      }
+      expect(await saldoDe(id)).toBe(5);
+    });
+
     test("el cliente no puede escribir en el libro", async () => {
       const id = await crearUsuario(pool, nuevoCorreo("libro"));
       let error: string | null = null;
