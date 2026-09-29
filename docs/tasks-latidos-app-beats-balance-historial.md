@@ -75,7 +75,7 @@ Depende de: ninguna
   - genera un movimiento de tipo escaneo por cada escaneo existente, con su fecha y dia real;
   - inserta la bienvenida a cada usuario que no la tenga, con fecha de la migracion;
   - recalcula `beats_balance` desde el libro usando la marca de transaccion del disparador (plan §4, decision 4).
-- [ ] T009 [P] Crear `scripts/sql/limpiar-datos-prueba.sql`, en una sola transaccion, que:
+- [X] T009 [P] Crear `scripts/sql/limpiar-datos-prueba.sql`, en una sola transaccion, que:
   - borra en orden los movimientos de escaneo, los escaneos, los QR y las marcas indicadas en una lista editable al inicio del archivo (o todo lo de prueba);
   - recalcula los saldos y conserva las bienvenidas;
   - termina ejecutando la reconciliacion.
