@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 import { ContadorBeats } from "@/components/marca/contador-beats";
 import { redirect } from "next/navigation";
 
@@ -10,11 +8,9 @@ import { exigirPerfil } from "@/lib/usuario/sesion";
  * Pantalla de Inicio (T032).
  *
  * El contador de Beats es la firma visual de la app (constitution §2): numero
- * grande en Anton amarillo, lo primero que se ve. Sobre la base clara el
- * amarillo puro pierde contraste, asi que el numero vive dentro de una card
- * oscura que lo sostiene. Recien registrada la persona marca cero, y el
- * onboarding que acaba de ver le dio el contexto de por que ese numero va a
- * empezar a moverse.
+ * grande en navy dentro de una card de vidrio, lo primero que se ve. Recien
+ * registrada la persona ya tiene el bono de bienvenida, asi que el numero
+ * nunca arranca en cero.
  */
 export default async function Inicio() {
   const perfil = await exigirPerfil();
@@ -46,26 +42,12 @@ export default async function Inicio() {
           </div>
 
           {/*
-            Con cero Beats la pantalla es un estado vacio, y el microcopy guia a
-            la accion en vez de disculparse (constitution §3). La ilustracion
-            solo aparece aqui: en cuanto hay saldo, el numero es el protagonista
-            y una ilustracion debajo le competiria.
+            Ya no hay caso cero: el perfil nace con el bono de bienvenida (spec
+            de registro §9.16), asi que la ilustracion y el texto del estado
+            vacio salieron (criterio 12).
           */}
-          {perfil.beats_balance === 0 ? (
-            <Image
-              src="/assets/estados-vacios/vacio-sin-beats.webp"
-              alt=""
-              aria-hidden="true"
-              width={150}
-              height={150}
-              className="mt-6"
-            />
-          ) : null}
-
           <p className="mt-4 max-w-[16rem] text-center text-texto-secundario">
-            {perfil.beats_balance === 0
-              ? "Escanea un QR de marca para empezar a sumar."
-              : "Sigue participando para sumar mas."}
+            Sigue participando para sumar mas.
           </p>
         </section>
       </main>
