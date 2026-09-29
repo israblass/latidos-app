@@ -82,7 +82,7 @@ Depende de: ninguna
 - [X] T010 Actualizar los datos de prueba:
   - `supabase/seed.sql`: `beats_bienvenida` en la fila de configuracion, sin borrados en cascada;
   - `tests/servidor-mock/supabase-shim.sql`: el enum, la tabla, los disparadores y las funciones nuevas, para que los tests corran contra el mock.
-- [ ] T011 Regenerar los tipos:
+- [X] T011 Regenerar los tipos:
   - `src/types/database.ts` con la tabla `movimientos_beats`, el enum y la columna nueva de configuracion;
   - crear `src/types/beats.ts` con los tipos de dominio TipoMovimiento, Movimiento, DiaHistorial, ResumenBeats y CacheBeats.
 - [ ] T012 [P] Revisar `src/lib/qr/confirmar-canje-transaccion.ts` y `src/app/api/qr/confirmar-canje/route.ts` para que sigan leyendo `beats_balance_actualizado` del resultado de la funcion recreada, sin cambiar el contrato publico.

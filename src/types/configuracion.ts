@@ -12,6 +12,11 @@ export type ConfiguracionApp = {
    * cierre es simple (spec §9 regla 12).
    */
   modo_evento_activo: boolean;
+  /**
+   * Beats del bono de bienvenida al crear el perfil; mayor que 0, 5 por
+   * defecto (spec de registro §9.16).
+   */
+  beats_bienvenida: number;
   updated_at: string;
 };
 

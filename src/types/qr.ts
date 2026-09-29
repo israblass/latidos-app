@@ -35,6 +35,8 @@ export type Escaneo = {
   qr_marca_id: string;
   beats_otorgados: number;
   confirmado_en: string;
+  /** YYYY-MM-DD en hora de Caracas; lo usa el limite diario. */
+  dia_local: string;
   created_at: string;
 };
 
