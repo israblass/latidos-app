@@ -68,7 +68,7 @@ Depende de: ninguna
   - devuelve movimiento_id y saldo_resultante;
   - revoca la ejecucion a `anon` y `authenticated`;
   - lleva en la cabecera un comentario con el ejemplo de uso desde el editor SQL.
-- [ ] T007 [P] Crear los scripts de verificacion:
+- [X] T007 [P] Crear los scripts de verificacion:
   - `scripts/sql/reporte-saldos-previo.sql`: por usuario, saldo actual, saldo recalculado (escaneos + bienvenida) y diferencia;
   - `scripts/sql/reconciliacion-saldos.sql`: usuarios cuyo saldo no coincide con la suma de su libro; debe devolver vacio.
 - [ ] T008 Crear `supabase/migrations/20260929120500_carga_retroactiva.sql`, idempotente, que:
