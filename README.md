@@ -329,8 +329,8 @@ id pelado, que solo sirve escaneando desde dentro de la app.
 
 Confirmar es la unica accion que escribe. Todo ocurre dentro de una funcion de
 Postgres (`confirmar_canje_qr`, `security definer`) que en una sola transaccion
-revalida el QR, reserva el cupo, crea el Escaneo y suma el balance. Si algo no
-cuadra, no queda nada a medias.
+revalida el QR, reserva el cupo, crea el Escaneo y su movimiento en el libro de
+Beats (ver abajo). Si algo no cuadra, no queda nada a medias.
 
 **El cupo se reserva con un UPDATE condicional**, no leyendo y despues
 escribiendo:
@@ -363,6 +363,33 @@ los 10 que gano: el historico no se reescribe solo.
 un unique) y solo cambia el cierre de la pantalla de exito: encendido invita a
 seguir escaneando, apagado deja unicamente volver a Inicio. Viene apagado en el
 seed.
+
+## Libro de movimientos de Beats
+
+Desde la Fase 1 de Beats (`docs/tasks-latidos-app-beats-balance-historial.md`),
+todo lo que suma o resta Beats es una fila de `movimientos_beats`: escaneos,
+bono de bienvenida, ajustes y regalos (y a futuro donaciones o canjes).
+`usuarios.beats_balance` es una copia que solo mueve el disparador del libro.
+
+- **Nadie edita el saldo a mano**, ni desde el editor SQL: el candado
+  (`proteger_beats_balance`) lo rechaza para todos los roles. Para dar o quitar
+  Beats esta `registrar_movimiento_latidos(usuario_id, 'ajuste' | 'regalo',
+  beats)`, que deja el movimiento con su nombre en el historial. El ejemplo de
+  uso esta en la cabecera de `supabase/migrations/20260929120400_ajustes_latidos.sql`.
+- **Bono de bienvenida**: un disparador al crear el perfil inserta el movimiento
+  con `configuracion_app.beats_bienvenida` (5 por defecto), una sola vez.
+- **Borrado restringido**: una marca, un QR o un escaneo con historia no se
+  borran; se desactivan. Para quitar datos de prueba esta
+  `scripts/sql/limpiar-datos-prueba.sql`.
+- **Verificacion**: `scripts/sql/reconciliacion-saldos.sql` debe salir vacio.
+  `scripts/sql/reporte-saldos-previo.sql` es la foto de los saldos antes de
+  migrar.
+
+**Orden de las migraciones.** Se aplican siempre en el orden de sus nombres. Si
+alguna vez se vuelve a pegar una migracion vieja (`20260910120000_usuarios.sql`
+o `20260911180000_canje.sql`), hay que volver a pegar despues las del
+`20260929120000` en adelante: las viejas reescriben `proteger_beats_balance` y
+`confirmar_canje_qr` con su version anterior.
 
 ## Design system
 
