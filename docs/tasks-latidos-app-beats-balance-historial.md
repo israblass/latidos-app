@@ -71,7 +71,7 @@ Depende de: ninguna
 - [X] T007 [P] Crear los scripts de verificacion:
   - `scripts/sql/reporte-saldos-previo.sql`: por usuario, saldo actual, saldo recalculado (escaneos + bienvenida) y diferencia;
   - `scripts/sql/reconciliacion-saldos.sql`: usuarios cuyo saldo no coincide con la suma de su libro; debe devolver vacio.
-- [ ] T008 Crear `supabase/migrations/20260929120500_carga_retroactiva.sql`, idempotente, que:
+- [X] T008 Crear `supabase/migrations/20260929120500_carga_retroactiva.sql`, idempotente, que:
   - genera un movimiento de tipo escaneo por cada escaneo existente, con su fecha y dia real;
   - inserta la bienvenida a cada usuario que no la tenga, con fecha de la migracion;
   - recalcula `beats_balance` desde el libro usando la marca de transaccion del disparador (plan §4, decision 4).
