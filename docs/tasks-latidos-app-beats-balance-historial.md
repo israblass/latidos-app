@@ -44,7 +44,7 @@ relacionados:
 Objetivo: toda variacion de Beats pasa por el libro, existe el bono de bienvenida, las cuentas actuales quedan migradas y cuadradas, e Inicio deja de tener estado en cero.
 Depende de: ninguna
 
-- [ ] T001 Crear la migracion del libro en `supabase/migrations/20260929120000_movimientos_beats.sql`. Incluye:
+- [X] T001 Crear la migracion del libro en `supabase/migrations/20260929120000_movimientos_beats.sql`. Incluye:
   - enum `tipo_movimiento_beats` (escaneo, bienvenida, ajuste, regalo, donacion, voluntariado, prediccion, canje);
   - tabla `movimientos_beats` con los campos del plan §2: id, usuario_id, tipo, beats, ocurrido_en, dia_local, marca_id, escaneo_id, created_at;
   - checks de beats distinto de cero y de coherencia entre tipo y referencias;
@@ -52,7 +52,7 @@ Depende de: ninguna
   - indices (usuario_id, dia_local desc, ocurrido_en desc) y (usuario_id, tipo);
   - RLS con solo `select` propio y sin policies de escritura;
   - alta de la tabla en la publicacion de tiempo real.
-- [ ] T002 En la misma migracion `supabase/migrations/20260929120000_movimientos_beats.sql`:
+- [X] T002 En la misma migracion `supabase/migrations/20260929120000_movimientos_beats.sql`:
   - crear el disparador del libro, que al insertar marca la transaccion como "viene del libro", suma `beats` a `usuarios.beats_balance` y desmarca;
   - reemplazar la funcion `proteger_beats_balance` por el candado nuevo, que rechaza cualquier cambio de saldo sin esa marca, para todos los roles (plan §4, decisiones 2 y 3).
 - [ ] T003 [P] Crear `supabase/migrations/20260929120100_borrado_restringido.sql`, que cambia a borrado restringido las FKs `escaneos.qr_marca_id` y `qr_marca.marca_id` (plan §4, decision 6).
