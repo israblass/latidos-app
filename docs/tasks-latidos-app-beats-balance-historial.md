@@ -55,8 +55,8 @@ Depende de: ninguna
 - [X] T002 En la misma migracion `supabase/migrations/20260929120000_movimientos_beats.sql`:
   - crear el disparador del libro, que al insertar marca la transaccion como "viene del libro", suma `beats` a `usuarios.beats_balance` y desmarca;
   - reemplazar la funcion `proteger_beats_balance` por el candado nuevo, que rechaza cualquier cambio de saldo sin esa marca, para todos los roles (plan §4, decisiones 2 y 3).
-- [ ] T003 [P] Crear `supabase/migrations/20260929120100_borrado_restringido.sql`, que cambia a borrado restringido las FKs `escaneos.qr_marca_id` y `qr_marca.marca_id` (plan §4, decision 6).
-- [ ] T004 [P] Crear `supabase/migrations/20260929120200_bono_bienvenida.sql`, que:
+- [X] T003 [P] Crear `supabase/migrations/20260929120100_borrado_restringido.sql`, que cambia a borrado restringido las FKs `escaneos.qr_marca_id` y `qr_marca.marca_id` (plan §4, decision 6).
+- [X] T004 [P] Crear `supabase/migrations/20260929120200_bono_bienvenida.sql`, que:
   - agrega `beats_bienvenida` (entero mayor que 0, por defecto 5) a `configuracion_app`;
   - crea el disparador que, al insertar en `usuarios`, inserta un movimiento de tipo bienvenida con el monto configurado (5 si no hay configuracion), de forma idempotente.
 - [ ] T005 [P] Crear `supabase/migrations/20260929120300_canje_con_libro.sql`, que recrea `confirmar_canje_qr`:
