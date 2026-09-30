@@ -11,12 +11,17 @@ export function SinConexionBeats() {
       aria-label="Sin conexión"
       className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center"
     >
+      {/* `unoptimized`: la imagen se pide por su ruta tal cual, que es la que
+          el service worker guarda junto a la copia de /beats. Una variante de
+          next/image nunca se habria pedido con red, porque esta pantalla solo
+          aparece sin ella. */}
       <Image
         src="/assets/estados-vacios/vacio-sin-conexion.webp"
         alt=""
         aria-hidden="true"
         width={180}
         height={180}
+        unoptimized
         priority
       />
       <p className="mt-6 max-w-[18rem] text-texto-principal">

@@ -16,6 +16,14 @@ import { cortarRed, volverRed } from "../ayudantes/red";
 test.beforeEach(reiniciarMock);
 
 const aviso = (page: Page) => page.locator("[data-aviso-beats]");
+
+/** Imagenes visibles que no cargaron (sin red, las que no estan guardadas). */
+const imagenesRotas = (page: Page) =>
+  page.evaluate(() =>
+    Array.from(document.images)
+      .filter((i) => i.getBoundingClientRect().width > 0 && (!i.complete || i.naturalWidth === 0))
+      .map((i) => i.getAttribute("src")),
+  );
 const CACHE_SW = "latidos-shell-v4";
 
 /**
@@ -60,6 +68,8 @@ test("sin red abre con lo guardado y el aviso con la hora", async ({ page, conte
   await expect(page.getByText("Regalo Latidos")).toHaveCount(1);
   await expect(aviso(page)).toHaveAttribute("data-aviso-beats", "sin-conexion");
   await expect(aviso(page)).toHaveText(/^Sin conexión\. Así estaban tus Beats a las \d{1,2}:\d{2} (am|pm)\.$/);
+  // Los iconos (barra, filas) salen de lo guardado, no quedan rotos.
+  await expect.poll(() => imagenesRotas(page)).toEqual([]);
   await volverRed(context);
 });
 
@@ -115,6 +125,8 @@ test("sin red y sin nada guardado: la pantalla completa de sin conexion", async 
     "Necesitas conexión para ver tus Beats por primera vez. Vuelve a intentarlo cuando tengas señal.",
   );
   await expect(pantalla.locator("img[src*='vacio-sin-conexion']")).toBeVisible();
+  // La ilustracion solo se ve sin red: el service worker la guardo con la copia.
+  await expect.poll(() => imagenesRotas(page)).toEqual([]);
   await expect(numeroDeBeats(page)).toHaveCount(0);
 
   // Al volver la señal carga la pantalla normal.

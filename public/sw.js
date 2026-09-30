@@ -27,6 +27,15 @@ const RUTA_SIN_CONEXION = "/sin-conexion";
  */
 const PANTALLAS_CON_COPIA = ["/beats"];
 
+/**
+ * Lo que una pantalla con copia muestra SOLO sin red, y que por lo tanto nunca
+ * se llega a pedir con red: se guarda junto con su copia. Sin esto, la
+ * ilustracion de "sin conexion" de Beats se veria rota justo cuando hace falta.
+ */
+const RECURSOS_SIN_RED = {
+  "/beats": ["/assets/estados-vacios/vacio-sin-conexion.webp"],
+};
+
 // Lo minimo para que la app abra estando sin señal.
 const SHELL = [RUTA_SIN_CONEXION, "/manifest.json", "/icon-192.png", "/icon-512.png"];
 
@@ -68,6 +77,11 @@ self.addEventListener("activate", (evento) => {
  * registro.
  */
 function sePuedeCachear(url) {
+  // Las variantes que genera next/image llevan la imagen, el ancho y la
+  // calidad como parametros, pero son archivos estaticos: sin guardarlas, sin
+  // red se veian rotos los iconos de la barra y de las filas.
+  if (url.pathname === "/_next/image") return true;
+
   // Con parametros no se cachea: distinguen contenido dinamico (los `?_rsc=`
   // de Next, los `?v=` del servidor de desarrollo) y ensucian el cache.
   if (url.search) return false;
@@ -100,7 +114,13 @@ async function resolverNavegacion(peticion, url) {
     // Se guarda por detras, sin hacer esperar a la pantalla.
     if (conCopia && respuesta.ok && !respuesta.redirected) {
       copiaParaGuardar(respuesta)
-        .then((copia) => caches.open(CACHE_SHELL).then((cache) => cache.put(url.pathname, copia)))
+        .then(async (copia) => {
+          const cache = await caches.open(CACHE_SHELL);
+          await cache.put(url.pathname, copia);
+          for (const recurso of RECURSOS_SIN_RED[url.pathname] || []) {
+            if (!(await cache.match(recurso))) await cache.add(recurso).catch(() => null);
+          }
+        })
         .catch(() => null);
     }
     return respuesta;
