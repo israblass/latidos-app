@@ -22,8 +22,12 @@ Rama de trabajo: `claude/beats-fases-2-6` (parte del ultimo commit de
 - **Fase 4** (actualizacion en vivo): HECHA. T034 a T038.
   Suite completa al cerrar la fase: 181 pruebas pasan, 3 omitidas (las de
   rendimiento).
-- **Fase 5** (sin conexion y errores): en curso.
-- **Fase 6**: pendiente.
+- **Fase 5** (sin conexion y errores): HECHA. T039 a T045.
+  Suite completa al cerrar la fase: 190 pruebas pasan, 3 omitidas (las de
+  rendimiento). Despues, revisando capturas sin red, aparecio que las
+  imagenes de next/image salian rotas sin conexion; se corrigio en el service
+  worker y lo cubre la suite final de la Fase 6.
+- **Fase 6** (polish y QA): en curso.
 
 ## 2. Pasos en produccion
 
