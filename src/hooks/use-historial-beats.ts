@@ -2,10 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useMovimientosEnVivo } from "@/hooks/use-movimientos-en-vivo";
+import { escribirCache } from "@/lib/beats/cache";
 import { leerHistorial, leerMarca, leerResumen } from "@/lib/beats/consultas";
 import { insertarMovimiento } from "@/lib/beats/insertar-movimiento";
-import { leerUsuarioDeSesion, useMovimientosEnVivo } from "@/hooks/use-movimientos-en-vivo";
-import type { DiaHistorial, Movimiento, MovimientoBeats, ResumenBeats } from "@/types/beats";
+import type {
+  CacheBeats,
+  DiaHistorial,
+  Movimiento,
+  MovimientoBeats,
+  ResumenBeats,
+} from "@/types/beats";
 
 /**
  * Estado de la pantalla de Beats: saldo, historial por dias y que dias estan
@@ -16,17 +23,27 @@ import type { DiaHistorial, Movimiento, MovimientoBeats, ResumenBeats } from "@/
  * cierra otro (spec §7 pasos 5 y 7). Los lotes siguientes llegan con
  * `cargarMas`, que la pantalla llama al acercarse al final de la lista.
  *
- * Expone `estado` y `errorAlCargarMas` para que las fases de en vivo y sin
- * conexion se apoyen aqui en vez de duplicar la carga.
- *
  * En vivo (T035): cada movimiento nuevo del libro entra en su dia (o crea el
  * dia arriba y abierto), y el saldo se relee de la base en vez de sumarse
  * aqui, para que el numero sea siempre el autoritativo.
+ *
+ * Sin conexion (T040): `hidratar` pinta al instante la copia guardada en el
+ * dispositivo, y cada carga exitosa o evento en vivo la vuelve a escribir.
+ * `origen` dice si lo que se ve salio de la red en esta visita o de la copia,
+ * y `actualizadoEn` de cuando es, para el aviso "Asi estaban tus Beats a las".
  */
 
 export type EstadoHistorial = "esperando" | "cargando" | "listo" | "error";
+export type OrigenDatos = "ninguno" | "cache" | "red";
 
-export function useHistorialBeats(resumenInicial: ResumenBeats | null) {
+export function useHistorialBeats({
+  resumenInicial,
+  usuarioId,
+}: {
+  resumenInicial: ResumenBeats | null;
+  /** De la sesion local: existe aunque no haya red. */
+  usuarioId: string | null;
+}) {
   const [resumen, setResumen] = useState<ResumenBeats | null>(resumenInicial);
   const [dias, setDias] = useState<DiaHistorial[]>([]);
   const [hayMas, setHayMas] = useState(false);
@@ -35,6 +52,8 @@ export function useHistorialBeats(resumenInicial: ResumenBeats | null) {
   const [cargandoMas, setCargandoMas] = useState(false);
   const [errorAlCargarMas, setErrorAlCargarMas] = useState(false);
   const [abiertos, setAbiertos] = useState<Set<string>>(new Set());
+  const [origen, setOrigen] = useState<OrigenDatos>("ninguno");
+  const [actualizadoEn, setActualizadoEn] = useState<string | null>(null);
 
   // Una carga de mas en vuelo a la vez: el observador del final de la lista
   // puede disparar varias veces seguidas mientras la primera no termina.
@@ -49,11 +68,29 @@ export function useHistorialBeats(resumenInicial: ResumenBeats | null) {
 
   // Marcas ya resueltas por id: un escaneo en vivo trae marca_id, no el nombre.
   const marcas = useRef(new Map<string, { nombre: string; logo_url: string | null }>());
-  const [usuarioId, setUsuarioId] = useState<string | null>(null);
 
   useEffect(() => {
     if (resumenInicial) setResumen(resumenInicial);
   }, [resumenInicial]);
+
+  /** Pinta la copia guardada mientras llegan los datos frescos. */
+  const hidratar = useCallback((cache: CacheBeats) => {
+    setResumen((actual) =>
+      actual ?? {
+        saldo: cache.saldo,
+        tiene_escaneos: cache.tiene_escaneos,
+        onboarding_visto: cache.onboarding_visto,
+      },
+    );
+    setDias((actuales) => (actuales.length ? actuales : cache.dias));
+    setHayMas(cache.hay_mas);
+    setCursor(cache.siguiente_cursor);
+    setAbiertos((actuales) =>
+      actuales.size ? actuales : new Set(cache.dias[0] ? [cache.dias[0].dia_local] : []),
+    );
+    setOrigen((actual) => (actual === "red" ? actual : "cache"));
+    setActualizadoEn((actual) => actual ?? cache.actualizado_en);
+  }, []);
 
   const cargarInicio = useCallback(async () => {
     setEstado("cargando");
@@ -63,6 +100,8 @@ export function useHistorialBeats(resumenInicial: ResumenBeats | null) {
       setHayMas(pagina.hay_mas);
       setCursor(pagina.siguiente_cursor);
       setAbiertos(new Set(pagina.dias[0] ? [pagina.dias[0].dia_local] : []));
+      setOrigen("red");
+      setActualizadoEn(new Date().toISOString());
       setEstado("listo");
     } catch {
       setEstado("error");
@@ -73,8 +112,26 @@ export function useHistorialBeats(resumenInicial: ResumenBeats | null) {
     if (resumenInicial) void cargarInicio();
   }, [resumenInicial, cargarInicio]);
 
+  // La copia se reescribe con cada dato fresco: carga, lote nuevo o evento en
+  // vivo. Lo que vino de la propia copia no se vuelve a guardar.
+  useEffect(() => {
+    if (!usuarioId || origen !== "red" || !resumen || !actualizadoEn) return;
+    escribirCache({
+      usuario_id: usuarioId,
+      saldo: resumen.saldo,
+      tiene_escaneos: resumen.tiene_escaneos,
+      onboarding_visto: resumen.onboarding_visto,
+      dias,
+      hay_mas: hayMas,
+      siguiente_cursor: cursor,
+      actualizado_en: actualizadoEn,
+    });
+  }, [usuarioId, origen, resumen, dias, hayMas, cursor, actualizadoEn]);
+
   const cargarMas = useCallback(async () => {
-    if (!hayMas || !cursor || pidiendoMas.current) return;
+    // Sin datos frescos (se esta viendo la copia sin red) no se piden dias
+    // anteriores: la spec §8.2 lo deja para cuando vuelva la señal.
+    if (!hayMas || !cursor || pidiendoMas.current || origen !== "red") return;
     pidiendoMas.current = true;
     setCargandoMas(true);
     setErrorAlCargarMas(false);
@@ -89,18 +146,7 @@ export function useHistorialBeats(resumenInicial: ResumenBeats | null) {
       pidiendoMas.current = false;
       setCargandoMas(false);
     }
-  }, [hayMas, cursor]);
-
-  useEffect(() => {
-    if (!resumenInicial) return;
-    let vigente = true;
-    void leerUsuarioDeSesion().then((id) => {
-      if (vigente) setUsuarioId(id);
-    });
-    return () => {
-      vigente = false;
-    };
-  }, [resumenInicial]);
+  }, [hayMas, cursor, origen]);
 
   const alLlegarMovimiento = useCallback(async (fila: MovimientoBeats) => {
     let marca: Movimiento["marca"] = null;
@@ -137,13 +183,18 @@ export function useHistorialBeats(resumenInicial: ResumenBeats | null) {
     // contar uno dos veces o perderlo.
     try {
       const actual = await leerResumen();
-      if (actual) setResumen(actual);
+      if (actual) {
+        setResumen(actual);
+        setActualizadoEn(new Date().toISOString());
+      }
     } catch {
       // Sin red en este momento: el numero se pone al dia en la proxima carga.
     }
   }, []);
 
-  useMovimientosEnVivo(usuarioId, alLlegarMovimiento);
+  // Solo con datos frescos: sin red no hay canal, y suscribirse sobre la copia
+  // mezclaria eventos nuevos con dias viejos.
+  useMovimientosEnVivo(origen === "red" ? usuarioId : null, alLlegarMovimiento);
 
   const alternarDia = useCallback((dia: string) => {
     setAbiertos((previos) => {
@@ -156,17 +207,17 @@ export function useHistorialBeats(resumenInicial: ResumenBeats | null) {
 
   return {
     resumen,
-    setResumen,
     dias,
-    setDias,
     hayMas,
     estado,
+    origen,
+    actualizadoEn,
     cargandoMas,
     errorAlCargarMas,
     abiertos,
-    setAbiertos,
     alternarDia,
     cargarMas,
+    hidratar,
     recargar: cargarInicio,
   };
 }

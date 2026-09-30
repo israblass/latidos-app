@@ -9,6 +9,16 @@ import { defineConfig, devices } from "@playwright/test";
  * cruzan. Para apuntar a un despliegue de verdad: URL_BASE=https://... y
  * las pruebas que escriben en la base se saltan solas.
  */
+/*
+ * Sin esto, ni el modo sin red ni el enrutado de Playwright alcanzan a las
+ * peticiones que hace el propio service worker: una prueba "sin red" seguiria
+ * recibiendo la pagina desde el servidor y nunca ejercitaria las copias de
+ * public/sw.js. Con la bandera, context.route() tambien las intercepta (ver
+ * cortarRed en tests/ayudantes/red.ts). Es experimental en Playwright; si una
+ * version futura la quita, las pruebas sin red de Beats lo van a delatar.
+ */
+process.env.PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS ??= "1";
+
 const URL_BASE = process.env.URL_BASE || "http://localhost:3000";
 const URL_MOCK = process.env.URL_MOCK || "http://localhost:54321";
 const CONTRA_DESPLIEGUE = Boolean(process.env.URL_BASE);

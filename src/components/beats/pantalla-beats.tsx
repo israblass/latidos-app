@@ -8,7 +8,12 @@ import { HojaComoGanar } from "@/components/beats/hoja-como-ganar";
 import { AnuncioVivo } from "@/components/beats/anuncio-vivo";
 import { ContadorBeatsVivo } from "@/components/beats/contador-beats-vivo";
 import { TabBar } from "@/components/navegacion/tab-bar";
+import { AvisoEstado } from "@/components/beats/aviso-estado";
+import { SinConexionBeats } from "@/components/beats/sin-conexion-beats";
+import { useConexion } from "@/hooks/use-conexion";
 import { useGuardiaBeats } from "@/hooks/use-guardia-beats";
+import { leerUsuarioDeSesion } from "@/hooks/use-movimientos-en-vivo";
+import { borrarCachesAjenas, borrarTodasLasCaches, leerCache } from "@/lib/beats/cache";
 import { useHistorialBeats } from "@/hooks/use-historial-beats";
 
 /**
@@ -49,28 +54,103 @@ function FinDeLista({ alVerse, activo }: { alVerse: () => void; activo: boolean 
   return <div ref={ref} aria-hidden="true" className="h-px" />;
 }
 
+/** Id de la sesion guardada en el dispositivo; se lee sin ir a la red. */
+function useUsuarioLocal() {
+  const [usuario, setUsuario] = useState<{ resuelto: boolean; id: string | null }>({
+    resuelto: false,
+    id: null,
+  });
+  useEffect(() => {
+    let vigente = true;
+    void leerUsuarioDeSesion()
+      .catch(() => null)
+      .then((id) => {
+        if (vigente) setUsuario({ resuelto: true, id });
+      });
+    return () => {
+      vigente = false;
+    };
+  }, []);
+  return usuario;
+}
+
 export function PantallaBeats() {
   const guardia = useGuardiaBeats();
   const resumenGuardia = guardia.estado === "listo" ? guardia.resumen : null;
-  const historial = useHistorialBeats(resumenGuardia);
-  const { resumen, dias, abiertos, estado } = historial;
+  const usuarioLocal = useUsuarioLocal();
+  const enLinea = useConexion();
+  const historial = useHistorialBeats({
+    resumenInicial: resumenGuardia,
+    usuarioId: usuarioLocal.id,
+  });
+  const { resumen, dias, abiertos, estado, origen, hidratar } = historial;
   const [hojaAbierta, setHojaAbierta] = useState(false);
 
-  const sinDatos = guardia.estado === "sinVerificar" || estado === "error";
-  const cargando = !sinDatos && (!resumen || estado === "esperando" || estado === "cargando");
+  // Primero lo guardado, al instante; los datos frescos llegan despues (spec
+  // §7 paso 2). La copia de otra persona nunca se muestra y se borra al abrir
+  // (spec §8.11): solo cuenta la de quien tiene la sesion en este dispositivo.
+  useEffect(() => {
+    if (!usuarioLocal.resuelto) return;
+    if (!usuarioLocal.id) {
+      borrarTodasLasCaches();
+      return;
+    }
+    borrarCachesAjenas(usuarioLocal.id);
+    const copia = leerCache(usuarioLocal.id);
+    if (copia) hidratar(copia);
+  }, [usuarioLocal, hidratar]);
+
+  const tieneDatos = origen !== "ninguno" && Boolean(resumen);
+  const fallo = guardia.estado === "sinVerificar" || estado === "error";
+  const reintentando = guardia.estado === "verificando" || estado === "cargando";
+  const cargando = !tieneDatos && !fallo;
 
   // Estable: la hoja la usa como dependencia de su efecto, y una funcion nueva
   // en cada render la haria cerrarse y abrirse de nuevo.
   const cerrarHoja = useCallback(() => setHojaAbierta(false), []);
 
-  const reintentar = () => {
-    if (guardia.estado === "sinVerificar") guardia.reintentar();
-    else void historial.recargar();
-  };
+  const { reintentar: reintentarGuardia } = guardia;
+  const { recargar } = historial;
+  const estadoGuardia = guardia.estado;
+  const reintentar = useCallback(() => {
+    if (estadoGuardia !== "listo") reintentarGuardia();
+    else void recargar();
+  }, [estadoGuardia, reintentarGuardia, recargar]);
+
+  // Al volver la señal, la pantalla se pone al dia sola (spec §8.2).
+  const estabaSinRed = useRef(false);
+  useEffect(() => {
+    if (!enLinea) {
+      estabaSinRed.current = true;
+      return;
+    }
+    if (estabaSinRed.current) {
+      estabaSinRed.current = false;
+      reintentar();
+    }
+  }, [enLinea, reintentar]);
+
+  if (!tieneDatos && fallo && !enLinea) {
+    return (
+      <>
+        <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
+          <h1 className="titulo-pantalla">Beats</h1>
+          <SinConexionBeats />
+        </main>
+        <TabBar />
+      </>
+    );
+  }
 
   return (
     <>
       <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
+        {tieneDatos && !enLinea ? (
+          <AvisoEstado tipo="sin-conexion" actualizadoEn={historial.actualizadoEn} />
+        ) : tieneDatos && fallo ? (
+          <AvisoEstado tipo="error" alReintentar={reintentar} reintentando={reintentando} />
+        ) : null}
+
         <header className="flex min-h-touch items-center justify-between gap-3">
           <h1 className="titulo-pantalla">Beats</h1>
           {/* Ghost azul a la derecha del titulo (spec §10.1). */}
@@ -92,7 +172,7 @@ export function PantallaBeats() {
               <ContadorBeatsVivo valor={resumen.saldo} />
             ) : (
               <div className="flex min-h-[132px] items-center justify-center text-texto-secundario">
-                {sinDatos ? null : <span className="girador" aria-hidden="true" />}
+                {fallo ? null : <span className="girador" aria-hidden="true" />}
               </div>
             )}
           </div>
@@ -108,10 +188,17 @@ export function PantallaBeats() {
               <span className="girador" aria-hidden="true" />
               Cargando tu historial
             </p>
-          ) : sinDatos ? (
+          ) : !tieneDatos ? (
+            // Con red, sin nada guardado y con la carga fallida: el mismo
+            // mensaje del aviso, en lugar del historial (spec §8.4).
             <div className="vidrio-medio flex flex-col items-center gap-3 px-5 py-6 text-center">
               <p className="text-texto-principal">No pudimos actualizar.</p>
-              <button type="button" onClick={reintentar} className="boton-secundario w-auto">
+              <button
+                type="button"
+                onClick={reintentar}
+                disabled={reintentando}
+                className="boton-secundario w-auto"
+              >
                 Reintentar
               </button>
             </div>
@@ -151,7 +238,7 @@ export function PantallaBeats() {
 
         {/* Solo mientras no haya ningun escaneo: con el primero se retira y la
             explicacion queda en el boton de arriba (spec §8.1). */}
-        {!cargando && !sinDatos && resumen && !resumen.tiene_escaneos ? <EstadoInicial /> : null}
+        {tieneDatos && resumen && !resumen.tiene_escaneos ? <EstadoInicial /> : null}
       </main>
 
       <AnuncioVivo saldo={resumen?.saldo ?? null} />

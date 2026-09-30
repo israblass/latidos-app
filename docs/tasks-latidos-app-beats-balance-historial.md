@@ -241,18 +241,18 @@ Verificacion:
 Objetivo: la pantalla es util con mala señal o fallas.
 Depende de: Fase 2
 
-- [ ] T039 [US-5] Crear `src/lib/beats/cache.ts`: leer, escribir y borrar CacheBeats en almacenamiento local con clave por usuario (campos del plan §2), descartar la cache si el usuario no coincide con la sesion y borrar las claves de otros usuarios al abrir.
-- [ ] T040 [US-5] Integrar la cache en `src/hooks/use-historial-beats.ts` y `src/hooks/use-guardia-beats.ts`:
+- [X] T039 [US-5] Crear `src/lib/beats/cache.ts`: leer, escribir y borrar CacheBeats en almacenamiento local con clave por usuario (campos del plan §2), descartar la cache si el usuario no coincide con la sesion y borrar las claves de otros usuarios al abrir.
+- [X] T040 [US-5] Integrar la cache en `src/hooks/use-historial-beats.ts` y `src/hooks/use-guardia-beats.ts`:
   - la pantalla abre de inmediato con lo guardado y luego pide datos frescos;
   - escribe la cache tras cada carga exitosa y tras cada evento en vivo;
   - sin red, el guardia usa `onboarding_visto` de la cache y la sesion local, en vez de redirigir.
-- [ ] T041 [US-5] [P] Crear `src/components/beats/aviso-estado.tsx`, con el toast de la constitution §2 (borde izquierdo de color semantico):
+- [X] T041 [US-5] [P] Crear `src/components/beats/aviso-estado.tsx`, con el toast de la constitution §2 (borde izquierdo de color semantico):
   - sin conexion: "Sin conexion. Asi estaban tus Beats a las [hora]", con "ayer, [hora]" o el dia si no fue hoy; desaparece y dispara la recarga al volver la red, usando `src/hooks/use-conexion.ts`;
   - con conexion y falla de carga: "No pudimos actualizar" con boton "Reintentar".
-- [ ] T042 [US-5] [P] Crear `src/components/beats/sin-conexion-beats.tsx`: pantalla completa con `public/assets/estados-vacios/vacio-sin-conexion.webp` y el texto "Necesitas conexion para ver tus Beats por primera vez. Vuelve a intentarlo cuando tengas señal.", para cuando no hay red ni cache. Integrarla en `src/components/beats/pantalla-beats.tsx`.
-- [ ] T043 [US-5] [P] Actualizar `public/sw.js` a v4: para la navegacion a `/beats`, red primero; en cada respuesta exitosa guardar una copia en el cache del shell; sin red, servir esa copia o, si no existe, `/sin-conexion`. Las demas rutas no cambian.
-- [ ] T044 [US-5] [P] Crear `src/components/pwa/limpiar-cache-sesion.tsx`, que escucha el evento de cierre de sesion de Auth y borra CacheBeats. Montarlo en `src/app/layout.tsx` junto a `RegistrarServiceWorker`.
-- [ ] T045 Escribir `tests/integracion/beats-sin-conexion.test.ts` con Playwright en modo offline, que cubre:
+- [X] T042 [US-5] [P] Crear `src/components/beats/sin-conexion-beats.tsx`: pantalla completa con `public/assets/estados-vacios/vacio-sin-conexion.webp` y el texto "Necesitas conexion para ver tus Beats por primera vez. Vuelve a intentarlo cuando tengas señal.", para cuando no hay red ni cache. Integrarla en `src/components/beats/pantalla-beats.tsx`.
+- [X] T043 [US-5] [P] Actualizar `public/sw.js` a v4: para la navegacion a `/beats`, red primero; en cada respuesta exitosa guardar una copia en el cache del shell; sin red, servir esa copia o, si no existe, `/sin-conexion`. Las demas rutas no cambian.
+- [X] T044 [US-5] [P] Crear `src/components/pwa/limpiar-cache-sesion.tsx`, que escucha el evento de cierre de sesion de Auth y borra CacheBeats. Montarlo en `src/app/layout.tsx` junto a `RegistrarServiceWorker`.
+- [X] T045 Escribir `tests/integracion/beats-sin-conexion.test.ts` con Playwright en modo offline, que cubre:
   - apertura con cache y aviso con hora, y variante "ayer";
   - recarga automatica al reconectar;
   - navegador limpio sin red;

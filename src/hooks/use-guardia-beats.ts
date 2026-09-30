@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { leerResumen } from "@/lib/beats/consultas";
 import type { ResumenBeats } from "@/types/beats";
@@ -59,5 +59,10 @@ export function useGuardiaBeats(): EstadoGuardia & { reintentar: () => void } {
     };
   }, [router, intento]);
 
-  return { ...estado, reintentar: () => setIntento((n) => n + 1) };
+  const reintentar = useCallback(() => {
+    setEstado({ estado: "verificando" });
+    setIntento((n) => n + 1);
+  }, []);
+
+  return { ...estado, reintentar };
 }

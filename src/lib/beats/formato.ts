@@ -96,3 +96,19 @@ export function nombreMovimiento(
 
 /** Los movimientos de Latidos llevan el icono de Latidos y no una marca. */
 export const esMovimientoDeLatidos = (tipo: TipoMovimiento) => tipo !== "escaneo";
+
+/**
+ * Cuando es una copia guardada, dicho como lo lee el aviso sin conexion
+ * (spec §8.2): "a las 3:40 pm" si fue hoy, "ayer, 9:10 pm" si fue ayer, y
+ * "el 28 sept, 9:10 pm" si fue antes.
+ */
+export function momentoDeLaCopia(instante: string, ahora: Date = new Date()): string {
+  const hora = horaDe(instante);
+  const dia = diaLocalDe(new Date(instante));
+  const etiqueta = etiquetaDia(dia, ahora);
+  if (etiqueta === "HOY") return `a las ${hora}`;
+  if (etiqueta === "AYER") return `ayer, ${hora}`;
+  // "MIÉRCOLES 23 SEPT" -> "el 23 sept"
+  const [, numero, mes] = etiqueta.split(" ");
+  return `el ${numero} ${mes.toLowerCase()}, ${hora}`;
+}

@@ -10,11 +10,22 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v3";
+const VERSION = "v4";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
+// v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
+// (plan de Beats §3, "Pantalla de Beats disponible sin conexion").
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
+
+/**
+ * Pantallas cuyo HTML se guarda en cada visita con red y se sirve sin ella.
+ * Solo las que no llevan datos de nadie en el HTML: la de Beats es una
+ * pantalla de cliente que trae los datos despues, con la sesion de quien la
+ * abre. Una pantalla renderizada en servidor con datos de la persona NUNCA
+ * puede entrar aqui: se le serviria a otra persona en el mismo telefono.
+ */
+const PANTALLAS_CON_COPIA = ["/beats"];
 
 // Lo minimo para que la app abra estando sin señal.
 const SHELL = [RUTA_SIN_CONEXION, "/manifest.json", "/icon-192.png", "/icon-512.png"];
@@ -66,12 +77,39 @@ function sePuedeCachear(url) {
   return /\.(?:png|jpg|jpeg|svg|webp|gif|ico|woff2?)$/.test(url.pathname);
 }
 
-/** Navegacion: la red manda; sin señal, la pantalla propia de sin conexion. */
-async function resolverNavegacion(peticion) {
+/**
+ * Copia limpia de una respuesta de navegacion para guardarla: mismo cuerpo y
+ * tipo, sin ninguna otra cabecera. Asi no queda guardado nada que dependa de
+ * quien la pidio (cookies de sesion, cabeceras de cache del servidor).
+ */
+async function copiaParaGuardar(respuesta) {
+  const cuerpo = await respuesta.clone().blob();
+  return new Response(cuerpo, {
+    status: 200,
+    headers: { "content-type": respuesta.headers.get("content-type") || "text/html" },
+  });
+}
+
+/** Navegacion: la red manda; sin señal, la copia o la pantalla de sin conexion. */
+async function resolverNavegacion(peticion, url) {
+  const conCopia = PANTALLAS_CON_COPIA.includes(url.pathname);
   try {
-    return await fetch(peticion);
+    const respuesta = await fetch(peticion);
+    // Solo se guarda una respuesta buena y final: una redireccion (a la
+    // bienvenida, al onboarding) no es la pantalla.
+    // Se guarda por detras, sin hacer esperar a la pantalla.
+    if (conCopia && respuesta.ok && !respuesta.redirected) {
+      copiaParaGuardar(respuesta)
+        .then((copia) => caches.open(CACHE_SHELL).then((cache) => cache.put(url.pathname, copia)))
+        .catch(() => null);
+    }
+    return respuesta;
   } catch {
     const cache = await caches.open(CACHE_SHELL);
+    if (conCopia) {
+      const copia = await cache.match(url.pathname);
+      if (copia) return copia;
+    }
     const sinConexion = await cache.match(RUTA_SIN_CONEXION);
     if (sinConexion) return sinConexion;
 
@@ -136,7 +174,7 @@ self.addEventListener("fetch", (evento) => {
   }
 
   if (peticion.mode === "navigate") {
-    evento.respondWith(resolverNavegacion(peticion));
+    evento.respondWith(resolverNavegacion(peticion, url));
     return;
   }
 
