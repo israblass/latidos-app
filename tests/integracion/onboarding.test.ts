@@ -66,9 +66,10 @@ test("la barra inferior trae los 5 tabs", async ({ page }) => {
   await page.waitForURL("**/inicio");
 
   await expect(page.locator("nav li")).toHaveCount(5);
-  // Inicio y Escanear navegan; los otros tres todavia no existen.
-  await expect(page.locator("nav a")).toHaveCount(2);
-  await expect(page.locator("nav button[disabled]")).toHaveCount(3);
+  // Inicio, Escanear y Beats navegan (Beats se encendio en la Fase 2 de su
+  // historia); Pulso y Perfil todavia no existen.
+  await expect(page.locator("nav a")).toHaveText([/Inicio/, /Escanear/, /Beats/]);
+  await expect(page.locator("nav button[disabled]")).toHaveText([/Pulso/, /Perfil/]);
 });
 
 test("el onboarding presenta los avisos y para que sirven", async ({ page }) => {
