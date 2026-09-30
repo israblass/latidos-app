@@ -16,6 +16,8 @@
 const http = require("http");
 const crypto = require("crypto");
 
+const tiempoReal = require("./tiempo-real");
+
 const PUERTO = Number(process.env.PUERTO_MOCK || 54321);
 
 // Espejo de supabase/seed.sql. Si el seed cambia, esto cambia con el.
@@ -49,6 +51,7 @@ function reiniciar() {
   tokens = new Map();       // token_hash -> correo
   ultimoEnlace = null;
   fallas = new Set();
+  tiempoReal.reiniciar();
 }
 reiniciar();
 
@@ -70,6 +73,9 @@ function registrarMovimiento(usuarioId, tipo, beats, extra = {}) {
   };
   movimientos.push(fila);
   perfil.beats_balance += beats;
+  // Como la publicacion de Supabase: cada insercion en el libro sale por el
+  // canal de tiempo real.
+  tiempoReal.publicarInsercion("movimientos_beats", fila);
   return fila;
 }
 
@@ -233,6 +239,25 @@ const servidor = http.createServer((req, res) => {
       const qr = qrs.find((q) => q.id === id);
       qr.estado = estado;
       return json(200, qr);
+    }
+    // Corta o restablece el tiempo real (caida del canal, Fase 4).
+    if (url.pathname === "/prueba/tiempo-real" && req.method === "POST") {
+      tiempoReal.ponerCaido(Boolean(JSON.parse(cuerpo).caido));
+      return json(200, { ok: true });
+    }
+    if (url.pathname === "/prueba/canales" && req.method === "GET") {
+      return json(200, { canales: tiempoReal.canalesDe(url.searchParams.get("id")) });
+    }
+    // Corre hacia atras todos los movimientos de una cuenta, para tener una
+    // pantalla sin dia de HOY en la que un movimiento en vivo cree el dia.
+    if (url.pathname === "/prueba/mover-movimientos" && req.method === "POST") {
+      const { usuario_id, dias } = JSON.parse(cuerpo);
+      for (const m of movimientos.filter((x) => x.usuario_id === usuario_id)) {
+        const antes = new Date(new Date(m.ocurrido_en).getTime() - dias * 86400000);
+        m.ocurrido_en = antes.toISOString();
+        m.dia_local = diaEnCaracas(antes);
+      }
+      return json(200, { ok: true });
     }
     // Hace fallar una RPC con 500 hasta que se apague.
     if (url.pathname === "/prueba/falla" && req.method === "POST") {
@@ -417,5 +442,7 @@ const servidor = http.createServer((req, res) => {
     json(404, { message: "no mockeado: " + url.pathname });
   });
 });
+
+tiempoReal.montar(servidor);
 
 servidor.listen(PUERTO, () => console.log(`mock de Supabase en :${PUERTO}`));

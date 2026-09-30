@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { BarraAcento } from "@/components/marca/titulo-con-acento";
 
 /**
@@ -18,9 +20,15 @@ export function ContadorBeats({
   valor,
   /** Un ciclo rapido al acabar de sumar, en vez del latido de reposo. */
   recienSumado = false,
+  /**
+   * Lo que se pinta en lugar del numero fijo: la pantalla de Beats pasa aqui
+   * el contador animado cuando el saldo cambia con la pantalla abierta.
+   */
+  numero,
 }: {
   valor: number;
   recienSumado?: boolean;
+  numero?: ReactNode;
 }) {
   return (
     <div className="relative flex flex-col items-center">

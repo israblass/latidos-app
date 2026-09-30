@@ -104,3 +104,14 @@ export const simularFalla = (rpc: string, activa: boolean) =>
 
 export const movimientosDe = (id: string): Promise<{ tipo: string; beats: number }[]> =>
   pedir(`/prueba/movimientos?id=${id}`);
+
+/** Corta (true) o restablece (false) el tiempo real del mock. */
+export const ponerTiempoRealCaido = (caido: boolean) => enviar("/prueba/tiempo-real", { caido });
+
+/** Canales de tiempo real unidos ahora por esa cuenta. */
+export const canalesDe = (id: string): Promise<{ canales: number }> =>
+  pedir(`/prueba/canales?id=${id}`);
+
+/** Corre hacia atras todos los movimientos de una cuenta. */
+export const moverMovimientos = (usuarioId: string, dias: number) =>
+  enviar("/prueba/mover-movimientos", { usuario_id: usuarioId, dias });

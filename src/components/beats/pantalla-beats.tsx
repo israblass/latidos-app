@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { DiaHistorial } from "@/components/beats/dia-historial";
 import { EstadoInicial } from "@/components/beats/estado-inicial";
 import { HojaComoGanar } from "@/components/beats/hoja-como-ganar";
-import { ContadorBeats } from "@/components/marca/contador-beats";
+import { AnuncioVivo } from "@/components/beats/anuncio-vivo";
+import { ContadorBeatsVivo } from "@/components/beats/contador-beats-vivo";
 import { TabBar } from "@/components/navegacion/tab-bar";
 import { useGuardiaBeats } from "@/hooks/use-guardia-beats";
 import { useHistorialBeats } from "@/hooks/use-historial-beats";
@@ -88,7 +89,7 @@ export function PantallaBeats() {
             {resumen ? (
               // Sin animacion de entrada (spec §10.11): el numero aparece
               // directo. Solo se anima si cambia con la pantalla abierta.
-              <ContadorBeats valor={resumen.saldo} />
+              <ContadorBeatsVivo valor={resumen.saldo} />
             ) : (
               <div className="flex min-h-[132px] items-center justify-center text-texto-secundario">
                 {sinDatos ? null : <span className="girador" aria-hidden="true" />}
@@ -153,6 +154,7 @@ export function PantallaBeats() {
         {!cargando && !sinDatos && resumen && !resumen.tiene_escaneos ? <EstadoInicial /> : null}
       </main>
 
+      <AnuncioVivo saldo={resumen?.saldo ?? null} />
       <TabBar />
       <HojaComoGanar abierta={hojaAbierta} alCerrar={cerrarHoja} />
     </>

@@ -212,15 +212,15 @@ Verificacion:
 Objetivo: la pantalla refleja cambios de saldo sin salir de ella.
 Depende de: Fase 2
 
-- [ ] T034 [US-4] Crear `src/hooks/use-movimientos-en-vivo.ts`: suscripcion al canal de tiempo real de inserciones en `movimientos_beats`, filtrada por el usuario de la sesion; alta al montar y baja al desmontar; tolerante a la caida del canal, sin mostrar errores.
-- [ ] T035 [US-4] Integrar T034 en `src/hooks/use-historial-beats.ts`. Por cada evento:
+- [X] T034 [US-4] Crear `src/hooks/use-movimientos-en-vivo.ts`: suscripcion al canal de tiempo real de inserciones en `movimientos_beats`, filtrada por el usuario de la sesion; alta al montar y baja al desmontar; tolerante a la caida del canal, sin mostrar errores.
+- [X] T035 [US-4] Integrar T034 en `src/hooks/use-historial-beats.ts`. Por cada evento:
   - resuelve la marca con `leerMarca` si no esta en memoria;
   - inserta la fila en su dia o crea el dia arriba y abierto;
   - relee el saldo con `leerResumen`;
   - actualiza `tiene_escaneos`.
-- [ ] T036 [US-4] [P] Crear `src/components/beats/contador-beats-vivo.tsx`, que envuelve `ContadorBeats` y usa `ContadorAnimado` de `src/components/escaneo/contador-animado.tsx` solo cuando el saldo cambia con la pantalla abierta. Respeta `prefers-reduced-motion`. Reemplaza al contador en `src/components/beats/pantalla-beats.tsx`.
-- [ ] T037 [US-4] [P] Crear `src/components/beats/anuncio-vivo.tsx`: region `aria-live="polite"` que anuncia "Sumaste N Beats" (o "Se descontaron N Beats" si el cambio es negativo) cuando el saldo cambia en vivo. Montarla en `src/components/beats/pantalla-beats.tsx`.
-- [ ] T038 Escribir `tests/integracion/beats-en-vivo.test.ts`, que cubre:
+- [X] T036 [US-4] [P] Crear `src/components/beats/contador-beats-vivo.tsx`, que envuelve `ContadorBeats` y usa `ContadorAnimado` de `src/components/escaneo/contador-animado.tsx` solo cuando el saldo cambia con la pantalla abierta. Respeta `prefers-reduced-motion`. Reemplaza al contador en `src/components/beats/pantalla-beats.tsx`.
+- [X] T037 [US-4] [P] Crear `src/components/beats/anuncio-vivo.tsx`: region `aria-live="polite"` que anuncia "Sumaste N Beats" (o "Se descontaron N Beats" si el cambio es negativo) cuando el saldo cambia en vivo. Montarla en `src/components/beats/pantalla-beats.tsx`.
+- [X] T038 Escribir `tests/integracion/beats-en-vivo.test.ts`, que cubre:
   - un escaneo desde otra sesion del mismo usuario anima el contador, agrega la fila y anuncia el cambio;
   - un regalo por funcion interna produce el mismo resultado;
   - un dia nuevo se crea arriba y abierto;
