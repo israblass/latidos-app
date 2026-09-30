@@ -144,6 +144,63 @@ test.describe("RLS", () => {
     });
   });
 
+  test.describe("tabla movimientos_beats (libro de Beats)", () => {
+    // T048. Beto tiene su bienvenida y un regalo de 500 (beforeAll).
+    const saldoYLibroDe = async (id: string) =>
+      (
+        await pool.query(
+          `select u.beats_balance as saldo,
+                  (select json_agg(beats order by beats) from public.movimientos_beats m where m.usuario_id = u.id) as libro
+             from public.usuarios u where u.id = $1`,
+          [id],
+        )
+      ).rows[0];
+
+    test("Ana no lee los movimientos de Beto", async () => {
+      const propios = await comoAna(`select usuario_id from public.movimientos_beats`);
+      expect(propios.map((f) => f.usuario_id)).toEqual([ana]);
+      const ajenos = await comoAna(`select id from public.movimientos_beats where usuario_id = $1`, [beto]);
+      expect(ajenos).toHaveLength(0);
+    });
+
+    test("Ana no puede insertarse un movimiento", async () => {
+      const error = await comoAnaDebeFallar(
+        `insert into public.movimientos_beats (usuario_id, tipo, beats, dia_local)
+         values ($1, 'regalo', 1000, current_date)`,
+        [ana],
+      );
+      expect(error).toMatch(/row-level security|violates|permission/i);
+      expect(await saldoYLibroDe(ana)).toEqual({ saldo: 5, libro: [5] });
+    });
+
+    test("Ana no puede reescribir ni borrar sus movimientos", async () => {
+      // Sin policies de update ni delete, las filas ni siquiera son alcanzables.
+      await comoAna(`update public.movimientos_beats set beats = 9999 where usuario_id = $1`, [ana]);
+      await comoAna(`delete from public.movimientos_beats where usuario_id = $1`, [ana]);
+      await comoAna(`delete from public.movimientos_beats where usuario_id = $1`, [beto]);
+      expect(await saldoYLibroDe(ana)).toEqual({ saldo: 5, libro: [5] });
+      expect(await saldoYLibroDe(beto)).toEqual({ saldo: 505, libro: [5, 500] });
+    });
+
+    test("Ana no puede cambiar su saldo ni poniendo la marca del libro", async () => {
+      const error = await comoAnaDebeFallar(
+        `select set_config('latidos.desde_libro', 'si', false);
+         update public.usuarios set beats_balance = 777 where id = '${ana}'`,
+      );
+      expect(error).toMatch(/solo cambia con un movimiento del libro/);
+      expect(await saldoYLibroDe(ana)).toEqual({ saldo: 5, libro: [5] });
+    });
+
+    test("Ana no puede ejecutar registrar_movimiento_latidos", async () => {
+      const error = await comoAnaDebeFallar(
+        `select * from public.registrar_movimiento_latidos($1, 'regalo', 100)`,
+        [ana],
+      );
+      expect(error).toMatch(/permission denied/i);
+      expect(await saldoYLibroDe(ana)).toEqual({ saldo: 5, libro: [5] });
+    });
+  });
+
   test.describe("tabla escaneos", () => {
     test("Ana no ve el historial de Beto", async () => {
       const filas = await comoAna(`select id, usuario_id, beats_otorgados from public.escaneos`);
