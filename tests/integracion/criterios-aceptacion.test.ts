@@ -256,7 +256,14 @@ test("13 — PARCIAL: el escaner pide permiso de camara antes de activarse", asy
 
   await page.goto("/escanear");
   await page.locator("video").waitFor({ state: "visible", timeout: 15_000 });
-  expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).__pidioCamara)).toBe(true);
+  // El <video> se pinta antes de pedir la camara: la llamada llega despues de
+  // cargar qr-scanner y comprobar que hay camara. Mirar una sola vez al ver el
+  // video era una carrera que fallaba con la maquina cargada (suite completa).
+  await expect
+    .poll(() => page.evaluate(() => (window as unknown as Record<string, unknown>).__pidioCamara), {
+      timeout: 15_000,
+    })
+    .toBe(true);
 });
 
 test("14 — el QR se reconoce sin boton de captura", async ({ page, context }) => {
