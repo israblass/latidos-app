@@ -19,8 +19,11 @@ Rama de trabajo: `claude/beats-fases-2-6` (parte del ultimo commit de
   pasan (170 en esa corrida, 3 omitidas de rendimiento). Esa corrida incluyo
   por error el archivo de pruebas de la Fase 4, todavia sin construir; sus 7
   fallos son de ese archivo y no cuentan para la Fase 3.
-- **Fase 4** (actualizacion en vivo): en curso.
-- **Fases 5 y 6**: pendientes.
+- **Fase 4** (actualizacion en vivo): HECHA. T034 a T038.
+  Suite completa al cerrar la fase: 181 pruebas pasan, 3 omitidas (las de
+  rendimiento).
+- **Fase 5** (sin conexion y errores): en curso.
+- **Fase 6**: pendiente.
 
 ## 2. Pasos en produccion
 
