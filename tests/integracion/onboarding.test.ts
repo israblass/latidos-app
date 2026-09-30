@@ -39,6 +39,13 @@ test("la pantalla 2 explica como se ganan Beats y para que sirven", async ({ pag
 
   await expect(page.getByText(/Beats/).first()).toBeVisible();
   await expect(page.getByText(/Escanea/i).first()).toBeVisible();
+
+  // Ajuste del 2026-09-29 (spec de registro, criterio 12c): sin montos fijos,
+  // "Cada marca da distinto", y lo que todavia no existe marcado "Pronto".
+  await expect(page.getByText("Cada marca da distinto.")).toBeVisible();
+  await expect(page.getByText(/^\+\d+$/)).toHaveCount(0);
+  await expect(page.locator("li[data-estado='pronto']")).toHaveCount(6);
+  await expect(page.locator("li[data-estado='disponible']")).toHaveText(/Escanea QR de marcas/);
 });
 
 test("saltar desde la pantalla 1 lleva directo a Inicio", async ({ page }) => {

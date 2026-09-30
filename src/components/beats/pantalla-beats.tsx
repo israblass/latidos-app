@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DiaHistorial } from "@/components/beats/dia-historial";
+import { EstadoInicial } from "@/components/beats/estado-inicial";
+import { HojaComoGanar } from "@/components/beats/hoja-como-ganar";
 import { ContadorBeats } from "@/components/marca/contador-beats";
 import { TabBar } from "@/components/navegacion/tab-bar";
 import { useGuardiaBeats } from "@/hooks/use-guardia-beats";
@@ -51,9 +53,14 @@ export function PantallaBeats() {
   const resumenGuardia = guardia.estado === "listo" ? guardia.resumen : null;
   const historial = useHistorialBeats(resumenGuardia);
   const { resumen, dias, abiertos, estado } = historial;
+  const [hojaAbierta, setHojaAbierta] = useState(false);
 
   const sinDatos = guardia.estado === "sinVerificar" || estado === "error";
   const cargando = !sinDatos && (!resumen || estado === "esperando" || estado === "cargando");
+
+  // Estable: la hoja la usa como dependencia de su efecto, y una funcion nueva
+  // en cada render la haria cerrarse y abrirse de nuevo.
+  const cerrarHoja = useCallback(() => setHojaAbierta(false), []);
 
   const reintentar = () => {
     if (guardia.estado === "sinVerificar") guardia.reintentar();
@@ -65,6 +72,15 @@ export function PantallaBeats() {
       <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
         <header className="flex min-h-touch items-center justify-between gap-3">
           <h1 className="titulo-pantalla">Beats</h1>
+          {/* Ghost azul a la derecha del titulo (spec §10.1). */}
+          <button
+            type="button"
+            onClick={() => setHojaAbierta(true)}
+            aria-haspopup="dialog"
+            className="boton-ghost -mr-4"
+          >
+            ¿Cómo gano Beats?
+          </button>
         </header>
 
         <section aria-label="Tu balance de Beats" className="mt-4">
@@ -131,9 +147,14 @@ export function PantallaBeats() {
             </div>
           )}
         </section>
+
+        {/* Solo mientras no haya ningun escaneo: con el primero se retira y la
+            explicacion queda en el boton de arriba (spec §8.1). */}
+        {!cargando && !sinDatos && resumen && !resumen.tiene_escaneos ? <EstadoInicial /> : null}
       </main>
 
       <TabBar />
+      <HojaComoGanar abierta={hojaAbierta} alCerrar={cerrarHoja} />
     </>
   );
 }

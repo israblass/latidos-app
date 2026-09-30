@@ -179,19 +179,19 @@ Verificacion:
 Objetivo: la explicacion de como ganar vive en un solo lugar y se muestra donde corresponde.
 Depende de: Fase 2
 
-- [ ] T027 [US-3] Crear `src/lib/beats/contenido-como-ganar.ts` con las listas unicas:
+- [X] T027 [US-3] Crear `src/lib/beats/contenido-como-ganar.ts` con las listas unicas:
   - formas de ganar: escanear QR de marcas, disponible, con "Cada marca da distinto"; donar, voluntariado y actividades como "Pronto";
   - en que los cambias: concierto, merch y cursos, todos "Pronto".
 
   Cada item lleva titulo, detalle, icono o ilustracion (assets existentes en `public/assets/iconos` y `public/assets/recompensas`) y estado disponible o pronto.
-- [ ] T028 [US-3] [P] Crear el componente reutilizable `src/components/ui/hoja-inferior.tsx`: radio superior de 24 px, fondo claro, asa centrada, cierre al tocar fuera y al arrastrar hacia abajo, foco atrapado mientras esta abierta, devolucion del foco al disparador y `role="dialog"` con titulo.
-- [ ] T029 [US-3] [P] Crear `src/components/beats/lista-como-ganar.tsx`, que renderiza el contenido de T027: items "Pronto" atenuados, sin interaccion, con etiqueta "Pronto" y contraste AA.
-- [ ] T030 [US-3] Agregar a `src/components/beats/pantalla-beats.tsx` el boton ghost azul "¿Como gano Beats?" a la derecha del titulo, que abre la hoja de T028 con las secciones "Como los ganas" y "En que los cambias" de T029.
-- [ ] T031 [US-3] Crear `src/components/beats/estado-inicial.tsx` e integrarlo en `src/components/beats/pantalla-beats.tsx`:
+- [X] T028 [US-3] [P] Crear el componente reutilizable `src/components/ui/hoja-inferior.tsx`: radio superior de 24 px, fondo claro, asa centrada, cierre al tocar fuera y al arrastrar hacia abajo, foco atrapado mientras esta abierta, devolucion del foco al disparador y `role="dialog"` con titulo.
+- [X] T029 [US-3] [P] Crear `src/components/beats/lista-como-ganar.tsx`, que renderiza el contenido de T027: items "Pronto" atenuados, sin interaccion, con etiqueta "Pronto" y contraste AA.
+- [X] T030 [US-3] Agregar a `src/components/beats/pantalla-beats.tsx` el boton ghost azul "¿Como gano Beats?" a la derecha del titulo, que abre la hoja de T028 con las secciones "Como los ganas" y "En que los cambias" de T029.
+- [X] T031 [US-3] Crear `src/components/beats/estado-inicial.tsx` e integrarlo en `src/components/beats/pantalla-beats.tsx`:
   - mientras `tiene_escaneos` sea falso, debajo del historial se muestran la lista de formas de ganar desplegada, la linea "Escanea tu primer QR para sumar." y el boton "Escanear" hacia `/escanear`;
   - desaparece en cuanto hay un escaneo.
-- [ ] T032 [US-3] [P] Migrar `src/app/onboarding/pantalla-2/page.tsx` para que use el contenido de T027: sin montos fijos, con "Cada marca da distinto" y "Pronto" en lo no disponible. Mantener su estructura visual actual (bloques y titulos de seccion).
-- [ ] T033 Escribir `tests/integracion/beats-como-ganar.test.ts`, que cubre:
+- [X] T032 [US-3] [P] Migrar `src/app/onboarding/pantalla-2/page.tsx` para que use el contenido de T027: sin montos fijos, con "Cada marca da distinto" y "Pronto" en lo no disponible. Mantener su estructura visual actual (bloques y titulos de seccion).
+- [X] T033 Escribir `tests/integracion/beats-como-ganar.test.ts`, que cubre:
   - estado inicial visible solo sin escaneos y oculto tras el primero;
   - "Escanear" abre el escaner;
   - apertura y cierre de la hoja, foco, "Pronto" no interactivo;

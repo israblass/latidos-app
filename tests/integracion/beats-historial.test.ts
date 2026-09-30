@@ -95,6 +95,19 @@ test.describe("pantalla", () => {
     ).toBeVisible();
   });
 
+  test("ni Inicio ni Beats se desplazan de lado", async ({ page }) => {
+    // El halo del contador se salia de la pantalla: la animacion de latido
+    // pisaba el translate que lo centra.
+    const anchoSobrante = () =>
+      page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    await cuentaEnInicio(page);
+    expect(await anchoSobrante()).toBe(0);
+    await abrirBeats(page);
+    expect(await anchoSobrante()).toBe(0);
+    await page.getByRole("button", { name: "¿Cómo gano Beats?" }).click();
+    expect(await anchoSobrante()).toBe(0);
+  });
+
   test("HOY abierto, los demas cerrados, con etiquetas, totales y conteos", async ({ page }) => {
     // V013, criterios 5, 6, 7 y 15.
     const { id } = await cuentaConId(page);
