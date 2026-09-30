@@ -29,7 +29,7 @@ export default function PantallaComoGanarBeats() {
     <CarruselOnboarding pantalla={2} textoAvance="Siguiente">
       <IlustracionOnboarding
         nombre="onboarding-2-escanear"
-        descripcion="Una persona escaneando el codigo QR de una marca con su telefono"
+        descripcion="Una persona escaneando el código QR de una marca con su teléfono"
       />
 
       <div className="vidrio-medio mt-3 px-5 py-7 text-center">
