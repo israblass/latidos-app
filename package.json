@@ -11,7 +11,7 @@
     "qr:prueba": "node scripts/generar-qr-prueba.mjs",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
-    "test:bd": "playwright test tests/integracion/rls.test.ts tests/integracion/qr-concurrencia.test.ts tests/integracion/limite-diario.test.ts",
+    "test:bd": "playwright test tests/integracion/rls.test.ts tests/integracion/qr-concurrencia.test.ts tests/integracion/limite-diario.test.ts tests/integracion/libro-movimientos.test.ts tests/integracion/lectura-beats.test.ts tests/integracion/libro-concurrencia.test.ts",
     "rendimiento": "PROBAR_RENDIMIENTO=1 playwright test tests/integracion/rendimiento.test.ts"
   },
   "dependencies": {

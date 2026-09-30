@@ -60,3 +60,58 @@ export const sembrarEscaneo = async (opciones: {
     dia_local: cuando.toISOString().slice(0, 10),
   });
 };
+
+/**
+ * Siembra un movimiento del libro como si hubiera ocurrido hace `diasAtras`
+ * dias, a la hora indicada de Caracas. Por defecto las 3 de la tarde: lejos de
+ * la medianoche, para que el dia no dependa de a que hora corre la prueba.
+ */
+export const sembrarMovimiento = (opciones: {
+  usuarioId: string;
+  tipo: "escaneo" | "bienvenida" | "ajuste" | "regalo";
+  beats: number;
+  diasAtras?: number;
+  horaCaracas?: number;
+  minuto?: number;
+  marcaId?: string;
+}) => {
+  const hoyCaracas = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Caracas" }).format(
+    new Date(),
+  );
+  const [a, m, d] = hoyCaracas.split("-").map(Number);
+  // Caracas es UTC-4 todo el año (no tiene horario de verano).
+  const cuando = new Date(
+    Date.UTC(a, m - 1, d - (opciones.diasAtras ?? 0), (opciones.horaCaracas ?? 15) + 4, opciones.minuto ?? 0),
+  );
+  return enviar("/prueba/movimiento", {
+    usuario_id: opciones.usuarioId,
+    tipo: opciones.tipo,
+    beats: opciones.beats,
+    ocurrido_en: cuando.toISOString(),
+    marca_id: opciones.marcaId,
+  });
+};
+
+export const cambiarMarca = (id: string, cambios: { nombre?: string; logo_url?: string | null }) =>
+  enviar("/prueba/marca", { id, ...cambios });
+
+export const cambiarEstadoQR = (id: string, estado: "activo" | "inactivo") =>
+  enviar("/prueba/qr-estado", { id, estado });
+
+/** Hace fallar una RPC del mock (500) hasta que se apague. */
+export const simularFalla = (rpc: string, activa: boolean) =>
+  enviar("/prueba/falla", { rpc, activa });
+
+export const movimientosDe = (id: string): Promise<{ tipo: string; beats: number }[]> =>
+  pedir(`/prueba/movimientos?id=${id}`);
+
+/** Corta (true) o restablece (false) el tiempo real del mock. */
+export const ponerTiempoRealCaido = (caido: boolean) => enviar("/prueba/tiempo-real", { caido });
+
+/** Canales de tiempo real unidos ahora por esa cuenta. */
+export const canalesDe = (id: string): Promise<{ canales: number }> =>
+  pedir(`/prueba/canales?id=${id}`);
+
+/** Corre hacia atras todos los movimientos de una cuenta. */
+export const moverMovimientos = (usuarioId: string, dias: number) =>
+  enviar("/prueba/mover-movimientos", { usuario_id: usuarioId, dias });

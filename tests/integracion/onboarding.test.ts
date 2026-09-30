@@ -39,6 +39,13 @@ test("la pantalla 2 explica como se ganan Beats y para que sirven", async ({ pag
 
   await expect(page.getByText(/Beats/).first()).toBeVisible();
   await expect(page.getByText(/Escanea/i).first()).toBeVisible();
+
+  // Ajuste del 2026-09-29 (spec de registro, criterio 12c): sin montos fijos,
+  // "Cada marca da distinto", y lo que todavia no existe marcado "Pronto".
+  await expect(page.getByText("Cada marca da distinto.")).toBeVisible();
+  await expect(page.getByText(/^\+\d+$/)).toHaveCount(0);
+  await expect(page.locator("li[data-estado='pronto']")).toHaveCount(6);
+  await expect(page.locator("li[data-estado='disponible']")).toHaveText(/Escanea QR de marcas/);
 });
 
 test("saltar desde la pantalla 1 lleva directo a Inicio", async ({ page }) => {
@@ -49,14 +56,14 @@ test("saltar desde la pantalla 1 lleva directo a Inicio", async ({ page }) => {
   await expect(page).toHaveURL(/\/inicio/);
 });
 
-test("Inicio arranca con el contador de Beats en cero", async ({ page }) => {
+test("Inicio arranca con el bono de bienvenida en el contador", async ({ page }) => {
   // Criterio 12.
   const datos = await reciénRegistrada(page);
   await page.getByRole("button", { name: "Saltar" }).click();
   await page.waitForURL("**/inicio");
 
-  const contador = page.locator("section[aria-label='Tu balance de Beats']");
-  await expect(contador).toContainText("0");
+  const contador = page.locator("section[aria-label='Tu balance de Beats'] p.font-display");
+  await expect(contador).toHaveText("5");
   await expect(page.getByText(datos.nombre)).toBeVisible();
 });
 
@@ -66,9 +73,10 @@ test("la barra inferior trae los 5 tabs", async ({ page }) => {
   await page.waitForURL("**/inicio");
 
   await expect(page.locator("nav li")).toHaveCount(5);
-  // Inicio y Escanear navegan; los otros tres todavia no existen.
-  await expect(page.locator("nav a")).toHaveCount(2);
-  await expect(page.locator("nav button[disabled]")).toHaveCount(3);
+  // Inicio, Escanear y Beats navegan (Beats se encendio en la Fase 2 de su
+  // historia); Pulso y Perfil todavia no existen.
+  await expect(page.locator("nav a")).toHaveText([/Inicio/, /Escanear/, /Beats/]);
+  await expect(page.locator("nav button[disabled]")).toHaveText([/Pulso/, /Perfil/]);
 });
 
 test("el onboarding presenta los avisos y para que sirven", async ({ page }) => {

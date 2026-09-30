@@ -35,7 +35,8 @@ test.describe("RLS", () => {
     ana = await crearUsuario(pool, "ana@ejemplo.com");
     beto = await crearUsuario(pool, "beto@ejemplo.com");
     // Beto ya tiene Beats e historial: hay algo concreto que Ana podria espiar.
-    await pool.query(`update public.usuarios set beats_balance = 500 where id = $1`, [beto]);
+    // El saldo ya no se edita a mano (candado del libro): se le da con un regalo.
+    await pool.query(`select public.registrar_movimiento_latidos($1, 'regalo', 500)`, [beto]);
     await pool.query(
       `insert into public.escaneos (usuario_id, qr_marca_id, beats_otorgados, confirmado_en, dia_local)
        values ($1, 'b2000000-0000-4000-8000-000000000001', 500, now(), current_date)`,
@@ -110,7 +111,7 @@ test.describe("RLS", () => {
 
       const { rows } = await pool.query(
         `select beats_balance from public.usuarios where id = $1`, [ana]);
-      expect(rows[0].beats_balance).toBe(0);
+      expect(rows[0].beats_balance).toBe(5); // solo el bono de bienvenida
     });
 
     test("tampoco colando el balance junto a un campo legitimo", async () => {
@@ -121,7 +122,7 @@ test.describe("RLS", () => {
       expect(error).toBeTruthy();
       const { rows } = await pool.query(
         `select beats_balance from public.usuarios where id = $1`, [ana]);
-      expect(rows[0].beats_balance).toBe(0);
+      expect(rows[0].beats_balance).toBe(5); // solo el bono de bienvenida
     });
 
     test("los campos que si le tocan si se pueden actualizar", async () => {
@@ -140,6 +141,63 @@ test.describe("RLS", () => {
       await comoAna(`delete from public.usuarios where id = $1`, [ana]);
       const { rows } = await pool.query(`select count(*)::int as total from public.usuarios`);
       expect(rows[0].total).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  test.describe("tabla movimientos_beats (libro de Beats)", () => {
+    // T048. Beto tiene su bienvenida y un regalo de 500 (beforeAll).
+    const saldoYLibroDe = async (id: string) =>
+      (
+        await pool.query(
+          `select u.beats_balance as saldo,
+                  (select json_agg(beats order by beats) from public.movimientos_beats m where m.usuario_id = u.id) as libro
+             from public.usuarios u where u.id = $1`,
+          [id],
+        )
+      ).rows[0];
+
+    test("Ana no lee los movimientos de Beto", async () => {
+      const propios = await comoAna(`select usuario_id from public.movimientos_beats`);
+      expect(propios.map((f) => f.usuario_id)).toEqual([ana]);
+      const ajenos = await comoAna(`select id from public.movimientos_beats where usuario_id = $1`, [beto]);
+      expect(ajenos).toHaveLength(0);
+    });
+
+    test("Ana no puede insertarse un movimiento", async () => {
+      const error = await comoAnaDebeFallar(
+        `insert into public.movimientos_beats (usuario_id, tipo, beats, dia_local)
+         values ($1, 'regalo', 1000, current_date)`,
+        [ana],
+      );
+      expect(error).toMatch(/row-level security|violates|permission/i);
+      expect(await saldoYLibroDe(ana)).toEqual({ saldo: 5, libro: [5] });
+    });
+
+    test("Ana no puede reescribir ni borrar sus movimientos", async () => {
+      // Sin policies de update ni delete, las filas ni siquiera son alcanzables.
+      await comoAna(`update public.movimientos_beats set beats = 9999 where usuario_id = $1`, [ana]);
+      await comoAna(`delete from public.movimientos_beats where usuario_id = $1`, [ana]);
+      await comoAna(`delete from public.movimientos_beats where usuario_id = $1`, [beto]);
+      expect(await saldoYLibroDe(ana)).toEqual({ saldo: 5, libro: [5] });
+      expect(await saldoYLibroDe(beto)).toEqual({ saldo: 505, libro: [5, 500] });
+    });
+
+    test("Ana no puede cambiar su saldo ni poniendo la marca del libro", async () => {
+      const error = await comoAnaDebeFallar(
+        `select set_config('latidos.desde_libro', 'si', false);
+         update public.usuarios set beats_balance = 777 where id = '${ana}'`,
+      );
+      expect(error).toMatch(/solo cambia con un movimiento del libro/);
+      expect(await saldoYLibroDe(ana)).toEqual({ saldo: 5, libro: [5] });
+    });
+
+    test("Ana no puede ejecutar registrar_movimiento_latidos", async () => {
+      const error = await comoAnaDebeFallar(
+        `select * from public.registrar_movimiento_latidos($1, 'regalo', 100)`,
+        [ana],
+      );
+      expect(error).toMatch(/permission denied/i);
+      expect(await saldoYLibroDe(ana)).toEqual({ saldo: 5, libro: [5] });
     });
   });
 
@@ -318,6 +376,34 @@ test.describe("RLS", () => {
         rows.map((r) => r.nombre),
         "un trigger security definer no ve el rol real de quien escribe",
       ).toEqual([]);
+    });
+
+    test("por RPC el cliente solo alcanza el canje, el calculo del dia y la lectura de Beats", async () => {
+      // PostgREST expone como RPC toda funcion de `public` que el rol pueda
+      // ejecutar. Esta lista es esa superficie completa para la app: ninguna
+      // de estas funciones pone la marca del libro ni toca el saldo salvo
+      // el canje, que lo hace por el libro. `set_config` y `interno.*` no
+      // estan en `public`, asi que PostgREST no los expone.
+      // Una funcion nueva ejecutable por el cliente tiene que agregarse aqui a
+      // conciencia, no colarse por los permisos por defecto de Supabase.
+      const { rows } = await pool.query<{ rol: string; nombre: string }>(
+        `select r.rol, p.proname as nombre
+           from pg_proc p
+           join pg_namespace n on n.oid = p.pronamespace
+           cross join (values ('anon'), ('authenticated')) as r(rol)
+          where n.nspname = 'public'
+            and p.prorettype <> 'trigger'::regtype
+            and has_function_privilege(r.rol, p.oid, 'execute')
+          order by 1, 2`);
+      // resumen_beats e historial_beats (Fase 2 de Beats) son de solo lectura
+      // y corren con los permisos de quien llama: la RLS decide que se ve.
+      expect(rows.map((r) => `${r.rol}: ${r.nombre}`)).toEqual([
+        "anon: dia_local_latidos",
+        "authenticated: confirmar_canje_qr",
+        "authenticated: dia_local_latidos",
+        "authenticated: historial_beats",
+        "authenticated: resumen_beats",
+      ]);
     });
 
     test("las funciones security definer no quedan ejecutables por todo el mundo", async () => {

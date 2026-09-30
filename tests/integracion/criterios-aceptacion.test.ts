@@ -25,8 +25,12 @@ const UA_ANDROID =
   "Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) " +
   "Chrome/120.0.0.0 Mobile Safari/537.36";
 
+/** El numero del contador (ver tests/integracion/escaneo-exitoso.test.ts). */
 const contadorDeBeats = (page: Page) =>
-  page.locator("section[aria-label='Tu balance de Beats']");
+  page.locator("section[aria-label='Tu balance de Beats'] p.font-display");
+
+/** Saldo con el que nace toda cuenta: el bono de bienvenida (spec de registro §9.16). */
+const BIENVENIDA = 5;
 
 test.beforeEach(reiniciarMock);
 
@@ -219,9 +223,16 @@ test("11 — el permiso de avisos se plantea durante el onboarding", async ({ pa
   await expect(page.getByText("Avisos del programa")).toBeVisible();
 });
 
-test("12 — Inicio muestra el contador de Beats en cero", async ({ page }) => {
+test("12 — Inicio muestra el contador con el bono de bienvenida, sin estado en cero", async ({
+  page,
+}) => {
+  // Ajuste del 2026-09-29 a la spec de registro: el perfil nace con el bono, y
+  // la ilustracion y el texto del caso cero ya no existen.
   await cuentaEnInicio(page);
-  await expect(contadorDeBeats(page)).toContainText("0");
+  await expect(contadorDeBeats(page)).toHaveText(String(BIENVENIDA));
+  await expect(page.getByText("Sigue participando para sumar mas.")).toBeVisible();
+  await expect(page.getByText("Escanea un QR de marca para empezar a sumar.")).toHaveCount(0);
+  await expect(page.locator("img[src*='vacio-sin-beats']")).toHaveCount(0);
 });
 
 test("13 — PARCIAL: el escaner pide permiso de camara antes de activarse", async ({
@@ -245,7 +256,14 @@ test("13 — PARCIAL: el escaner pide permiso de camara antes de activarse", asy
 
   await page.goto("/escanear");
   await page.locator("video").waitFor({ state: "visible", timeout: 15_000 });
-  expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).__pidioCamara)).toBe(true);
+  // El <video> se pinta antes de pedir la camara: la llamada llega despues de
+  // cargar qr-scanner y comprobar que hay camara. Mirar una sola vez al ver el
+  // video era una carrera que fallaba con la maquina cargada (suite completa).
+  await expect
+    .poll(() => page.evaluate(() => (window as unknown as Record<string, unknown>).__pidioCamara), {
+      timeout: 15_000,
+    })
+    .toBe(true);
 });
 
 test("14 — el QR se reconoce sin boton de captura", async ({ page, context }) => {
@@ -270,7 +288,7 @@ test("15 — un QR valido muestra la confirmacion sin otorgar Beats todavia", as
   const despues = await estadoDelQR(QR.sinLimite);
   expect(despues.escaneos).toBe(antes.escaneos);
   await page.goto("/inicio");
-  await expect(contadorDeBeats(page)).toContainText("0");
+  await expect(contadorDeBeats(page)).toHaveText(String(BIENVENIDA));
 });
 
 test("16 — confirmar otorga los Beats y muestra el contador subiendo", async ({ page }) => {
@@ -279,9 +297,12 @@ test("16 — confirmar otorga los Beats y muestra el contador subiendo", async (
   await page.getByRole("button", { name: "Confirmar canje" }).click();
 
   await expect(page.getByText(/Sumaste 10 Beats de KFC/)).toBeVisible();
-  // El contador anima de 0 a 10 y termina en el valor final.
+  // El contador anima del saldo anterior (el bono de bienvenida, 5) al nuevo
+  // (5 + 10) y termina en el valor final.
   const marcador = page.locator("[aria-label*='Beats']").first();
-  await expect.poll(() => marcador.textContent(), { timeout: 5_000 }).toMatch(/10/);
+  await expect
+    .poll(() => marcador.textContent(), { timeout: 5_000 })
+    .toBe(String(BIENVENIDA + 10));
 });
 
 test("17 — cancelar no otorga Beats ni gasta cupo diario ni total", async ({ page }) => {

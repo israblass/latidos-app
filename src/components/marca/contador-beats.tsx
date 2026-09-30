@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { BarraAcento } from "@/components/marca/titulo-con-acento";
 
 /**
@@ -18,9 +20,15 @@ export function ContadorBeats({
   valor,
   /** Un ciclo rapido al acabar de sumar, en vez del latido de reposo. */
   recienSumado = false,
+  /**
+   * Lo que se pinta en lugar del numero fijo: la pantalla de Beats pasa aqui
+   * el contador animado cuando el saldo cambia con la pantalla abierta.
+   */
+  numero,
 }: {
   valor: number;
   recienSumado?: boolean;
+  numero?: ReactNode;
 }) {
   return (
     <div className="relative flex flex-col items-center">
@@ -29,15 +37,25 @@ export function ContadorBeats({
         justo lo que la preferencia pide. El gradiente sigue ahi, solo deja de
         respirar.
       */}
+      {/*
+        El centrado y el latido van en dos capas. La animacion anima `transform`
+        (escala), y en la misma capa pisaba el translate que centra el halo: se
+        quedaba corrido media anchura a la derecha y, en un telefono, asomaba
+        fuera de la pantalla y la hacia desplazable de lado.
+      */}
       <div
         aria-hidden="true"
-        className={`halo-beats pointer-events-none absolute left-1/2 top-1/2 h-[220px] w-[220px] -translate-x-1/2 -translate-y-1/2 motion-reduce:animate-none ${
-          recienSumado ? "animate-latido-rapido" : "animate-latido"
-        }`}
-      />
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[220px] w-[220px] -translate-x-1/2 -translate-y-1/2"
+      >
+        <div
+          className={`halo-beats h-full w-full motion-reduce:animate-none ${
+            recienSumado ? "animate-latido-rapido" : "animate-latido"
+          }`}
+        />
+      </div>
 
       <p className="font-display relative text-[76px] leading-none text-texto-principal">
-        {valor}
+        {numero ?? valor}
       </p>
 
       <BarraAcento className="relative mt-3" />

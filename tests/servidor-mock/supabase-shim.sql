@@ -33,3 +33,26 @@ alter default privileges in schema public
 
 -- auth.users la crea el shim antes de este punto, asi que va explicita.
 grant select on auth.users to anon, authenticated, service_role;
+
+-- Supabase deja usar el esquema auth a los roles de la API. Las politicas RLS
+-- no lo notan (guardan la funcion ya resuelta), pero una funcion SQL que llama
+-- a auth.uid() la resuelve al ejecutarse, y sin este permiso fallaria aqui
+-- aunque en Supabase funcione.
+grant usage on schema auth to anon, authenticated, service_role;
+
+-- Supabase tambien concede EXECUTE sobre las funciones nuevas de public a anon,
+-- authenticated y service_role, de forma explicita y no via PUBLIC. Sin esto,
+-- un `revoke ... from public` pareceria suficiente en las pruebas y en
+-- produccion dejaria la funcion abierta a anon.
+alter default privileges in schema public
+  grant execute on functions to anon, authenticated, service_role;
+
+-- La publicacion de tiempo real existe en todo proyecto de Supabase. La
+-- migracion del libro de movimientos se da de alta en ella.
+do $$
+begin
+  if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    create publication supabase_realtime;
+  end if;
+end;
+$$;

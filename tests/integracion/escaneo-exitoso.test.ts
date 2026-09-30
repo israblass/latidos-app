@@ -15,8 +15,15 @@ import { MARCA, QR } from "../ayudantes/qr";
  */
 test.beforeEach(reiniciarMock);
 
+/**
+ * El numero del contador, no la seccion entera: con el bono de bienvenida el
+ * saldo inicial es 5, y "15" o "55" tambien contienen un 5.
+ */
 const contador = (page: import("@playwright/test").Page) =>
-  page.locator("section[aria-label='Tu balance de Beats']");
+  page.locator("section[aria-label='Tu balance de Beats'] p.font-display");
+
+/** Saldo con el que nace toda cuenta: el bono de bienvenida. */
+const BIENVENIDA = 5;
 
 test("un QR valido muestra la confirmacion sin otorgar nada todavia", async ({ page }) => {
   // Criterio 15.
@@ -36,7 +43,7 @@ test("un QR valido muestra la confirmacion sin otorgar nada todavia", async ({ p
   expect(despues.escaneos).toBe(antes.escaneos);
   expect(despues.qr.escaneos_totales_contador).toBe(antes.qr.escaneos_totales_contador);
   await page.goto("/inicio");
-  await expect(contador(page)).toContainText("0");
+  await expect(contador(page)).toHaveText(String(BIENVENIDA));
 });
 
 test("confirmar otorga los Beats, crea el Escaneo y sube el contador del QR", async ({
@@ -83,7 +90,7 @@ test("al volver a Inicio el balance ya refleja los Beats nuevos", async ({ page 
 
   await page.getByRole("button", { name: "Volver a Inicio" }).click();
   await page.waitForURL("**/inicio");
-  await expect(contador(page)).toContainText("10");
+  await expect(contador(page)).toHaveText(String(BIENVENIDA + 10));
 });
 
 test("cancelar no escribe nada ni gasta cupo del QR", async ({ page }) => {
@@ -100,7 +107,7 @@ test("cancelar no escribe nada ni gasta cupo del QR", async ({ page }) => {
   expect(despues.qr.escaneos_totales_contador).toBe(antes.qr.escaneos_totales_contador);
 
   await page.goto("/inicio");
-  await expect(contador(page)).toContainText("0");
+  await expect(contador(page)).toHaveText(String(BIENVENIDA));
 });
 
 test("con modo evento activo, el cierre invita a seguir escaneando", async ({ page }) => {
@@ -148,10 +155,9 @@ test("el historico conserva los Beats del momento del canje", async ({ page, bro
   await otra.getByRole("button", { name: "Confirmar canje" }).click();
   await expect(otra.getByText(/Sumaste 50 Beats/)).toBeVisible();
 
-  // Quien canjeo antes sigue con sus 10.
+  // Quien canjeo antes sigue con sus 10 (mas la bienvenida), no con 50.
   await page.goto("/inicio");
-  await expect(contador(page)).toContainText("10");
-  await expect(contador(page)).not.toContainText("50");
+  await expect(contador(page)).toHaveText(String(BIENVENIDA + 10));
 
   await otroContexto.close();
 });

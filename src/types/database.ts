@@ -4,6 +4,12 @@
  * con `supabase gen types typescript`.
  */
 
+import type {
+  MovimientoBeats,
+  PaginaHistorial,
+  ResumenBeats,
+  TipoMovimiento,
+} from "@/types/beats";
 import type { ConfiguracionApp } from "@/types/configuracion";
 import type { Escaneo, EstadoQR, Marca, QRMarca } from "@/types/qr";
 import type { TipoUsuario, Usuario } from "@/types/usuario";
@@ -56,9 +62,25 @@ export type Database = {
         Update: Partial<Omit<Escaneo, "id" | "created_at">>;
         Relationships: [];
       };
+      movimientos_beats: {
+        Row: MovimientoBeats;
+        // El cliente no escribe en el libro: no hay policies de insert, update
+        // ni delete. Los tipos lo reflejan para que ni siquiera compile.
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: { [_ in never]: never };
     Functions: {
+      resumen_beats: {
+        Args: Record<string, never>;
+        Returns: ResumenBeats[];
+      };
+      historial_beats: {
+        Args: { p_antes_de?: string | null; p_cantidad_dias?: number };
+        Returns: PaginaHistorial;
+      };
       confirmar_canje_qr: {
         Args: {
           p_qr_marca_id: string;
@@ -71,6 +93,7 @@ export type Database = {
     Enums: {
       tipo_usuario: TipoUsuario;
       estado_qr: EstadoQR;
+      tipo_movimiento_beats: TipoMovimiento;
     };
     CompositeTypes: { [_ in never]: never };
   };

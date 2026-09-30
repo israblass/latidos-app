@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Anton, DM_Sans } from "next/font/google";
 import "./globals.css";
 
+import { LimpiarCacheSesion } from "@/components/pwa/limpiar-cache-sesion";
 import { RegistrarServiceWorker } from "@/components/pwa/registrar-service-worker";
 import { FondoApp } from "@/components/marca/fondo-app";
 
@@ -64,6 +65,7 @@ export default function RootLayout({
         <FondoApp />
         {children}
         <RegistrarServiceWorker />
+        <LimpiarCacheSesion />
       </body>
     </html>
   );
