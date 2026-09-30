@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { LimpiarCacheSesion } from "@/components/pwa/limpiar-cache-sesion";
 import { RegistrarServiceWorker } from "@/components/pwa/registrar-service-worker";
+import { RecargarAlVolver } from "@/components/sesion/recargar-al-volver";
 import { FondoApp } from "@/components/marca/fondo-app";
 
 const anton = Anton({
@@ -49,7 +50,9 @@ export const viewport: Viewport = {
   themeColor: "#FFFFFF",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // Sin maximumScale: bloquear el zoom impide ampliar el texto a quien lo
+  // necesita (WCAG 1.4.4). Los campos usan 16 px, asi que iOS no hace zoom
+  // solo al escribir, que era lo que ese bloqueo evitaba.
   viewportFit: "cover",
 };
 
@@ -66,6 +69,7 @@ export default function RootLayout({
         {children}
         <RegistrarServiceWorker />
         <LimpiarCacheSesion />
+        <RecargarAlVolver />
       </body>
     </html>
   );

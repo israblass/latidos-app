@@ -60,6 +60,11 @@ function clavesGuardadas(): string[] {
   }
 }
 
+/** Si queda alguna copia de Beats en este navegador, de cualquier usuario. */
+export function hayCachesGuardadas(): boolean {
+  return clavesGuardadas().length > 0;
+}
+
 /** Borra las copias de cualquier usuario que no sea el de la sesion actual. */
 export function borrarCachesAjenas(usuarioId: string) {
   try {

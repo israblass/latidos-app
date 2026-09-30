@@ -24,6 +24,7 @@
     "zod": "^4.6.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.56.1",
     "@types/node": "^20",
     "@types/pg": "^8.11.10",
