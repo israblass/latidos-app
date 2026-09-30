@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
  * Barra de navegacion inferior: 5 tabs, con "Escanear" destacado al centro
  * (constitution §8).
  *
- * Inicio, Escanear y Beats ya existen. Pulso y Perfil se pintan apagados y sin
+ * Inicio, Escanear, Beats y Perfil ya existen. Pulso se pinta apagado y sin
  * enlace en vez de omitirse: asi la barra ya tiene su forma definitiva y ningun
  * toque termina en un 404. Cada tab se enciende cuando llegue su fase.
  */
@@ -29,7 +29,7 @@ const TABS: Tab[] = [
   { etiqueta: "Pulso", icono: "pulso" },
   { etiqueta: "Escanear", icono: "escanear", href: "/escanear", destacado: true },
   { etiqueta: "Beats", icono: "beats", href: "/beats" },
-  { etiqueta: "Perfil", icono: "perfil" },
+  { etiqueta: "Perfil", icono: "perfil", href: "/perfil" },
 ];
 
 /**

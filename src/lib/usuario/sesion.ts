@@ -43,3 +43,43 @@ export async function exigirPerfil(): Promise<PerfilSesion> {
   if (!perfil) redirect("/registro/confirma-tu-correo");
   return perfil;
 }
+
+/**
+ * Guardia de las pantallas protegidas nuevas (Perfil): sin sesion vuelve a la
+ * bienvenida, donde estan "Registrarme" y "Ya tengo cuenta". Con sesion pero
+ * sin perfil, o sin el onboarding visto, sigue las mismas reglas que Inicio.
+ *
+ * Inicio y Beats siguen mandando a /registro/confirma-tu-correo sin sesion:
+ * cambiarlas queda fuera de esta tarea.
+ */
+export async function exigirSesionConPerfil(): Promise<{
+  correo: string | null;
+  perfil: PerfilSesion;
+}> {
+  const supabase = crearClienteServidor();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/");
+
+  const { data: perfil } = await supabase
+    .from("usuarios")
+    .select(CAMPOS)
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!perfil) redirect("/registro/confirma-tu-correo");
+  if (!perfil.onboarding_visto) redirect("/onboarding/pantalla-1");
+
+  return { correo: user.email ?? null, perfil };
+}
+
+/** Hay una sesion valida en este dispositivo (sin mirar el perfil). */
+export async function haySesion(): Promise<boolean> {
+  const supabase = crearClienteServidor();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return Boolean(user);
+}
