@@ -50,7 +50,9 @@ export const viewport: Viewport = {
   themeColor: "#FFFFFF",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // Sin maximumScale: bloquear el zoom impide ampliar el texto a quien lo
+  // necesita (WCAG 1.4.4). Los campos usan 16 px, asi que iOS no hace zoom
+  // solo al escribir, que era lo que ese bloqueo evitaba.
   viewportFit: "cover",
 };
 
