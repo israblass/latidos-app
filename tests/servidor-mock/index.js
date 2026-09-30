@@ -144,7 +144,21 @@ const servidor = http.createServer((req, res) => {
   req.on("data", (c) => (cuerpo += c));
   req.on("end", () => {
     const url = new URL(req.url, "http://local");
-    const json = (c, d) => { res.writeHead(c, { "content-type": "application/json" }); res.end(JSON.stringify(d)); };
+    // CORS como el de Supabase: la pantalla de Beats lee desde el navegador,
+    // no desde el servidor de Next, y el navegador exige estas cabeceras.
+    const cors = {
+      "access-control-allow-origin": req.headers.origin || "*",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers":
+        req.headers["access-control-request-headers"] || "authorization, apikey, content-type, x-client-info, prefer, accept-profile, content-profile",
+      "access-control-allow-methods": "GET, POST, PATCH, DELETE, OPTIONS",
+      "access-control-expose-headers": "content-range",
+    };
+    if (req.method === "OPTIONS") {
+      res.writeHead(204, cors);
+      return res.end();
+    }
+    const json = (c, d) => { res.writeHead(c, { "content-type": "application/json", ...cors }); res.end(JSON.stringify(d)); };
     const unico = () => (req.headers.accept || "").includes("pgrst.object");
     const sujeto = () => {
       const a = req.headers.authorization || "";

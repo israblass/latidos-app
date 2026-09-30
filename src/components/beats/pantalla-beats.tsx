@@ -17,9 +17,15 @@ import { useHistorialBeats } from "@/hooks/use-historial-beats";
  */
 
 /**
- * Marca el final de la lista: cuando entra en pantalla (o se acerca), pide el
- * siguiente lote de dias. Mas comodo que un boton "Ver mas" en un telefono, y
- * la spec pide que ocurra "sin que tenga que hacer nada" (spec §1).
+ * Marca el final de la lista: cuando entra en pantalla, pide el siguiente lote
+ * de dias. Mas comodo que un boton "Ver mas" en un telefono, y la spec pide que
+ * ocurra "sin que tenga que hacer nada" (spec §1).
+ *
+ * Sin margen de anticipacion a proposito: con los dias cerrados la lista es
+ * corta, y un margen hacia que el segundo lote se pidiera al abrir, sin que la
+ * persona bajara (la spec dice "al bajar", §11 criterio 22). Si la lista no
+ * alcanza a llenar la pantalla, el final ya se ve y el lote se pide solo: asi
+ * nunca queda historial al que no se pueda llegar.
  */
 function FinDeLista({ alVerse, activo }: { alVerse: () => void; activo: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -31,7 +37,7 @@ function FinDeLista({ alVerse, activo }: { alVerse: () => void; activo: boolean 
       (entradas) => {
         if (entradas.some((e) => e.isIntersecting)) alVerse();
       },
-      { rootMargin: "240px 0px" },
+      { rootMargin: "0px" },
     );
     observador.observe(nodo);
     return () => observador.disconnect();

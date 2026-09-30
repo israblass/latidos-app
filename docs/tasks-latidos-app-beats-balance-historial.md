@@ -127,34 +127,34 @@ Depende de: Fase 1
   - `historial_beats(antes_de, cantidad_dias)`: devuelve dias completos con total_neto, conteo solo de escaneos y movimientos (nombre y logo actuales de la marca via marca_id), mas hay_mas y siguiente_cursor, todo del mas reciente al mas antiguo (plan §3).
 
   Agregar ambas funciones a `tests/servidor-mock/supabase-shim.sql`.
-- [ ] T017 [US-2] [P] Crear `src/lib/beats/consultas.ts` con `leerResumen`, `leerHistorial(antesDe?, cantidadDias = 7)` y `leerMarca(id)`, usando el cliente de navegador de `src/lib/supabase/client.ts` y los tipos de `src/types/beats.ts`.
-- [ ] T018 [US-2] [P] Crear `src/lib/beats/formato.ts`, que reutiliza la zona de `src/lib/fecha/limite-diario.ts` y contiene:
+- [X] T017 [US-2] [P] Crear `src/lib/beats/consultas.ts` con `leerResumen`, `leerHistorial(antesDe?, cantidadDias = 7)` y `leerMarca(id)`, usando el cliente de navegador de `src/lib/supabase/client.ts` y los tipos de `src/types/beats.ts`.
+- [X] T018 [US-2] [P] Crear `src/lib/beats/formato.ts`, que reutiliza la zona de `src/lib/fecha/limite-diario.ts` y contiene:
   - etiqueta de dia: "HOY", "AYER" o dia de la semana y fecha sin año en mayusculas ("MIERCOLES 30 SEPT"), calculada en hora de Caracas sin importar la zona del telefono;
   - hora en formato de 12 h con am/pm;
   - Beats con signo;
   - conteo "N escaneo(s)";
   - nombre visible por tipo de movimiento ("Bienvenida a Latidos", "Ajuste Latidos", "Regalo Latidos" o el nombre de la marca).
-- [ ] T019 [US-1] [P] Crear `src/hooks/use-guardia-beats.ts`, que:
+- [X] T019 [US-1] [P] Crear `src/hooks/use-guardia-beats.ts`, que:
   - sin sesion redirige a `/registro/confirma-tu-correo`;
   - con `onboarding_visto` falso redirige a `/onboarding/pantalla-1`;
   - valida con `leerResumen` cuando hay red;
   - deja un punto de extension para usar la cache sin red, que se completa en la Fase 5.
-- [ ] T020 [US-1] Crear la ruta `src/app/beats/page.tsx` como pantalla de cliente y el componente `src/components/beats/pantalla-beats.tsx`, con:
+- [X] T020 [US-1] Crear la ruta `src/app/beats/page.tsx` como pantalla de cliente y el componente `src/components/beats/pantalla-beats.tsx`, con:
   - titulo "BEATS" en tipografia display;
   - `ContadorBeats` de `src/components/marca/contador-beats.tsx` dentro de una card `vidrio-medio`, sin animacion de entrada;
   - la linea "Pronto podras cambiarlos por entradas al concierto, merch y cursos.";
   - un contenedor para el historial;
   - la `TabBar`.
-- [ ] T021 [US-2] [P] Crear `src/components/beats/dia-historial.tsx`: linea de dia como boton de acordeon con `aria-expanded`, etiqueta, total neto y conteo (sin conteo si no hay escaneos), estado abierto y cerrado independiente por dia, y touch target de 48 px o mas.
-- [ ] T022 [US-2] [P] Crear `src/components/beats/fila-movimiento.tsx`: fila no interactiva con el logo de la marca, un circulo con la inicial si no tiene logo, o el icono de Latidos (`public/icon-192.png`) en los tipos de Latidos; nombre visible, Beats con signo en color de texto normal y hora.
-- [ ] T023 [US-2] Crear `src/hooks/use-historial-beats.ts` e integrarlo en `src/components/beats/pantalla-beats.tsx`:
+- [X] T021 [US-2] [P] Crear `src/components/beats/dia-historial.tsx`: linea de dia como boton de acordeon con `aria-expanded`, etiqueta, total neto y conteo (sin conteo si no hay escaneos), estado abierto y cerrado independiente por dia, y touch target de 48 px o mas.
+- [X] T022 [US-2] [P] Crear `src/components/beats/fila-movimiento.tsx`: fila no interactiva con el logo de la marca, un circulo con la inicial si no tiene logo, o el icono de Latidos (`public/icon-192.png`) en los tipos de Latidos; nombre visible, Beats con signo en color de texto normal y hora.
+- [X] T023 [US-2] Crear `src/hooks/use-historial-beats.ts` e integrarlo en `src/components/beats/pantalla-beats.tsx`:
   - carga inicial de resumen e historial de 7 dias;
   - dia mas reciente abierto;
   - al acercarse al final de la lista, carga el siguiente lote con `siguiente_cursor` hasta que `hay_mas` sea falso;
   - estados de carga y error expuestos para las Fases 4 y 5.
-- [ ] T024 [US-1] [P] Encender el tab Beats en `src/components/navegacion/tab-bar.tsx` con `href: "/beats"`.
-- [ ] T025 [US-1] [P] Convertir la card del contador en `src/app/inicio/page.tsx` en un enlace a `/beats`, accesible ("Ver mis Beats"), sin cambiar su aspecto.
-- [ ] T026 Escribir `tests/integracion/beats-historial.test.ts`, que cubre:
+- [X] T024 [US-1] [P] Encender el tab Beats en `src/components/navegacion/tab-bar.tsx` con `href: "/beats"`.
+- [X] T025 [US-1] [P] Convertir la card del contador en `src/app/inicio/page.tsx` en un enlace a `/beats`, accesible ("Ver mis Beats"), sin cambiar su aspecto.
+- [X] T026 Escribir `tests/integracion/beats-historial.test.ts`, que cubre:
   - acceso desde el tab y desde la card, y la pantalla de exito del escaneo sin enlace;
   - redirecciones del guardia;
   - contador sin animacion de entrada;
