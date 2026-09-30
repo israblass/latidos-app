@@ -4,7 +4,12 @@
  * con `supabase gen types typescript`.
  */
 
-import type { MovimientoBeats, TipoMovimiento } from "@/types/beats";
+import type {
+  MovimientoBeats,
+  PaginaHistorial,
+  ResumenBeats,
+  TipoMovimiento,
+} from "@/types/beats";
 import type { ConfiguracionApp } from "@/types/configuracion";
 import type { Escaneo, EstadoQR, Marca, QRMarca } from "@/types/qr";
 import type { TipoUsuario, Usuario } from "@/types/usuario";
@@ -68,6 +73,14 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      resumen_beats: {
+        Args: Record<string, never>;
+        Returns: ResumenBeats[];
+      };
+      historial_beats: {
+        Args: { p_antes_de?: string | null; p_cantidad_dias?: number };
+        Returns: PaginaHistorial;
+      };
       confirmar_canje_qr: {
         Args: {
           p_qr_marca_id: string;

@@ -64,6 +64,14 @@ export type DiaHistorial = {
   movimientos: Movimiento[];
 };
 
+/** Un lote del historial, tal como lo devuelve historial_beats(). */
+export type PaginaHistorial = {
+  dias: DiaHistorial[];
+  hay_mas: boolean;
+  /** Dia a pasar como `p_antes_de` para el siguiente lote, o nulo si no hay mas. */
+  siguiente_cursor: string | null;
+};
+
 /** Lo minimo para decidir que mostrar al abrir la pantalla de Beats. */
 export type ResumenBeats = {
   saldo: number;
