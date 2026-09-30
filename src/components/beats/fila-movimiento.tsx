@@ -57,9 +57,11 @@ function IconoFila({ movimiento }: { movimiento: Movimiento }) {
   }
 
   return (
+    // La letra en navy y no en azul: el azul de texto sobre el circulo azul
+    // claro se quedaba en 4.48:1, justo bajo el AA.
     <span
       aria-hidden="true"
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secundario/10 text-[15px] font-bold text-secundario-texto"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secundario/10 text-[15px] font-bold text-texto-principal"
     >
       {nombre.trim().charAt(0).toUpperCase() || "?"}
     </span>

@@ -2,7 +2,15 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { auditar, informe } from "../ayudantes/accesibilidad";
 import { completarRegistro, confirmarCorreo, cuentaEnInicio } from "../ayudantes/cuenta";
-import { ponerModoEvento, reiniciarMock } from "../ayudantes/mock";
+import { MARCA_KFC, MARCA_PEPSI, abrirBeats, cuentaConId, lineaDelDia } from "../ayudantes/beats";
+import {
+  cambiarMarca,
+  ponerModoEvento,
+  reiniciarMock,
+  sembrarMovimiento,
+  simularFalla,
+} from "../ayudantes/mock";
+import { cortarRed, volverRed } from "../ayudantes/red";
 import { QR } from "../ayudantes/qr";
 
 /**
@@ -155,4 +163,93 @@ test("modal de instalacion en iOS", async ({ browser }) => {
   await pagina.waitForTimeout(1000);
   await revisar(pagina, "modal de instalacion iOS");
   await contexto.close();
+});
+
+test.describe("pantalla de Beats (T049)", () => {
+  test("con historial, dias abiertos y cerrados", async ({ page }) => {
+    const { id } = await cuentaConId(page);
+    await cambiarMarca(MARCA_PEPSI, { logo_url: "/icon-32.png" });
+    await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 10, marcaId: MARCA_KFC });
+    await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 5, diasAtras: 1, marcaId: MARCA_PEPSI });
+    await sembrarMovimiento({ usuarioId: id, tipo: "ajuste", beats: -2, diasAtras: 1, horaCaracas: 20 });
+    await sembrarMovimiento({ usuarioId: id, tipo: "regalo", beats: 3, diasAtras: 4 });
+    await abrirBeats(page);
+    await lineaDelDia(page, "AYER").click();
+    await revisar(page, "beats con historial");
+  });
+
+  test("estado inicial, con los Pronto atenuados", async ({ page }) => {
+    await cuentaEnInicio(page);
+    await abrirBeats(page);
+    await expect(page.getByText("Escanea tu primer QR para sumar.")).toBeVisible();
+    await revisar(page, "beats estado inicial");
+  });
+
+  test("hoja ¿Cómo gano Beats?", async ({ page }) => {
+    await cuentaEnInicio(page);
+    await abrirBeats(page);
+    await page.getByRole("button", { name: "¿Cómo gano Beats?" }).click();
+    const hoja = page.getByRole("dialog", { name: "¿Cómo gano Beats?" });
+    await expect(hoja).toHaveAttribute("aria-modal", "true");
+    await page.waitForTimeout(400); // que termine de entrar
+    await revisar(page, "hoja como gano beats");
+  });
+
+  test("el acordeon se maneja con teclado y anuncia su estado", async ({ page }) => {
+    const { id } = await cuentaConId(page);
+    await sembrarMovimiento({ usuarioId: id, tipo: "regalo", beats: 3, diasAtras: 1 });
+    await abrirBeats(page);
+
+    const ayer = lineaDelDia(page, "AYER");
+    await expect(ayer).toHaveAttribute("aria-controls", /^dia-/);
+    // Se llega con Tab, como a cualquier boton.
+    let llegó = false;
+    for (let i = 0; i < 12 && !llegó; i++) {
+      await page.keyboard.press("Tab");
+      llegó = await ayer.evaluate((el) => el === document.activeElement);
+    }
+    expect(llegó, "Tab nunca llego a la linea de AYER").toBe(true);
+
+    await page.keyboard.press("Enter");
+    await expect(ayer).toHaveAttribute("aria-expanded", "true");
+    await page.keyboard.press("Space");
+    await expect(ayer).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test("la region viva existe desde el principio, vacia", async ({ page }) => {
+    await cuentaEnInicio(page);
+    await abrirBeats(page);
+    const region = page.locator("[data-anuncio-beats]");
+    await expect(region).toHaveAttribute("aria-live", "polite");
+    await expect(region).toHaveText("");
+  });
+
+  test("avisos sin conexion y de error", async ({ page, context }) => {
+    await cuentaEnInicio(page);
+    await abrirBeats(page);
+    await page.evaluate(() => navigator.serviceWorker.ready);
+    await page.reload();
+    await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+    await page.reload();
+    await expect
+      .poll(() => page.evaluate(() => caches.open("latidos-shell-v4").then((c) => c.match("/beats")).then(Boolean)))
+      .toBe(true);
+
+    await cortarRed(context);
+    await page.reload();
+    await expect(page.locator("[data-aviso-beats='sin-conexion']")).toBeVisible();
+    await revisar(page, "beats sin conexion con copia");
+
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await expect(page.getByRole("region", { name: "Sin conexión" })).toBeVisible();
+    await revisar(page, "beats sin conexion sin copia");
+    await volverRed(context);
+
+    await simularFalla("historial_beats", true);
+    await page.reload();
+    await expect(page.getByText("No pudimos actualizar.")).toBeVisible();
+    await revisar(page, "beats con la carga fallida");
+    await simularFalla("historial_beats", false);
+  });
 });
