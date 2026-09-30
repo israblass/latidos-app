@@ -122,7 +122,7 @@ Verificacion:
 Objetivo: la persona entra a sus Beats y ve saldo, recordatorio e historial por dias.
 Depende de: Fase 1
 
-- [ ] T016 [US-2] Crear `supabase/migrations/20260929130000_lectura_beats.sql` con dos funciones que respetan RLS:
+- [X] T016 [US-2] Crear `supabase/migrations/20260929130000_lectura_beats.sql` con dos funciones que respetan RLS:
   - `resumen_beats()`: devuelve saldo, tiene_escaneos y onboarding_visto;
   - `historial_beats(antes_de, cantidad_dias)`: devuelve dias completos con total_neto, conteo solo de escaneos y movimientos (nombre y logo actuales de la marca via marca_id), mas hay_mas y siguiente_cursor, todo del mas reciente al mas antiguo (plan §3).
 

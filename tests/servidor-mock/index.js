@@ -34,6 +34,8 @@ const SEMILLA = {
 };
 
 let marcas, qrs, escaneos, movimientos, configuracion, usuariosAuth, perfiles, tokens, ultimoEnlace;
+// Fallas simuladas por nombre de RPC (Fase 5: "No pudimos actualizar").
+let fallas;
 
 /** Devuelve el mock al estado semilla. Las pruebas lo llaman antes de cada caso. */
 function reiniciar() {
@@ -46,6 +48,7 @@ function reiniciar() {
   perfiles = new Map();     // id -> fila de la tabla usuarios
   tokens = new Map();       // token_hash -> correo
   ultimoEnlace = null;
+  fallas = new Set();
 }
 reiniciar();
 
@@ -57,9 +60,61 @@ reiniciar();
 function registrarMovimiento(usuarioId, tipo, beats, extra = {}) {
   const perfil = perfiles.get(usuarioId);
   if (perfil.beats_balance + beats < 0) throw new Error("saldo negativo");
-  movimientos.push({ id: crypto.randomUUID(), usuario_id: usuarioId, tipo, beats,
-                     ocurrido_en: new Date().toISOString(), ...extra });
+  const ocurrido_en = extra.ocurrido_en || new Date().toISOString();
+  const fila = {
+    id: crypto.randomUUID(), usuario_id: usuarioId, tipo, beats,
+    marca_id: null, escaneo_id: null,
+    ocurrido_en, dia_local: diaEnCaracas(new Date(ocurrido_en)),
+    created_at: new Date().toISOString(),
+    ...extra,
+  };
+  movimientos.push(fila);
   perfil.beats_balance += beats;
+  return fila;
+}
+
+/** YYYY-MM-DD en hora de Caracas, como dia_local_latidos() en la base. */
+function diaEnCaracas(instante) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Caracas", year: "numeric", month: "2-digit", day: "2-digit",
+  }).format(instante);
+}
+
+/**
+ * Espejo de historial_beats(): dias completos, del mas reciente al mas
+ * antiguo, con la marca en su valor actual. La version que importa vive en
+ * supabase/migrations/20260929130000_lectura_beats.sql.
+ */
+function historialDe(usuarioId, antesDe, cantidadDias) {
+  const cantidad = Math.min(Math.max(Number(cantidadDias) || 7, 1), 31);
+  const propios = movimientos.filter((m) => m.usuario_id === usuarioId);
+  const dias = [...new Set(propios.map((m) => m.dia_local))]
+    .filter((d) => !antesDe || d < antesDe)
+    .sort()
+    .reverse();
+  const hayMas = dias.length > cantidad;
+  const pagina = dias.slice(0, cantidad);
+  return {
+    dias: pagina.map((dia) => {
+      const delDia = propios
+        .filter((m) => m.dia_local === dia)
+        .sort((a, b) => (a.ocurrido_en < b.ocurrido_en ? 1 : a.ocurrido_en > b.ocurrido_en ? -1 : 0));
+      return {
+        dia_local: dia,
+        total_neto: delDia.reduce((t, m) => t + m.beats, 0),
+        escaneos: delDia.filter((m) => m.tipo === "escaneo").length,
+        movimientos: delDia.map((m) => {
+          const marca = m.marca_id ? marcas.find((x) => x.id === m.marca_id) : null;
+          return {
+            id: m.id, tipo: m.tipo, beats: m.beats, ocurrido_en: m.ocurrido_en,
+            marca: marca ? { nombre: marca.nombre, logo_url: marca.logo_url } : null,
+          };
+        }),
+      };
+    }),
+    hay_mas: hayMas,
+    siguiente_cursor: hayMas ? pagina[pagina.length - 1] : null,
+  };
 }
 
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
@@ -136,6 +191,41 @@ const servidor = http.createServer((req, res) => {
     if (url.pathname === "/prueba/movimientos" && req.method === "GET") {
       const id = url.searchParams.get("id");
       return json(200, movimientos.filter((m) => m.usuario_id === id));
+    }
+    // Siembra un movimiento con fecha arbitraria: dias viejos para el historial,
+    // regalos o ajustes como los registraria el equipo tecnico.
+    if (url.pathname === "/prueba/movimiento" && req.method === "POST") {
+      const { usuario_id, tipo, beats, ocurrido_en, marca_id } = JSON.parse(cuerpo);
+      if (!perfiles.has(usuario_id)) return json(404, { message: "sin perfil" });
+      try {
+        const fila = registrarMovimiento(usuario_id, tipo, beats, {
+          ...(ocurrido_en ? { ocurrido_en } : {}),
+          ...(marca_id ? { marca_id } : {}),
+        });
+        return json(201, fila);
+      } catch (e) {
+        return json(400, { message: e.message });
+      }
+    }
+    // Cambia el nombre o el logo de una marca, como lo haria el admin.
+    if (url.pathname === "/prueba/marca" && req.method === "POST") {
+      const { id, ...cambios } = JSON.parse(cuerpo);
+      const marca = marcas.find((m) => m.id === id);
+      Object.assign(marca, cambios);
+      return json(200, marca);
+    }
+    if (url.pathname === "/prueba/qr-estado" && req.method === "POST") {
+      const { id, estado } = JSON.parse(cuerpo);
+      const qr = qrs.find((q) => q.id === id);
+      qr.estado = estado;
+      return json(200, qr);
+    }
+    // Hace fallar una RPC con 500 hasta que se apague.
+    if (url.pathname === "/prueba/falla" && req.method === "POST") {
+      const { rpc, activa } = JSON.parse(cuerpo);
+      if (activa) fallas.add(rpc);
+      else fallas.delete(rpc);
+      return json(200, { fallas: [...fallas] });
     }
     if (url.pathname === "/prueba/balance" && req.method === "GET") {
       const p = perfiles.get(url.searchParams.get("id"));
@@ -242,6 +332,43 @@ const servidor = http.createServer((req, res) => {
       }
       const fila = perfiles.get(id) || null;
       return json(200, unico() ? fila : fila ? [fila] : []);
+    }
+
+    const rpc = url.pathname.startsWith("/rest/v1/rpc/") ? url.pathname.slice(13) : null;
+    if (rpc && fallas.has(rpc)) {
+      return json(500, { code: "XX000", message: "falla simulada" });
+    }
+
+    // Espejo de resumen_beats(): sin sesion o sin perfil, ninguna fila.
+    if (rpc === "resumen_beats" && req.method === "POST") {
+      const id = sujeto();
+      if (!id) return json(401, { message: "no auth" });
+      const perfil = perfiles.get(id);
+      if (!perfil) return json(200, []);
+      return json(200, [{
+        saldo: perfil.beats_balance,
+        tiene_escaneos: movimientos.some((m) => m.usuario_id === id && m.tipo === "escaneo"),
+        onboarding_visto: perfil.onboarding_visto,
+      }]);
+    }
+
+    if (rpc === "historial_beats" && req.method === "POST") {
+      const id = sujeto();
+      if (!id) return json(401, { message: "no auth" });
+      const { p_antes_de, p_cantidad_dias } = JSON.parse(cuerpo || "{}");
+      return json(200, historialDe(id, p_antes_de, p_cantidad_dias));
+    }
+
+    // Marcas: cualquiera con sesion las lee (marcas_select_autenticado).
+    if (url.pathname === "/rest/v1/marcas" && req.method === "GET") {
+      if (!sujeto()) return json(401, { message: "no auth" });
+      const filtroId = (url.searchParams.get("id") || "").replace("eq.", "");
+      const halladas = marcas.filter((m) => !filtroId || m.id === filtroId)
+        .map(({ id, nombre, logo_url }) => ({ id, nombre, logo_url }));
+      if (unico()) {
+        return halladas[0] ? json(200, halladas[0]) : json(406, { code: "PGRST116", message: "0 rows" });
+      }
+      return json(200, halladas);
     }
 
     // Espejo en JavaScript de la funcion confirmar_canje_qr de Postgres.

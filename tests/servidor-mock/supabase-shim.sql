@@ -34,6 +34,12 @@ alter default privileges in schema public
 -- auth.users la crea el shim antes de este punto, asi que va explicita.
 grant select on auth.users to anon, authenticated, service_role;
 
+-- Supabase deja usar el esquema auth a los roles de la API. Las politicas RLS
+-- no lo notan (guardan la funcion ya resuelta), pero una funcion SQL que llama
+-- a auth.uid() la resuelve al ejecutarse, y sin este permiso fallaria aqui
+-- aunque en Supabase funcione.
+grant usage on schema auth to anon, authenticated, service_role;
+
 -- Supabase tambien concede EXECUTE sobre las funciones nuevas de public a anon,
 -- authenticated y service_role, de forma explicita y no via PUBLIC. Sin esto,
 -- un `revoke ... from public` pareceria suficiente en las pruebas y en

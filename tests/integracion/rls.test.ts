@@ -321,7 +321,7 @@ test.describe("RLS", () => {
       ).toEqual([]);
     });
 
-    test("por RPC el cliente solo alcanza el canje y el calculo del dia", async () => {
+    test("por RPC el cliente solo alcanza el canje, el calculo del dia y la lectura de Beats", async () => {
       // PostgREST expone como RPC toda funcion de `public` que el rol pueda
       // ejecutar. Esta lista es esa superficie completa para la app: ninguna
       // de estas funciones pone la marca del libro ni toca el saldo salvo
@@ -338,10 +338,14 @@ test.describe("RLS", () => {
             and p.prorettype <> 'trigger'::regtype
             and has_function_privilege(r.rol, p.oid, 'execute')
           order by 1, 2`);
+      // resumen_beats e historial_beats (Fase 2 de Beats) son de solo lectura
+      // y corren con los permisos de quien llama: la RLS decide que se ve.
       expect(rows.map((r) => `${r.rol}: ${r.nombre}`)).toEqual([
         "anon: dia_local_latidos",
         "authenticated: confirmar_canje_qr",
         "authenticated: dia_local_latidos",
+        "authenticated: historial_beats",
+        "authenticated: resumen_beats",
       ]);
     });
 
