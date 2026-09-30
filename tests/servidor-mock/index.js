@@ -274,7 +274,7 @@ const servidor = http.createServer((req, res) => {
     // ---------- Auth ----------
 
     if (url.pathname === "/auth/v1/signup" && req.method === "POST") {
-      const { email, data } = JSON.parse(cuerpo || "{}");
+      const { email, password, data } = JSON.parse(cuerpo || "{}");
       if (process.env.FALLA_CORREO === "1") {
         return json(500, { code: "unexpected_failure", message: "Error sending confirmation email" });
       }
@@ -284,12 +284,48 @@ const servidor = http.createServer((req, res) => {
         return json(200, usuarioDe({ id: crypto.randomUUID(), correo: email, metadata: {}, identities: [], confirmado: false }));
       }
       const id = crypto.randomUUID();
-      const reg = { id, correo: email, metadata: data || {}, identities: [{ id, provider: "email" }], confirmado: false };
+      // La contraseña se guarda para poder entrar despues (/entrar). En el mock
+      // va en claro: es un servidor de pruebas y nunca ve una cuenta real.
+      const reg = { id, correo: email, contrasena: password, metadata: data || {}, identities: [{ id, provider: "email" }], confirmado: false };
       usuariosAuth.set(email, reg);
       const th = "hash-" + crypto.randomUUID();
       tokens.set(th, email);
       ultimoEnlace = `/auth/confirmar?token_hash=${th}&type=signup`;
       return json(200, usuarioDe(reg));
+    }
+
+    // Entrar con correo y contraseña (signInWithPassword). Los errores van con
+    // la forma de Supabase desde la version 2024-01-01 de su API: cabecera de
+    // version y `code`, que es lo que auth-js lee para llenar error.code.
+    if (url.pathname === "/auth/v1/token" && req.method === "POST" &&
+        url.searchParams.get("grant_type") === "password") {
+      const errorAuth = (estado, code, message) => {
+        res.writeHead(estado, {
+          "content-type": "application/json",
+          "x-supabase-api-version": "2024-01-01",
+          ...cors,
+          // Supabase la expone por CORS; sin esto auth-js no ve la version y
+          // no llena error.code.
+          "access-control-expose-headers": "content-range, x-supabase-api-version",
+        });
+        res.end(JSON.stringify({ code, message }));
+      };
+      if (fallas.has("auth:token")) return json(500, { message: "falla simulada" });
+      const { email, password } = JSON.parse(cuerpo || "{}");
+      const reg = usuariosAuth.get(String(email || "").trim().toLowerCase());
+      // Mismo error para correo inexistente y contraseña equivocada, como
+      // Supabase: no se delata si el correo tiene cuenta.
+      if (!reg || reg.contrasena !== password) {
+        return errorAuth(400, "invalid_credentials", "Invalid login credentials");
+      }
+      if (!reg.confirmado) return errorAuth(400, "email_not_confirmed", "Email not confirmed");
+      return json(200, sesion(reg.id, reg.correo, usuarioDe(reg)));
+    }
+
+    // Cerrar sesion. El mock no revoca tokens: con eso basta para el cliente.
+    if (url.pathname === "/auth/v1/logout" && req.method === "POST") {
+      res.writeHead(204, cors);
+      return res.end();
     }
 
     if (url.pathname === "/auth/v1/settings" && req.method === "GET") {
