@@ -14,8 +14,13 @@ Rama de trabajo: `claude/beats-fases-2-6` (parte del ultimo commit de
 - **Fase 2** (pantalla de Beats con historial): HECHA. T016 a T026.
   Suite completa al cerrar la fase: 159 pruebas pasan, 3 omitidas (las de
   rendimiento, que solo corren con `PROBAR_RENDIMIENTO=1`).
-- **Fase 3** (como ganar y estado inicial): en curso.
-- **Fases 4 a 6**: pendientes.
+- **Fase 3** (como ganar y estado inicial): HECHA. T027 a T033.
+  Suite completa al cerrar la fase: todas las pruebas de las Fases 1 a 3
+  pasan (170 en esa corrida, 3 omitidas de rendimiento). Esa corrida incluyo
+  por error el archivo de pruebas de la Fase 4, todavia sin construir; sus 7
+  fallos son de ese archivo y no cuentan para la Fase 3.
+- **Fase 4** (actualizacion en vivo): en curso.
+- **Fases 5 y 6**: pendientes.
 
 ## 2. Pasos en produccion
 
