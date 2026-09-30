@@ -46,6 +46,10 @@ export default function Home() {
           Registrarme
         </Link>
 
+        <Link href="/entrar" className="boton-ghost">
+          Ya tengo cuenta
+        </Link>
+
         <PromptsInstalacion />
       </div>
 
