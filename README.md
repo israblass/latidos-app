@@ -385,6 +385,11 @@ bono de bienvenida, ajustes y regalos (y a futuro donaciones o canjes).
   `scripts/sql/reporte-saldos-previo.sql` es la foto de los saldos antes de
   migrar.
 
+**Pantalla de Beats (Fases 2 a 6).** `/beats` muestra el saldo, el historial
+por dias, como ganar Beats, se actualiza en vivo y funciona sin conexion. Los
+pasos para produccion, el recorrido en telefono y las decisiones tomadas estan
+en `docs/PASOS-MANUALES-BEATS.md`.
+
 **Orden de las migraciones.** Se aplican siempre en el orden de sus nombres. Si
 alguna vez se vuelve a pegar una migracion vieja (`20260910120000_usuarios.sql`
 o `20260911180000_canje.sql`), hay que volver a pegar despues las del
