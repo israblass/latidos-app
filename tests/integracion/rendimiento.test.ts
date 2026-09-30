@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+import { MARCA_KFC } from "../ayudantes/beats";
 import { cuentaEnInicio } from "../ayudantes/cuenta";
-import { reiniciarMock } from "../ayudantes/mock";
+import { reiniciarMock, sembrarMovimiento, ultimoUsuario } from "../ayudantes/mock";
 
 /**
  * T067 — carga de la pantalla de escaneo y apertura de camara.
@@ -132,6 +133,41 @@ test.describe("rendimiento en 4G", () => {
 
     console.log(`[rendimiento] Inicio listo (cache fria, 4G) en ${transcurrido} ms`);
     await contexto.close();
+    expect(transcurrido).toBeLessThan(OBJETIVO_MS);
+  });
+
+  test("Beats con 60 dias de historial entra en el objetivo", async ({ browser }) => {
+    // T050. Una cuenta con seis meses de participacion (spec §1: "en marzo,
+    // despues de seis meses participando"): 60 dias con movimientos. La
+    // pantalla solo trae los primeros 7, asi que el tamaño del historial no
+    // deberia pesar en la primera carga.
+    const contexto = await sesionConCacheFria(browser);
+    const { id } = await ultimoUsuario();
+    for (let dia = 1; dia < 60; dia++) {
+      await sembrarMovimiento({ usuarioId: id as string, tipo: "escaneo", beats: 10, diasAtras: dia, marcaId: MARCA_KFC });
+    }
+
+    const pagina = await contexto.newPage();
+    await frenarA4G(contexto, pagina);
+
+    const arranque = Date.now();
+    await pagina.goto("/beats", { waitUntil: "commit" });
+    // Lista la pantalla: el saldo y el primer dia del historial pintados.
+    await pagina
+      .locator("section[aria-label='Tu balance de Beats'] p.font-display")
+      .waitFor({ timeout: 20_000 });
+    await pagina
+      .locator("section[aria-label='Historial de Beats'] button[aria-expanded]")
+      .first()
+      .waitFor({ timeout: 20_000 });
+    const transcurrido = Date.now() - arranque;
+
+    const dias = await pagina
+      .locator("section[aria-label='Historial de Beats'] button[aria-expanded]")
+      .count();
+    console.log(`[rendimiento] Beats con 60 dias listo (cache fria, 4G) en ${transcurrido} ms, ${dias} dias pintados`);
+    await contexto.close();
+    expect(dias).toBe(7);
     expect(transcurrido).toBeLessThan(OBJETIVO_MS);
   });
 
