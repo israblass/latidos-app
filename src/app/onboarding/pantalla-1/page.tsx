@@ -33,7 +33,7 @@ const FASES = [
     nombre: "Empuje",
     lettering: ASSETS.letteringEmpuje,
     fechas: "18 diciembre",
-    detalle: "Gaitazo y misa de accion de gracias, con marcas invitadas.",
+    detalle: "Gaitazo y Misa de Acción de Gracias, con marcas invitadas.",
     acento: "border-l-alerta",
   },
   {
