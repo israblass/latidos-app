@@ -39,7 +39,7 @@ test.describe("como se llega", () => {
   test("el tab Beats abre la pantalla y queda activo", async ({ page }) => {
     // V011 y criterio 1.
     await cuentaEnInicio(page);
-    const tab = page.getByRole("navigation", { name: "Navegacion principal" }).getByRole("link", {
+    const tab = page.getByRole("navigation", { name: "Principal" }).getByRole("link", {
       name: "Beats",
     });
     await tab.click();

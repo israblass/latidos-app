@@ -185,7 +185,7 @@ test.describe("perfil", () => {
 
   test("el tab Perfil lleva al correo de la persona y al boton de cerrar sesion", async ({ page }) => {
     const datos = await cuentaEnInicio(page);
-    const tab = page.getByRole("navigation", { name: "Navegacion principal" }).getByRole("link", { name: "Perfil" });
+    const tab = page.getByRole("navigation", { name: "Principal" }).getByRole("link", { name: "Perfil" });
     await tab.click();
     await page.waitForURL("**/perfil");
     await expect(tab).toHaveAttribute("aria-current", "page");
@@ -245,7 +245,7 @@ test.describe("cerrar sesion", () => {
     await expect.poll(() => clavesDeBeats(page)).toHaveLength(2);
     const antes = await clavesDeBeats(page);
 
-    const barra = page.getByRole("navigation", { name: "Navegacion principal" });
+    const barra = page.getByRole("navigation", { name: "Principal" });
     await barra.getByRole("link", { name: "Perfil" }).click();
     await page.waitForURL("**/perfil");
     await expect(page.getByText(datos.correo)).toBeVisible();
