@@ -30,7 +30,7 @@ export default async function Inicio() {
 
   return (
     <>
-      <main className="relative isolate flex min-h-dvh flex-col px-5 pb-28 pt-6">
+      <main className="relative isolate flex min-h-dvh flex-col px-5 espacio-barra pt-6">
         {/* El cielo solo en la cabecera: se funde con el crema hacia abajo. */}
         <FondoApp variante="cabecera" />
         <header className="flex items-center justify-between gap-3">

@@ -20,7 +20,7 @@ export default async function Perfil() {
 
   return (
     <>
-      <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
+      <main className="flex min-h-dvh flex-col px-5 espacio-barra pt-6">
         <header className="flex min-h-touch items-center">
           <h1 className="titulo-pantalla">Perfil</h1>
         </header>

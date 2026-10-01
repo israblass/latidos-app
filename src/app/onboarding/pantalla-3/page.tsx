@@ -25,7 +25,7 @@ export default function PantallaCierre() {
         ilustracion={ILUSTRACIONES.figuraAmarillaCorazon}
         descripcion="Una figura amarilla que sostiene un pequeño corazón"
       />
-      <div className="vidrio-medio mt-3 px-5 py-7 text-center">
+      <div className="vidrio mt-3 px-5 py-7 text-center">
         <TituloConAcento etiqueta="Todo listo" detalle="Tu cuenta esta activa y tu contador arranca en cero.">
           Empieza a
           <br />

@@ -117,7 +117,7 @@ export function HojaInferior({
         aria-labelledby={idTitulo}
         tabIndex={-1}
         style={{ transform: desplazamiento ? `translateY(${desplazamiento}px)` : undefined }}
-        className="relative flex max-h-[85dvh] w-full max-w-md flex-col rounded-t-sheet bg-superficie shadow-barra outline-none motion-safe:animate-entrar-tarjeta"
+        className="relative flex max-h-[85dvh] w-full max-w-md flex-col vidrio-hoja outline-none motion-safe:animate-entrar-tarjeta"
       >
         {/* Zona de arrastre: el asa y la cabecera. El contenido de abajo
             conserva su propio desplazamiento. */}
@@ -146,7 +146,11 @@ export function HojaInferior({
           </div>
         </div>
 
-        <div className="overflow-y-auto px-5 pb-[calc(24px+env(safe-area-inset-bottom))]">
+        {/* Enfocable para que el teclado tambien pueda desplazar el contenido. */}
+        <div
+          tabIndex={0}
+          className="overflow-y-auto px-5 pb-[calc(24px+env(safe-area-inset-bottom))] outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secundario"
+        >
           {children}
         </div>
       </div>

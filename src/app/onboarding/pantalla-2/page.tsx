@@ -33,7 +33,7 @@ export default function PantallaComoGanarBeats() {
         descripcion="Una caja azul abierta de la que sale un corazón amarillo"
       />
 
-      <div className="vidrio-medio mt-3 px-5 py-7 text-center">
+      <div className="vidrio mt-3 px-5 py-7 text-center">
         <TituloConAcento
           etiqueta="Tu moneda en Latidos"
           detalle="Los ganas participando y los cambias por recompensas."

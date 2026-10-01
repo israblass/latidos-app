@@ -51,7 +51,9 @@ export function CarruselOnboarding({ pantalla, textoAvance, children }: Props) {
     // contenido y el pie baja con el, asi que en una pantalla corta el boton de
     // avanzar termina debajo del pliegue. Con alto fijo, el pie se queda donde
     // esta y lo que scrollea es el contenido.
-    <div className="flex h-dvh flex-col px-5 pb-8 pt-4">
+    // <main>: es el contenido principal de la pantalla (landmark para lector
+    // de pantalla).
+    <main className="flex h-dvh flex-col px-5 pb-8 pt-4">
       <header className="flex justify-end">
         <button
           type="button"
@@ -70,7 +72,11 @@ export function CarruselOnboarding({ pantalla, textoAvance, children }: Props) {
         el pie y el boton de avanzar se sale de la vista en vez de que el
         contenido scrollee.
       */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      {/* Enfocable para que el teclado tambien pueda desplazarlo. */}
+      <div
+        tabIndex={0}
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secundario"
+      >
         {children}
       </div>
 
@@ -103,6 +109,6 @@ export function CarruselOnboarding({ pantalla, textoAvance, children }: Props) {
           {cerrando ? "Un momento..." : textoAvance}
         </button>
       </footer>
-    </div>
+    </main>
   );
 }

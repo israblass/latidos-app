@@ -133,7 +133,7 @@ export function PantallaBeats() {
   if (!tieneDatos && fallo && !enLinea) {
     return (
       <>
-        <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
+        <main className="flex min-h-dvh flex-col px-5 espacio-barra pt-6">
           <h1 className="titulo-pantalla">Beats</h1>
           <SinConexionBeats />
         </main>
@@ -144,7 +144,7 @@ export function PantallaBeats() {
 
   return (
     <>
-      <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
+      <main className="flex min-h-dvh flex-col px-5 espacio-barra pt-6">
         {tieneDatos && !enLinea ? (
           <AvisoEstado tipo="sin-conexion" actualizadoEn={historial.actualizadoEn} />
         ) : tieneDatos && fallo ? (

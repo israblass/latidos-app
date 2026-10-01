@@ -30,11 +30,10 @@ export function PromptIOS({ onCerrar }: Props) {
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       {/* Tocar fuera cierra. Es decorativo: los lectores de pantalla llegan al
           boton de cerrar, que hace lo mismo. */}
-      {/* El desenfoque va en el velo, no en la hoja: una hoja translucida con
-          texto oscuro encima pierde contraste segun lo que pase por detras, y
-          asi el efecto se ve igual sin arriesgar la legibilidad. */}
+      {/* Velo sin desenfoque: la hoja ya es una capa de vidrio, y como mucho
+          van dos a la vez (constitution §2). */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-[14px] backdrop-saturate-150"
+        className="absolute inset-0 bg-texto-principal/40"
         onClick={onCerrar}
         aria-hidden="true"
       />
@@ -45,7 +44,7 @@ export function PromptIOS({ onCerrar }: Props) {
         aria-modal="true"
         aria-labelledby="titulo-instalacion-ios"
         tabIndex={-1}
-        className="relative w-full max-w-md rounded-t-sheet bg-superficie px-5 pb-8 pt-5 shadow-elevado outline-none"
+        className="vidrio-hoja relative w-full max-w-md px-5 pb-8 pt-5 outline-none"
       >
         <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-black/15" />
 
