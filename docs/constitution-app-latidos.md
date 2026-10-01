@@ -2,11 +2,12 @@
 tipo: constitution
 producto: Latidos App
 slug: latidos-app
-version: 2.3.0
+version: 2.4.0
 fecha-creacion: 2026-08-20
 ultima-modificacion: 2026-10-01
 <!-- v2.0.0 | 2026-08-26 | Cambio de stack a PWA (Next.js + Capacitor) para lanzar en Android e iOS el 15 sept sin esperar aprobacion de tiendas. Fase 1 reordenada segun acuerdo con Kevin: prioriza registro + QR + Beats sobre Pulso completo. Beats por QR de marca ahora configurables en cualquier momento por el admin. -->
 <!-- v2.1.0 | 2026-09-10 | Cambio de design system: base clara/blanca en vez de fondo oscuro solido. El cliente pidio explicitamente alejarse del fondo oscuro por no ir con la tematica festiva del evento. Referencia de atmosfera: apps tipo Cashea/Yummy. La paleta de marca (amarillo/azul) y la tipografia no cambian, solo la base y los tonos de superficie. Pantallas ya construidas (bienvenida, registro, onboarding, Inicio) requieren pasada de restyle. -->
+<!-- v2.4.0 | 2026-10-01 | Menu inferior como pildora flotante de vidrio (estilo Facebook iOS / BanescoMovil): separada de los bordes, pestaña activa en su propia pildora amarilla que se desliza, etiquetas visibles en todas las pestañas e iconos SVG de trazo uniforme. El espacio inferior de las pantallas sale de un solo token. -->
 <!-- v2.3.0 | 2026-10-01 | Base crema #FFFFF5 (unica definicion: --color-fondo en globals.css) con tarjetas, hojas y modales en blanco puro #FFFFFF. Regla del amarillo y regla del azul. Liquid glass renovado en CSS puro y definido en un solo lugar (.vidrio, .vidrio-barra, .vidrio-hoja), maximo dos capas a la vez. El cielo solo en bienvenida, onboarding y header de Inicio. Texto secundario #565E6D. Icono nuevo de la app. -->
 <!-- v2.2.0 | 2026-09-29 | Se documenta lo ya construido y pedido por el cliente: vidrio esmerilado (liquid glass) claro sobre un lienzo de cielo con velo blanco, y contador de Beats en navy con barra y halo amarillo (sin card oscura). Se agrega el bono de bienvenida (5 Beats configurables, una vez por cuenta, al confirmar el correo) y las reglas de consistencia saldo/historial, historial en vivo y marcas en el historial. Salen de la historia de Beats: balance e historial. -->
 ---
@@ -99,7 +100,7 @@ El `#FDFB05` queda en 1.1:1 contra el crema y el blanco: es invisible como trazo
 - **Botones secundarios**: borde 1px `#0090FF`, texto navy `#1A2332`, fondo blanco.
 - **Botones ghost**: sin borde, texto navy `#1A2332` subrayado en `#0090FF`, fondo transparente. Para acciones secundarias.
 - **Cards**: border-radius 16px, padding 16px, superficie blanca `#FFFFFF` sobre el crema (clase `.superficie` / `.tarjeta`). El vidrio queda para la barra, las hojas y una pieza destacada sobre el cielo (ver "Liquid glass").
-- **Bottom navigation**: 5 tabs maximo, iconos + label, barra de vidrio (`.vidrio-barra`) por la que el contenido pasa por debajo; las pantallas reservan su alto mas la zona segura (`.espacio-barra`). Tab activo con icono azul y etiqueta navy. El tab central Escanear es un circulo amarillo solido con icono navy. Un tab cuya fase no ha llegado se muestra apagado y sin enlace, nunca se omite.
+- **Bottom navigation (menu inferior)**: pildora flotante de vidrio (`.vidrio-barra`, ver "Menu inferior flotante" abajo). 5 pestañas maximo, todas con icono y etiqueta. Una pestaña cuya fase no ha llegado se muestra apagada y sin enlace, nunca se omite.
 - **Bottom sheets**: border-radius 24px top, vidrio casi opaco (`.vidrio-hoja`, blanco al 94%), handle bar centrado, sobre un velo navy al 40% sin desenfoque.
 - **Inputs**: border-radius 12px, borde 1px `rgba(0,0,0,0.12)`, fondo `#F5F7FA`, altura 48px, texto `#1A2332`, placeholder `#9CA3AF`.
 - **Barras de progreso**: fondo `#F5F7FA` o `rgba(0,0,0,0.08)`, fill `#0090FF`, border-radius full (pill), altura 8px.
@@ -113,10 +114,22 @@ Pedido explicito del cliente. Vidrio CLARO, en CSS puro: sin WebGL, sin html-to-
 - **Clases**: `.vidrio` (pieza suelta sobre el cielo: contador de Inicio, card de la bienvenida, titulo del onboarding), `.vidrio-barra` (barra de tabs), `.vidrio-hoja` (hojas inferiores).
 - **Receta**: fondo `rgba(255,255,255,.55)`; `backdrop-filter: blur(20px) saturate(180%)` (y `-webkit-`); borde `1px solid rgba(255,255,255,.65)`; sombras `inset 0 1px 0 rgba(255,255,255,.8)`, `inset 0 -1px 0 rgba(26,35,50,.04)`, `0 8px 32px rgba(26,35,50,.10)`, `0 1px 3px rgba(26,35,50,.06)`.
 - **Brillo especular**: `::before` con degradado blanco a transparente y mascara, de modo que solo se ve el aro de 1px.
-- **Hojas**: misma receta con el fondo al 94%: llevan texto largo y van sobre un velo oscuro.
+- **Hojas y barra**: misma receta con el fondo mas opaco: las hojas al 94% (texto largo sobre un velo oscuro) y la barra al 85% (etiquetas de 11px que deben pasar AA aunque debajo pase contenido oscuro).
 - **Limite**: como mucho dos capas con desenfoque visibles a la vez. Por eso las tarjetas de contenido son blancas y no vidrio.
 - **Respaldos**: sin soporte de `backdrop-filter`, fondo `rgba(255,255,255,.92)`; con `prefers-reduced-transparency: reduce`, blanco solido sin desenfoque.
 - **Legibilidad**: el texto sobre vidrio cumple AA contra el crema y contra el pixel mas oscuro del cielo del header (lo verifica una prueba).
+
+### Menu inferior flotante (v2.4.0)
+
+Patron de referencia: la barra inferior de Facebook iOS y de BanescoMovil.
+
+- **Contenedor**: pildora fija, separada de los bordes: 12px a los lados y 8px sobre la zona segura del iPhone (`bottom: calc(env(safe-area-inset-bottom) + 8px)`), alto 64px, `border-radius: 9999px`. En pantallas anchas, maximo 480px y centrada. Usa la clase central `.vidrio-barra`, con el fondo al 85% para que las etiquetas pasen AA aunque debajo pase contenido oscuro. El componente no define vidrio propio.
+- **Pestañas**: repartidas en partes iguales; icono de 24px (SVG de trazo 1.75 con `currentColor`) y etiqueta visible debajo, DM Sans 11px, en TODAS las pestañas. Area tactil minima 44x44.
+- **Activa**: pildora de relleno amarillo `#FDFB05` detras del icono y la etiqueta; icono en variante rellena y texto navy `#1A2332` en negrita. Nunca amarillo como texto. **Inactivas**: icono de contorno y etiqueta en `#565E6D`.
+- **Animacion**: la pildora amarilla se desliza (`transform: translateX`, 250ms ease-out) desde la pestaña anterior hasta la nueva. Con `prefers-reduced-motion: reduce`, cambio instantaneo.
+- **Accesibilidad**: `<nav aria-label="Principal">`, `aria-current="page"` en la activa, foco visible con contorno navy de 2px separado 2px, etiquetas reales. Cada pestaña tiene previsto un hueco para insignia (punto o contador), que hoy no se muestra.
+- **Visibilidad**: solo en las pantallas con pestañas (Inicio, Beats, Perfil). No aparece en bienvenida, registro, entrar, onboarding, escaner ni sin conexion; con una hoja o modal abierto queda debajo del velo.
+- **Espacio inferior**: el contenido scrollea por debajo de la barra. Cada pantalla con barra reserva `alto de la barra + zona segura + 16px` con la clase `.espacio-barra`, calculada en un solo lugar a partir de `--alto-barra` (globals.css), de modo que el ultimo elemento se ve completo al llegar al final.
 
 ### Atmosfera
 
