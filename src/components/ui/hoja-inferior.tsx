@@ -107,7 +107,7 @@ export function HojaInferior({
         data-fondo-hoja
         aria-hidden="true"
         onClick={alCerrar}
-        className="absolute inset-0 bg-texto-principal/40 motion-safe:animate-entrar-pantalla"
+        className="absolute inset-0 bg-texto-principal/30 motion-safe:animate-entrar-pantalla"
       />
 
       <div

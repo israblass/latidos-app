@@ -51,7 +51,23 @@ export default defineConfig({
     },
   },
 
-  projects: [{ name: "movil", use: {} }],
+  projects: [
+    { name: "movil", use: {} },
+    /*
+     * Safari: el vidrio tiene que verse en los iPhone. Solo con PROBAR_WEBKIT=1
+     * (hace falta WebKit instalado: `npx playwright install webkit`) y solo
+     * las pruebas del vidrio, que no dependen de la camara falsa de Chromium.
+     */
+    ...(process.env.PROBAR_WEBKIT
+      ? [
+          {
+            name: "webkit",
+            testMatch: /vidrio\.test\.ts/,
+            use: { ...devices["iPhone 13"], launchOptions: { args: [] } },
+          },
+        ]
+      : []),
+  ],
 
   // Contra un despliegue no se levanta nada local.
   webServer: CONTRA_DESPLIEGUE
