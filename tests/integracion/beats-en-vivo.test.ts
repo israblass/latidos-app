@@ -70,7 +70,7 @@ test("un escaneo desde otra sesion anima el contador, agrega la fila y lo anunci
 
   await expect(numeroDeBeats(page)).toHaveText("15");
   await expect(page.locator(`#dia-${hoy()}`)).toContainText("KFC");
-  await expect(lineaDelDia(page, "HOY")).toContainText("+15 · 1 escaneo");
+  await expect(lineaDelDia(page, "HOY")).toContainText("2 movimientos · +15");
   await expect(anuncio(page)).toHaveText("Sumaste 10 Beats");
 
   // Paso por valores intermedios: animo, no salto.
@@ -120,7 +120,7 @@ test("un movimiento de un dia que no estaba crea el dia arriba y abierto", async
   await sembrarMovimiento({ usuarioId: id, tipo: "regalo", beats: 7 });
 
   await expect(lineasDeDias(page)).toHaveCount(2);
-  await expect(lineasDeDias(page).first()).toContainText("HOY");
+  await expect(lineasDeDias(page).first()).toContainText("Hoy");
   await expect(lineasDeDias(page).first()).toHaveAttribute("aria-expanded", "true");
   await expect(page.locator(`#dia-${hoy()}`)).toContainText("Regalo Latidos");
 });

@@ -55,6 +55,9 @@ const config: Config = {
           terciario: "#9CA3AF",
           // Para texto sobre superficies oscuras o sobre el amarillo.
           inverso: "#FFFFFF",
+          // Etiquetas sobre navy (hero de Beats, v2.8.0): blanco al 72%, por
+          // el principio de paleta. Da mas de 8:1 sobre el navy.
+          "sobre-navy": "rgb(255 255 255 / 0.72)",
         },
 
         exito: "#2EA043",

@@ -24,7 +24,7 @@ const imagenesRotas = (page: Page) =>
       .filter((i) => i.getBoundingClientRect().width > 0 && (!i.complete || i.naturalWidth === 0))
       .map((i) => i.getAttribute("src")),
   );
-const CACHE_SW = "latidos-shell-v8";
+const CACHE_SW = "latidos-shell-v9";
 
 /**
  * Deja la pantalla lista para abrirse sin red: el service worker controlando
@@ -70,6 +70,16 @@ test("sin red abre con lo guardado y el aviso con la hora", async ({ page, conte
   await expect(aviso(page)).toHaveText(/^Sin conexión\. Así estaban tus Beats a las \d{1,2}:\d{2} (am|pm)\.$/);
   // Los iconos (barra, filas) salen de lo guardado, no quedan rotos.
   await expect.poll(() => imagenesRotas(page)).toEqual([]);
+  // La linea de latido de "Tu pulso" (v2.8.0) se guarda con la copia de
+  // /beats y se ve sin red.
+  const ecg = page.locator("img[data-ecg-pulso]");
+  await expect.poll(() => ecg.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
+  expect(
+    await page.evaluate(
+      (nombre) => caches.open(nombre).then((c) => c.match("/ilustraciones/ecg-pulso.webp")).then(Boolean),
+      CACHE_SW,
+    ),
+  ).toBe(true);
   await volverRed(context);
 });
 

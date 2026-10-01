@@ -29,7 +29,7 @@ import {
 } from "../ayudantes/mock";
 import { QR } from "../ayudantes/qr";
 import { cortarRed, volverRed } from "../ayudantes/red";
-import { etiquetaDia } from "../../src/lib/beats/formato";
+import { etiquetaDia, tituloDia } from "../../src/lib/beats/formato";
 
 /**
  * T046 — criterios de aceptacion 1 a 33 de la spec de Beats y 12 a 12d de la
@@ -60,7 +60,7 @@ async function prepararCopia(page: Page) {
   await page.reload();
   await expect
     .poll(() =>
-      page.evaluate(() => caches.open("latidos-shell-v8").then((c) => c.match("/beats")).then(Boolean)),
+      page.evaluate(() => caches.open("latidos-shell-v9").then((c) => c.match("/beats")).then(Boolean)),
     )
     .toBe(true);
 }
@@ -105,29 +105,31 @@ test.describe("spec de Beats", () => {
     await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 10, diasAtras: 2, marcaId: MARCA_KFC });
     await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 10, diasAtras: 4, marcaId: MARCA_KFC });
     await abrirBeats(page);
-    await expect(lineasDeDias(page)).toHaveText([/HOY/, new RegExp(etiquetaDia(haceDias(2))), new RegExp(etiquetaDia(haceDias(4)))]);
+    // Desde la v2.8.0 la etiqueta va en tipo oracion: "Hoy", "Ayer", "Martes 29 sept".
+    await expect(lineasDeDias(page)).toHaveText([/^Hoy/, new RegExp(`^${tituloDia(haceDias(2))}`), new RegExp(`^${tituloDia(haceDias(4))}`)]);
     await expect(lineasDeDias(page).nth(0)).toHaveAttribute("aria-expanded", "true");
     await expect(lineasDeDias(page).nth(1)).toHaveAttribute("aria-expanded", "false");
     await expect(lineasDeDias(page).nth(2)).toHaveAttribute("aria-expanded", "false");
   });
 
-  test("6 — la linea cerrada dice dia, total neto y escaneos", async ({ page }) => {
+  test("6 — la linea cerrada dice dia, movimientos y total neto", async ({ page }) => {
     const { id } = await cuentaConId(page);
     await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 10, diasAtras: 1, marcaId: MARCA_KFC, horaCaracas: 10 });
     await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 10, diasAtras: 1, marcaId: MARCA_KFC, horaCaracas: 11 });
     await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 7, diasAtras: 6, marcaId: MARCA_KFC });
     await abrirBeats(page);
-    await expect(lineaDelDia(page, "AYER")).toHaveText(/AYER\s*\+20 · 2 escaneos/);
-    await expect(lineaDelDia(page, etiquetaDia(haceDias(6)))).toContainText("+7 · 1 escaneo");
+    // v2.8.0: "N movimientos · +total" (antes "+total · N escaneos").
+    await expect(lineaDelDia(page, "AYER")).toHaveText(/^Ayer\s*2 movimientos · \+20$/);
+    await expect(lineaDelDia(page, etiquetaDia(haceDias(6)))).toContainText("1 movimiento · +7");
     expect(etiquetaDia(haceDias(6))).not.toMatch(/20\d\d/); // sin año
   });
 
-  test("7 — un dia solo con movimientos de Latidos muestra el total sin conteo", async ({ page }) => {
+  test("7 — un dia solo con movimientos de Latidos cuenta sus movimientos y su total", async ({ page }) => {
     const { id } = await cuentaConId(page);
     await sembrarMovimiento({ usuarioId: id, tipo: "regalo", beats: 4, diasAtras: 1 });
     await abrirBeats(page);
-    await expect(lineaDelDia(page, "HOY")).toHaveText(/HOY\s*\+5$/);
-    await expect(lineaDelDia(page, "AYER")).toHaveText(/AYER\s*\+4$/);
+    await expect(lineaDelDia(page, "HOY")).toHaveText(/^Hoy\s*1 movimiento · \+5$/);
+    await expect(lineaDelDia(page, "AYER")).toHaveText(/^Ayer\s*1 movimiento · \+4$/);
   });
 
   test("8 — abrir otro dia deja los dos abiertos", async ({ page }) => {
@@ -146,8 +148,9 @@ test.describe("spec de Beats", () => {
     await abrirBeats(page);
     await lineaDelDia(page, "AYER").click();
     const filas = page.locator(`#dia-${haceDias(1)} li`);
-    await expect(filas.nth(0)).toHaveText(/Ajuste Latidos\s*-2\s*6:45 pm/);
-    await expect(filas.nth(1)).toHaveText(/K\s*KFC\s*\+10\s*1:05 pm/);
+    // v2.8.0: nombre y hora a la izquierda, Beats con signo a la derecha.
+    await expect(filas.nth(0)).toHaveText(/Ajuste Latidos\s*6:45 pm\s*-2/);
+    await expect(filas.nth(1)).toHaveText(/K\s*KFC\s*1:05 pm\s*\+10/);
     await expect(filas.nth(0).locator("img")).toHaveCount(1);
   });
 
@@ -200,12 +203,16 @@ test.describe("spec de Beats", () => {
     await expect(numeroDeBeats(page)).toHaveText("15");
   });
 
-  test("15 — la bienvenida es 'Bienvenida a Latidos · +5' con el icono de Latidos", async ({ page }) => {
+  test("15 — la bienvenida es 'Bienvenida a Latidos · +5' con el corazon en circulo amarillo", async ({ page }) => {
     await cuentaEnInicio(page);
     await abrirBeats(page);
     const fila = page.locator(`#dia-${hoy()} li`).filter({ hasText: "Bienvenida a Latidos" });
     await expect(fila).toContainText("+5");
-    await expect(fila.locator("img[src*='icon-512']")).toHaveCount(1);
+    // v2.8.0: la bienvenida lleva su propio icono; los demas movimientos de
+    // Latidos siguen con el de la app.
+    const icono = fila.locator("[data-icono-bienvenida]");
+    await expect(icono).toHaveCSS("background-color", "rgb(253, 251, 5)");
+    await expect(icono).toHaveAttribute("aria-hidden", "true");
   });
 
   test("16 — sin escaneos: explicacion desplegada, linea guia y Escanear", async ({ page }) => {

@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { DiaHistorial } from "@/components/beats/dia-historial";
 import { EstadoInicial } from "@/components/beats/estado-inicial";
 import { HojaComoGanar } from "@/components/beats/hoja-como-ganar";
 import { AnuncioVivo } from "@/components/beats/anuncio-vivo";
-import { ContadorBeatsVivo } from "@/components/beats/contador-beats-vivo";
+import { CarruselMarcas, HeroBeats, TuPulso } from "@/components/beats/dashboard-beats";
+import { CirculoFlecha } from "@/components/ui/circulo-flecha";
 import { TabBar } from "@/components/navegacion/tab-bar";
 import { AvisoEstado } from "@/components/beats/aviso-estado";
 import { SinConexionBeats } from "@/components/beats/sin-conexion-beats";
@@ -15,9 +16,13 @@ import { useGuardiaBeats } from "@/hooks/use-guardia-beats";
 import { leerUsuarioDeSesion } from "@/hooks/use-movimientos-en-vivo";
 import { borrarCachesAjenas, borrarTodasLasCaches, leerCache } from "@/lib/beats/cache";
 import { useHistorialBeats } from "@/hooks/use-historial-beats";
+import { marcasDelHistorial, metricasDeLaSemana } from "@/lib/beats/dashboard";
 
 /**
- * Pantalla de Beats (T020): saldo, recordatorio del canje e historial por dias.
+ * Pantalla de Beats (T020), como dashboard desde la v2.8.0 (constitution §2):
+ * cabecera "Tus Beats" con la pildora de ayuda, hero navy con el saldo, "Tu
+ * pulso" de la semana, carrusel de marcas, historial por dias en acordeon,
+ * "Cómo ganar" y el recordatorio del canje.
  *
  * Es una pantalla de cliente a proposito (plan §4, decision 10): el service
  * worker guarda una copia de su HTML, que no lleva datos de nadie, y los datos
@@ -104,6 +109,9 @@ export function PantallaBeats() {
   const fallo = guardia.estado === "sinVerificar" || estado === "error";
   const reintentando = guardia.estado === "verificando" || estado === "cargando";
   const cargando = !tieneDatos && !fallo;
+  // Del historial que ya esta en pantalla: no se pide nada mas a la red.
+  const metricas = useMemo(() => metricasDeLaSemana(dias), [dias]);
+  const marcas = useMemo(() => marcasDelHistorial(dias), [dias]);
 
   // Estable: la hoja la usa como dependencia de su efecto, y una funcion nueva
   // en cada render la haria cerrarse y abrirse de nuevo.
@@ -144,67 +152,76 @@ export function PantallaBeats() {
 
   return (
     <>
-      <main className="flex min-h-dvh flex-col px-5 espacio-barra pt-6">
+      <main className="relative isolate flex min-h-dvh flex-col px-4 espacio-barra pt-[max(22px,env(safe-area-inset-top))]">
+        {/* El mismo degradado de marca del Inicio: una sola definicion. */}
+        <div aria-hidden="true" className="fondo-inicio" />
         {tieneDatos && !enLinea ? (
           <AvisoEstado tipo="sin-conexion" actualizadoEn={historial.actualizadoEn} />
         ) : tieneDatos && fallo ? (
           <AvisoEstado tipo="error" alReintentar={reintentar} reintentando={reintentando} />
         ) : null}
 
-        <header className="flex min-h-touch items-center justify-between gap-3">
-          <h1 className="titulo-pantalla">Beats</h1>
-          {/* Ghost azul a la derecha del titulo (spec §10.1). */}
+        <header className="flex items-start justify-between gap-3">
+          <h1 className="mx-1 pt-2 text-[40px] font-light leading-[1.1] tracking-[-0.01em] text-texto-principal">
+            Tus <b className="block font-bold">Beats</b>
+          </h1>
+          {/* La pildora de ayuda de siempre, ahora navy (v2.8.0). */}
           <button
             type="button"
             onClick={() => setHojaAbierta(true)}
             aria-haspopup="dialog"
-            className="boton-ghost -mr-4"
+            aria-label="¿Cómo gano Beats?"
+            className="flex h-[58px] w-[108px] shrink-0 items-center justify-center rounded-full bg-texto-principal text-texto-inverso outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secundario active:scale-[0.97] motion-reduce:active:scale-100"
           >
-            ¿Cómo gano Beats?
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="M9.6 9.4a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.8M12 17h.01" />
+            </svg>
           </button>
         </header>
 
-        <section aria-label="Tu balance de Beats" className="mt-4">
-          <div className="superficie px-6 py-8 text-center">
-            {resumen ? (
-              // Sin animacion de entrada (spec §10.11): el numero aparece
-              // directo. Solo se anima si cambia con la pantalla abierta.
-              <ContadorBeatsVivo valor={resumen.saldo} />
-            ) : (
-              <div className="flex min-h-[132px] items-center justify-center text-texto-secundario">
-                {fallo ? null : <span className="girador" aria-hidden="true" />}
+        <HeroBeats saldo={resumen?.saldo ?? null} beatsSemana={metricas.beats} cargando={!fallo} />
+
+        <div className="mt-4 flex flex-col gap-4">
+          <TuPulso metricas={metricas} />
+
+          <CarruselMarcas marcas={marcas} />
+
+          <section aria-label="Historial de Beats" aria-busy={cargando}>
+            <h2 className="mx-1 font-display text-[22px] uppercase tracking-[0.02em] text-texto-principal">
+              Historial
+            </h2>
+            {cargando ? (
+              <p className="mt-3 flex items-center justify-center gap-2 py-6 text-texto-secundario">
+                <span className="girador" aria-hidden="true" />
+                Cargando tu historial
+              </p>
+            ) : !tieneDatos ? (
+              // Con red, sin nada guardado y con la carga fallida: el mismo
+              // mensaje del aviso, en lugar del historial (spec §8.4).
+              <div className="mt-3 flex flex-col items-center gap-3 rounded-[28px] border border-texto-principal/[0.08] bg-superficie px-5 py-6 text-center">
+                <p className="text-texto-principal">No pudimos actualizar.</p>
+                <button
+                  type="button"
+                  onClick={reintentar}
+                  disabled={reintentando}
+                  className="boton-secundario w-auto"
+                >
+                  Reintentar
+                </button>
               </div>
-            )}
-          </div>
-        </section>
-
-        <p className="mt-4 text-center text-[15px] text-texto-secundario">
-          Pronto podrás cambiarlos por entradas al concierto, merch y cursos.
-        </p>
-
-        <section aria-label="Historial de Beats" aria-busy={cargando} className="mt-6">
-          {cargando ? (
-            <p className="flex items-center justify-center gap-2 py-6 text-texto-secundario">
-              <span className="girador" aria-hidden="true" />
-              Cargando tu historial
-            </p>
-          ) : !tieneDatos ? (
-            // Con red, sin nada guardado y con la carga fallida: el mismo
-            // mensaje del aviso, en lugar del historial (spec §8.4).
-            <div className="superficie flex flex-col items-center gap-3 px-5 py-6 text-center">
-              <p className="text-texto-principal">No pudimos actualizar.</p>
-              <button
-                type="button"
-                onClick={reintentar}
-                disabled={reintentando}
-                className="boton-secundario w-auto"
-              >
-                Reintentar
-              </button>
-            </div>
-          ) : (
-            <div className="superficie px-4">
-              <ul>
+            ) : (
+              <div className="mt-3 overflow-hidden rounded-[28px] border border-texto-principal/[0.08] bg-superficie">
                 {dias.map((dia) => (
                   <DiaHistorial
                     key={dia.dia_local}
@@ -213,32 +230,46 @@ export function PantallaBeats() {
                     alAlternar={() => historial.alternarDia(dia.dia_local)}
                   />
                 ))}
-              </ul>
-              <FinDeLista alVerse={historial.cargarMas} activo={historial.hayMas} />
-              {historial.cargandoMas ? (
-                <p className="flex items-center justify-center gap-2 py-3 text-sm text-texto-secundario">
-                  <span className="girador" aria-hidden="true" />
-                  Cargando días anteriores
-                </p>
-              ) : null}
-              {historial.errorAlCargarMas ? (
-                <div className="flex justify-center py-2">
-                  <button
-                    type="button"
-                    onClick={() => void historial.cargarMas()}
-                    className="boton-ghost"
-                  >
-                    Reintentar
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          )}
-        </section>
+                <FinDeLista alVerse={historial.cargarMas} activo={historial.hayMas} />
+                {historial.cargandoMas ? (
+                  <p className="flex items-center justify-center gap-2 py-3 text-sm text-texto-secundario">
+                    <span className="girador" aria-hidden="true" />
+                    Cargando días anteriores
+                  </p>
+                ) : null}
+                {historial.errorAlCargarMas ? (
+                  <div className="flex justify-center py-2">
+                    <button
+                      type="button"
+                      onClick={() => void historial.cargarMas()}
+                      className="boton-ghost"
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </section>
 
-        {/* Solo mientras no haya ningun escaneo: con el primero se retira y la
-            explicacion queda en el boton de arriba (spec §8.1). */}
-        {tieneDatos && resumen && !resumen.tiene_escaneos ? <EstadoInicial /> : null}
+          {/* Solo mientras no haya ningun escaneo: con el primero se retira y
+              la explicacion queda en la pildora y en "Cómo ganar" (spec §8.1). */}
+          {tieneDatos && resumen && !resumen.tiene_escaneos ? <EstadoInicial /> : null}
+
+          <button
+            type="button"
+            onClick={() => setHojaAbierta(true)}
+            aria-haspopup="dialog"
+            className="boton-secundario boton--flecha text-[16px] font-bold"
+          >
+            Cómo ganar
+            <CirculoFlecha tamano={40} />
+          </button>
+
+          <p className="text-center text-[13px] text-texto-secundario">
+            Pronto podrás cambiarlos por entradas al concierto, merch y cursos.
+          </p>
+        </div>
       </main>
 
       <AnuncioVivo saldo={resumen?.saldo ?? null} />

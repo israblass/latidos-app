@@ -18,7 +18,7 @@ import {
   sembrarMovimiento,
 } from "../ayudantes/mock";
 import { QR } from "../ayudantes/qr";
-import { etiquetaDia } from "../../src/lib/beats/formato";
+import { etiquetaDia, tituloDia } from "../../src/lib/beats/formato";
 
 /**
  * T026 — pantalla de Beats con historial (Fase 2, V011 a V015).
@@ -119,27 +119,28 @@ test.describe("pantalla", () => {
     await abrirBeats(page);
     await expect(numeroDeBeats(page)).toHaveText("33");
 
-    const etiquetaVieja = etiquetaDia(haceDias(5));
-    expect(etiquetaVieja).toMatch(/^[A-ZÁÉÍÓÚ]+ \d{1,2} [A-Z]+$/);
+    // v2.8.0: la etiqueta en tipo oracion ("Hoy", "Ayer", "Jueves 25 sept") y
+    // debajo "N movimientos · +total".
+    const etiquetaVieja = tituloDia(haceDias(5));
+    expect(etiquetaVieja).toMatch(/^[A-ZÁÉÍÓÚ][a-záéíóú]+ \d{1,2} [a-z]+$/);
     await expect(lineasDeDias(page)).toHaveCount(3);
-    await expect(lineasDeDias(page).nth(0)).toContainText("HOY");
-    await expect(lineasDeDias(page).nth(1)).toContainText("AYER");
+    await expect(lineasDeDias(page).nth(0)).toContainText("Hoy");
+    await expect(lineasDeDias(page).nth(1)).toContainText("Ayer");
     await expect(lineasDeDias(page).nth(2)).toContainText(etiquetaVieja);
 
-    // Hoy solo tiene la bienvenida: total sin conteo de escaneos.
-    await expect(lineaDelDia(page, "HOY")).toHaveText(/HOY\s*\+5$/);
-    await expect(lineaDelDia(page, "AYER")).toContainText("+10 · 1 escaneo");
-    await expect(lineaDelDia(page, etiquetaVieja)).toContainText("+18 · 2 escaneos");
+    await expect(lineaDelDia(page, "HOY")).toHaveText(/^Hoy\s*1 movimiento · \+5$/);
+    await expect(lineaDelDia(page, "AYER")).toContainText("1 movimiento · +10");
+    await expect(lineaDelDia(page, etiquetaVieja)).toContainText("3 movimientos · +18");
 
     await expect(lineaDelDia(page, "HOY")).toHaveAttribute("aria-expanded", "true");
     await expect(lineaDelDia(page, "AYER")).toHaveAttribute("aria-expanded", "false");
     await expect(lineaDelDia(page, etiquetaVieja)).toHaveAttribute("aria-expanded", "false");
 
-    // La bienvenida, con el icono de Latidos.
+    // La bienvenida, con su corazon en circulo amarillo (v2.8.0).
     const hoy = page.locator(`#dia-${haceDias(0)}`);
     await expect(hoy).toContainText("Bienvenida a Latidos");
     await expect(hoy).toContainText("+5");
-    await expect(hoy.locator("img[src*='icon-512']")).toHaveCount(1);
+    await expect(hoy.locator("[data-icono-bienvenida]")).toHaveCount(1);
   });
 
   test("abrir un dia no cierra otro, y las filas no se tocan", async ({ page }) => {
@@ -194,7 +195,7 @@ test.describe("pantalla", () => {
 
     await abrirBeats(page);
     const linea = lineaDelDia(page, etiquetaDia(haceDias(2)));
-    await expect(linea).toContainText("+10 · 1 escaneo");
+    await expect(linea).toContainText("1 movimiento · +10");
     await linea.click();
 
     const fila = page.locator(`#dia-${haceDias(2)} li`).first();
@@ -250,5 +251,5 @@ test("con 20 dias se cargan 7, luego 7 mas al bajar, y al final nada mas", async
   await page.waitForTimeout(800);
   expect(pedidos).toHaveLength(3);
   expect(JSON.parse(pedidos[1]).p_antes_de).toBe(haceDias(6));
-  await expect(lineasDeDias(page).last()).toContainText(etiquetaDia(haceDias(19)));
+  await expect(lineasDeDias(page).last()).toContainText(tituloDia(haceDias(19)));
 });

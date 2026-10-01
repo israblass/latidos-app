@@ -1,15 +1,18 @@
 "use client";
 
+import { IconoReloj } from "@/components/beats/dashboard-beats";
 import { FilaMovimiento } from "@/components/beats/fila-movimiento";
-import { beatsConSigno, conteoEscaneos, etiquetaDia } from "@/lib/beats/formato";
+import { Acordeon } from "@/components/ui/acordeon";
+import { beatsConSigno, conteoMovimientos, tituloDia } from "@/lib/beats/formato";
 import type { DiaHistorial as Dia } from "@/types/beats";
 
 /**
- * Un dia del historial como acordeon (T021).
+ * Un dia del historial (T021; constitution §2, v2.8.0): una seccion del
+ * acordeon compartido dentro de la tarjeta del historial.
  *
- * Cerrado ya dice lo esencial: el dia, el total neto y cuantos escaneos hubo.
- * Un dia sin escaneos (solo la bienvenida, un regalo) muestra el total sin
- * conteo (spec §10.3). Cada dia se abre y se cierra por su cuenta.
+ * Cerrado ya dice lo esencial: "Hoy", "Ayer" o la fecha, cuantos movimientos
+ * hubo y el total neto del dia. Cada dia se abre y se cierra por su cuenta; el
+ * estado lo lleva el hook del historial (el dia mas reciente nace abierto).
  */
 export function DiaHistorial({
   dia,
@@ -20,48 +23,21 @@ export function DiaHistorial({
   abierto: boolean;
   alAlternar: () => void;
 }) {
-  const idPanel = `dia-${dia.dia_local}`;
-  const resumen =
-    dia.escaneos > 0
-      ? `${beatsConSigno(dia.total_neto)} · ${conteoEscaneos(dia.escaneos)}`
-      : beatsConSigno(dia.total_neto);
-
   return (
-    <li className="border-b border-sutil last:border-b-0">
-      <button
-        type="button"
-        aria-expanded={abierto}
-        aria-controls={idPanel}
-        onClick={alAlternar}
-        className="flex min-h-touch w-full items-center gap-3 py-3 text-left"
-      >
-        <span className="flex-1 text-[13px] font-medium uppercase tracking-etiqueta text-texto-principal">
-          {etiquetaDia(dia.dia_local)}
-        </span>
-        <span className="text-[13px] text-texto-secundario">{resumen}</span>
-        <svg
-          aria-hidden="true"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={`shrink-0 text-texto-secundario transition-transform duration-200 motion-reduce:transition-none ${
-            abierto ? "rotate-180" : ""
-          }`}
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
-      </button>
-
-      <ul id={idPanel} hidden={!abierto} className="pb-2 pl-1">
+    <Acordeon
+      titulo={tituloDia(dia.dia_local)}
+      subtitulo={`${conteoMovimientos(dia.movimientos.length)} · ${beatsConSigno(dia.total_neto)}`}
+      icono={<IconoReloj />}
+      abierto={abierto}
+      alAlternar={alAlternar}
+      nivel={3}
+      idRegion={`dia-${dia.dia_local}`}
+    >
+      <ul className="divide-y divide-texto-principal/[0.08]">
         {dia.movimientos.map((movimiento) => (
           <FilaMovimiento key={movimiento.id} movimiento={movimiento} />
         ))}
       </ul>
-    </li>
+    </Acordeon>
   );
 }

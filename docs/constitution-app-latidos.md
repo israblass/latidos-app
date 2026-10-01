@@ -2,11 +2,12 @@
 tipo: constitution
 producto: Latidos App
 slug: latidos-app
-version: 2.7.0
+version: 2.8.0
 fecha-creacion: 2026-08-20
 ultima-modificacion: 2026-10-01
 <!-- v2.0.0 | 2026-08-26 | Cambio de stack a PWA (Next.js + Capacitor) para lanzar en Android e iOS el 15 sept sin esperar aprobacion de tiendas. Fase 1 reordenada segun acuerdo con Kevin: prioriza registro + QR + Beats sobre Pulso completo. Beats por QR de marca ahora configurables en cualquier momento por el admin. -->
 <!-- v2.1.0 | 2026-09-10 | Cambio de design system: base clara/blanca en vez de fondo oscuro solido. El cliente pidio explicitamente alejarse del fondo oscuro por no ir con la tematica festiva del evento. Referencia de atmosfera: apps tipo Cashea/Yummy. La paleta de marca (amarillo/azul) y la tipografia no cambian, solo la base y los tonos de superficie. Pantallas ya construidas (bienvenida, registro, onboarding, Inicio) requieren pasada de restyle. -->
+<!-- v2.8.0 | 2026-10-01 | Pantalla de Beats como dashboard (referencia-v2/beats-dashboard aprobada por Isra): cabecera "Tus Beats" con la pildora navy "?", hero navy opaco con chip de la semana, tarjeta "Tu pulso" (ECG del cliente y metricas de 7 dias), carrusel de marcas con su criterio de calculo, historial por dias en el acordeon compartido y boton "Cómo ganar". Vuelve el token de texto sobre navy como blanco al 72%. Los colores de exito, alerta y error quedan documentados como excepcion funcional de la paleta. Pendiente de unificacion: el gris terciario #9CA3AF y el azul de texto #0070CC (no se tocan en esta version). -->
 <!-- v2.7.0 | 2026-10-01 | Inicio pulido (referencia-v2 aprobada por Isra): campana con hoja de notificaciones (solo interfaz, estado vacio, sin backend), avatar de marca en la pildora de perfil, tarjeta de Beats de vuelta en vidrio sobre el degradado, y principio de paleta: solo colores de la paleta y transparencias de esos mismos colores (fuera los tokens celeste, celeste-claro, gris-chip y sobre-navy, el gris de vidrio #4A5160 y las sombras #101828), vigilado por una prueba. "Cómo gano Beats" queda solo en la pantalla de Beats. -->
 <!-- v2.6.0 | 2026-10-01 | Inicio rediseñado (referencia aprobada por Isra): botones en pildora plana con modificador de flecha y boton oscuro; cabecera con pildoras de ayuda y perfil; tarjeta de Beats navy plana como excepcion al vidrio; fondo del Inicio en degradado de marca en CSS (el cielo de foto queda en bienvenida y onboarding); patron de acordeon; regla de copy de CTA. -->
 <!-- v2.5.0 | 2026-10-01 | Liquid glass que se nota: receta con variables (tinte en degradado, blur 24px + saturacion 200% + brillo, borde y reflejo marcados, sombra definida), opacidades minimas por contraste sobre negro, gris de texto sobre vidrio #4A5160, contenido con color detras de cada vidrio (cielo pleno bajo el contador de Inicio, capsula de puntos sobre el banner) y excepcion de controles chicos en el limite de dos capas. -->
@@ -78,7 +79,9 @@ En `src/` solo se escriben colores de la paleta, opacos o con transparencia de e
 - **Transparencias de uso comun**: azul al 12% (circulos de icono), azul al 8% (paneles claros), blanco al 72% (texto secundario sobre navy), navy al 8% (bordes y separadores), navy al 15% (borde del boton secundario). Las sombras son navy con alfa.
 - **Prueba**: `diseno.test.ts` falla si aparece en `src/` un hex o un `rgb()`/`rgba()` cuyo color no sea de la paleta. Lo que solo se menciona en un comentario no cuenta.
 - **Excepcion documentada**: los colores de una marca patrocinante. La linea se marca con el comentario `paleta: marca patrocinante`.
-- **Pendiente**: los tokens semanticos de `tailwind.config.ts` (exito, alerta, error y sus variantes de texto, terciario `#9CA3AF` y `secundario-texto` `#0070CC`) siguen fuera de esta lista. No viven en `src/`, asi que la prueba no los mira; falta decidir si se reemplazan o se agregan como excepcion.
+- **Excepcion funcional (v2.8.0)**: los colores de estado de `tailwind.config.ts` se quedan como estan, porque comunican un estado y no decoran: exito `#2EA043`, alerta `#D29922` y error `#F85149`, con sus variantes oscurecidas para texto sobre fondo claro (`exito-texto` `#15803D`, `alerta-texto` `#9A6700`, `error-texto` `#B3261E`). No se reemplazan por colores de la paleta.
+- **Pendiente de unificacion**: el gris terciario `#9CA3AF` (placeholders, hints) y el azul de texto `secundario-texto` `#0070CC` siguen fuera de la paleta. No se tocan hasta decidir con que se unifican (anotado en el CHANGELOG de la v2.8.0).
+- **Texto sobre navy (v2.8.0)**: el token `texto-sobre-navy` es blanco al 72% (`rgb(255 255 255 / 0.72)`), mas de 8:1 sobre el navy. Reemplaza al `#C9D1DE` que se quito en la v2.7.0.
 
 ### Regla del amarillo (v2.3.0)
 
@@ -158,6 +161,7 @@ Base crema `#FFFFF5` con superficies blancas (v2.3.0). Referencia de atmosfera: 
 
 - **Bienvenida y onboarding**: el cielo del branding (foto con velo blanco y tinte de marca en `soft-light`), a pantalla completa y fijo.
 - **Inicio (v2.7.0)**: degradado de marca en CSS puro, sin foto ni desenfoque (`.fondo-inicio`): un radial amarillo `rgba(253,251,5,.34)` arriba a la derecha y uno azul `rgba(0,144,255,.22)` a la izquierda, sobre el crema, en una franja de 640px detras del contenido. Sus colores viven como variables en `:root` (`--inicio-amarillo`, `--inicio-azul`), no escritos en la regla. Ya no hay vertical de cielo ni tonos verdosos.
+- **Beats (v2.8.0)**: el mismo `.fondo-inicio`, sin otra definicion: la pantalla pone el mismo div `aria-hidden` dentro de su `<main>` `relative isolate`.
 - **Resto de la app**: crema solido. A tamaño completo y sin velo, el cielo se reserva para el splash screen.
 
 ### Inicio (v2.6.0, pulido en v2.7.0)
@@ -178,13 +182,34 @@ Capas de vidrio grandes en el Inicio: la tarjeta de Beats y la barra (dos, el li
 
 Margenes laterales del Inicio: 16px (las demas pantallas siguen en 20px). No hay barra de progreso ni "proximo nivel": los niveles no estan definidos.
 
+### Beats como dashboard (v2.8.0)
+
+Referencia aprobada por Isra (`referencia-v2/beats-dashboard`, 390px). Solo front: todo sale del historial y del resumen que la pantalla ya trae (`useHistorialBeats`); no hay tablas ni RPC nuevas y no se pide nada mas a la red. Margenes laterales de 16px, como el Inicio. De arriba a abajo:
+
+1. **Cabecera**: `h1` "Tus Beats" en DM Sans a 40px ("Tus" en 300, "Beats" en 700) y, a la derecha, la pildora navy de 108x58 con "?" (`aria-label="¿Cómo gano Beats?"`) que abre la hoja de como ganar. Es la misma pildora de ayuda de antes, restilizada; no hay otra.
+2. **Hero navy**: opaco a proposito (no es vidrio), radio 30px, padding 22/24. "Beats acumulados" en blanco al 72%, el chip amarillo "+N esta semana" (mismo calculo semanal del Inicio; no aparece si N <= 0) y el saldo en Anton 68px blanco (`ContadorBeatsVivo` variante `navy`, con el conteo animado y el anuncio en vivo de siempre).
+3. **Tu pulso**: tarjeta blanca (radio 28px, borde navy al 8%). "Tu pulso" / "Últimos 7 días" y, a la derecha, el total de la semana en Anton. En el centro la linea de latido del cliente (`public/ilustraciones/ecg-pulso.webp`, 640x218, con transparencia, ~32 KB), decorativa (`alt=""`) y con ancho y alto fijos para no mover el layout; sin animacion. Abajo, tras una linea fina, tres metricas en Anton: Escaneos, Marcas y Días activos.
+4. **Marcas**: `h2` "Marcas" (Anton mayusculas) con "Donde has sumado" a la derecha. Carrusel horizontal con snap de tarjetas de 150px (logo de la marca o su inicial en circulo azul al 12%, nombre, "N escaneos" y "+total" en Anton). Al final, la tarjeta punteada "Descubre más" / "Escanea una marca", que es un enlace a Escanear. Sin marcas, queda solo esa. La lista es enfocable (se mueve con las flechas) y Tab pasa al enlace y sigue de largo, sin trampa.
+5. **Historial**: `h2` "Historial" y una sola tarjeta con un acordeon por dia (`h3`): icono de reloj, "Hoy" / "Ayer" / "Miércoles 23 sept", "N movimientos · +total" y el chevron en circulo navy. El dia mas reciente nace abierto. Se mantienen la carga de mas dias al llegar al final (`FinDeLista`), los lotes de 7 dias y el reintento. Filas: logo o inicial en circulo azul al 12% (40px), nombre (15px, 600), hora (13px gris) y "+N" en negrita a la derecha; la bienvenida va con un corazon navy en circulo amarillo y los demas movimientos de Latidos con el icono de la app. Las filas del Inicio usan el mismo componente.
+6. **Estado inicial** (sin ningun escaneo): la explicacion desplegada y "Escanear", como siempre (spec §8.1).
+7. **Cómo ganar**: `.boton-secundario .boton--flecha` con el circulo navy de 40px y flecha amarilla; abre la misma hoja que la pildora. Debajo, el recordatorio del canje en 13px gris.
+
+**Criterio de calculo** (`src/lib/beats/dashboard.ts`, funciones puras con pruebas):
+- **Semana**: hoy y los 6 dias anteriores, en dias locales de Caracas (`diaLocalDe`), igual que el chip del Inicio. El cambio de dia es a medianoche de Caracas, no del telefono.
+- **Movimiento de marca**: un escaneo (`tipo = "escaneo"`) que trae su marca. La bienvenida, los regalos y los ajustes son de Latidos: suman al total y cuentan como dia activo, pero no son marca ni escaneo de marca.
+- **Beats de la semana**: suma con signo de todos los movimientos de la semana.
+- **Escaneos**: movimientos de marca de la semana. **Marcas**: marcas distintas entre ellos. **Días activos**: dias locales distintos de la semana con al menos un movimiento de cualquier tipo.
+- **Carrusel**: los movimientos de marca de todo el historial cargado en pantalla (al abrir, los 7 dias con actividad mas recientes; crece al cargar mas), agrupados por el nombre actual de la marca, de la escaneada mas recientemente a la mas antigua. El primer lote siempre cubre la semana completa, asi que "Tu pulso" no depende de bajar.
+
+Capas de vidrio: solo la barra. El hero es navy opaco y las tarjetas son blancas opacas.
+
 ### Acordeon (v2.6.0)
 
-`src/components/ui/acordeon.tsx`. Cabecera `<h2><button>` con icono en circulo azul al 12% de 44px (v2.7.0; antes un celeste fuera de paleta), titulo (16px bold), subtitulo (13px, `#565E6D`) y un circulo navy de 36px con chevron amarillo que gira 180° al abrir. `aria-expanded`, `aria-controls` y una region nombrada por el titulo; cerrada, la region va `inert` (fuera del foco y del arbol accesible), tambien en el HTML del servidor. Abre con transicion de alto de 250ms (`grid-template-rows` 0fr -> 1fr); sin transicion con `prefers-reduced-motion`. Las secciones de una misma tarjeta se separan con una linea fina.
+`src/components/ui/acordeon.tsx`. Desde la v2.8.0 puede ir controlado desde fuera (`abierto` + `alAlternar`), con encabezado `h3` (`nivel={3}`) y con un id de region fijo: asi lo usa el historial de Beats. Cabecera `<h2><button>` con icono en circulo azul al 12% de 44px (v2.7.0; antes un celeste fuera de paleta), titulo (16px bold), subtitulo (13px, `#565E6D`) y un circulo navy de 36px con chevron amarillo que gira 180° al abrir. `aria-expanded`, `aria-controls` y una region nombrada por el titulo; cerrada, la region va `inert` (fuera del foco y del arbol accesible), tambien en el HTML del servidor. Abre con transicion de alto de 250ms (`grid-template-rows` 0fr -> 1fr); sin transicion con `prefers-reduced-motion`. Las secciones de una misma tarjeta se separan con una linea fina.
 
 ### Firma visual
 
-El momento memorable de la app es el contador de Beats: un numero grande en Anton. En Beats va en navy `#1A2332` sobre una superficie blanca; en el Inicio (v2.7.0) va en navy sobre la tarjeta de vidrio. El amarillo `#FDFB05` no se usa como color del numero (no alcanza contraste sobre superficie clara): pasa a una barra de acento debajo del numero y a un halo radial detras que late despacio (se queda quieto con `prefers-reduced-motion`). Con animacion de incremento cuando se suman puntos. Es lo primero que el usuario ve en su pantalla principal, y se ve igual en Inicio y en la pantalla de Beats para que se reconozca como el mismo numero.
+El momento memorable de la app es el contador de Beats: un numero grande en Anton. En Beats (v2.8.0) va en blanco sobre el hero navy; en el Inicio (v2.7.0) va en navy sobre la tarjeta de vidrio. El amarillo `#FDFB05` no se usa como color del numero (no alcanza contraste sobre superficie clara): pasa a una barra de acento debajo del numero y a un halo radial detras que late despacio (se queda quieto con `prefers-reduced-motion`). Con animacion de incremento cuando se suman puntos. Es lo primero que el usuario ve en su pantalla principal. Se reconoce como el mismo numero en Inicio y en Beats por la tipografia (Anton 68px) y el chip de la semana, aunque cambie el fondo. Desde la v2.8.0 ninguna pantalla usa la barra de acento ni el halo (la variante `halo` de `ContadorBeatsVivo` queda en el codigo).
 
 ## 3. Tono y Copy
 
@@ -381,7 +406,7 @@ Las predicciones son internas (no usan API de casas de apuestas). La seccion se 
 1. **Inicio**: resumen del programa, proxima jornada de Pulso, actividades recientes, banners publicitarios
 2. **Pulso**: jornada activa con insumos y progreso, centros de acopio, cronologia de jornadas pasadas
 3. **Escanear** (tab central destacado): abre la camara para escanear QR de marcas
-4. **Beats**: balance de Beats, historial de movimientos agrupado por dia, explicacion de como ganar Beats y en que se cambian, opciones de canje (Fase 3)
+4. **Beats**: dashboard (v2.8.0): balance de Beats, "Tu pulso" de la semana, marcas donde se ha sumado, historial de movimientos agrupado por dia, explicacion de como ganar Beats y en que se cambian, opciones de canje (Fase 3)
 5. **Perfil**: datos del usuario, QR personal, configuracion, cerrar sesion
 
 ### Pantallas adicionales (no en bottom tabs)

@@ -10,7 +10,7 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v8";
+const VERSION = "v9";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
@@ -23,6 +23,8 @@ const VERSION = "v8";
 // precacheada de /sin-conexion apunta a la hoja de estilos anterior.
 // v8: el CSS vuelve a cambiar (vidrio del Inicio, gris de la barra y las
 // hojas, principio de paleta): misma razon que la v7.
+// v9: la pantalla de Beats pasa a dashboard (CSS nuevo) y su copia sin red
+// guarda tambien la linea de latido de "Tu pulso".
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 
@@ -42,8 +44,15 @@ const PANTALLAS_CON_COPIA = ["/beats"];
  */
 const ILUSTRACION_SIN_SENAL = "/ilustraciones/latido-ecg-ruido.webp";
 
+/**
+ * La linea de latido de "Tu pulso" (~32 KB). Se ve con red, pero la primera
+ * visita a Beats puede no estar controlada todavia por este service worker:
+ * se guarda junto con la copia para que sin red no se vea rota.
+ */
+const ECG_PULSO = "/ilustraciones/ecg-pulso.webp";
+
 const RECURSOS_SIN_RED = {
-  "/beats": [ILUSTRACION_SIN_SENAL],
+  "/beats": [ILUSTRACION_SIN_SENAL, ECG_PULSO],
 };
 
 // Lo minimo para que la app abra estando sin señal. La ilustracion del latido
