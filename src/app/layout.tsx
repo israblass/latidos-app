@@ -5,7 +5,6 @@ import "./globals.css";
 import { LimpiarCacheSesion } from "@/components/pwa/limpiar-cache-sesion";
 import { RegistrarServiceWorker } from "@/components/pwa/registrar-service-worker";
 import { RecargarAlVolver } from "@/components/sesion/recargar-al-volver";
-import { FondoApp } from "@/components/marca/fondo-app";
 
 const anton = Anton({
   subsets: ["latin"],
@@ -64,8 +63,6 @@ export default function RootLayout({
   return (
     <html lang="es-VE" className={`${anton.variable} ${dmSans.variable}`}>
       <body className="min-h-dvh bg-fondo">
-        {/* Detras de todo: es lo que le da material al vidrio esmerilado. */}
-        <FondoApp />
         {children}
         <RegistrarServiceWorker />
         <LimpiarCacheSesion />

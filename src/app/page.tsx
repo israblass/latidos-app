@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PromptsInstalacion } from "@/components/instalacion/prompts-instalacion";
+import { FondoApp } from "@/components/marca/fondo-app";
 import { ImagenMarca } from "@/components/marca/imagen-marca";
 import { BarraAcento } from "@/components/marca/titulo-con-acento";
 import { ASSETS } from "@/lib/assets";
@@ -18,54 +19,64 @@ import { ASSETS } from "@/lib/assets";
  */
 export default function Home() {
   return (
-    <main className="flex min-h-dvh flex-col px-5 pb-8 pt-16">
-      <div className="flex flex-1 flex-col items-center justify-center text-center">
-        <div className="vidrio-medio flex w-full flex-col items-center px-6 py-12">
-          {/* El logo es el titulo de la pantalla: dentro de un h1, su texto
+    <>
+      {/* Bienvenida: una de las pantallas con el cielo de la marca. Va fuera del
+        <main>: la animacion de entrada le da un transform, y un hijo fijo se
+        mediria contra el y no contra la pantalla. */}
+      <FondoApp />
+      <main className="flex min-h-dvh flex-col px-5 pb-8 pt-16">
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <div className="vidrio-medio flex w-full flex-col items-center px-6 py-12">
+            {/* El logo es el titulo de la pantalla: dentro de un h1, su texto
               alternativo es lo que anuncia un lector de pantalla al entrar. */}
-          <h1>
-            <ImagenMarca
-              src={ASSETS.latidosHero}
-              alt="Latidos"
-              alto={96}
-              prioritaria
-            />
-          </h1>
-          <BarraAcento className="mt-5" />
+            <h1>
+              <ImagenMarca
+                src={ASSETS.latidosHero}
+                alt="Latidos"
+                alto={96}
+                prioritaria
+              />
+            </h1>
+            <BarraAcento className="mt-5" />
+          </div>
+
+          <p className="mt-8 max-w-[17rem] text-texto-secundario">
+            Participa, suma Beats y canjea recompensas del programa Latidos UCV.
+          </p>
         </div>
 
-        <p className="mt-8 max-w-[17rem] text-texto-secundario">
-          Participa, suma Beats y canjea recompensas del programa Latidos UCV.
-        </p>
-      </div>
+        <div className="flex flex-col gap-3">
+          <Link href="/registro/paso-1" className="boton-primario">
+            Registrarme
+          </Link>
 
-      <div className="flex flex-col gap-3">
-        <Link href="/registro/paso-1" className="boton-primario">
-          Registrarme
-        </Link>
+          <Link href="/entrar" className="boton-ghost">
+            Ya tengo cuenta
+          </Link>
 
-        <Link href="/entrar" className="boton-ghost">
-          Ya tengo cuenta
-        </Link>
+          <PromptsInstalacion />
+        </div>
 
-        <PromptsInstalacion />
-      </div>
-
-      {/* Credito institucional: los tres organizadores del programa. */}
-      <footer className="mt-8 flex flex-col items-center gap-3">
-        <p className="etiqueta">Un programa de</p>
-        {/* Se envuelve para que en pantallas angostas los tres logos bajen de
+        {/* Credito institucional: los tres organizadores del programa. */}
+        <footer className="mt-8 flex flex-col items-center gap-3">
+          <p className="etiqueta">Un programa de</p>
+          {/* Se envuelve para que en pantallas angostas los tres logos bajen de
             linea en vez de encogerse hasta volverse ilegibles. */}
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-          <ImagenMarca src={ASSETS.flame} alt="The Flame Creative Lab" alto={28} />
-          <ImagenMarca
-            src={ASSETS.ucv}
-            alt="Universidad Central de Venezuela"
-            alto={32}
-          />
-          <ImagenMarca src={ASSETS.munUcv} alt="MUN UCV" alto={32} />
-        </div>
-      </footer>
-    </main>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+            <ImagenMarca
+              src={ASSETS.flame}
+              alt="The Flame Creative Lab"
+              alto={28}
+            />
+            <ImagenMarca
+              src={ASSETS.ucv}
+              alt="Universidad Central de Venezuela"
+              alto={32}
+            />
+            <ImagenMarca src={ASSETS.munUcv} alt="MUN UCV" alto={32} />
+          </div>
+        </footer>
+      </main>
+    </>
   );
 }

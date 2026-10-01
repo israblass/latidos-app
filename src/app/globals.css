@@ -68,7 +68,9 @@
 
 @layer components {
   /*
-   * Capa de fondo fija. Detras de todo el contenido y sin capturar toques.
+   * El cielo (src/components/marca/fondo-app.tsx). Detras de todo el
+   * contenido y sin capturar toques. Solo en bienvenida, onboarding y el
+   * header de Inicio; el resto de la app es crema solido.
    */
   .fondo-app {
     position: fixed;
@@ -76,11 +78,23 @@
     z-index: -1;
     pointer-events: none;
     /*
-     * Capa propia de composicion. En Safari iOS el backdrop-filter sobre un
+     * Capa propia de composicion. En Safari iOS el desenfoque sobre un
      * position:fixed se rompe con el rebote del scroll; promoverlo a su propia
      * capa lo evita. No he podido comprobarlo en un iOS real desde aqui.
      */
     transform: translateZ(0);
+  }
+
+  /*
+   * Variante cabecera: una franja que se funde con el crema hacia abajo. La
+   * mascara hace la transicion; sin ella el cielo terminaria en un corte recto.
+   */
+  .fondo-app--cabecera {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 380px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
   }
 
   .fondo-app__cielo,
