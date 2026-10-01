@@ -8,17 +8,25 @@ import { useAlVolver } from "@/hooks/use-al-volver";
 import { leerResumen } from "@/lib/beats/consultas";
 
 /**
- * Contador de Inicio. Se ve igual que siempre (el mismo ContadorBeats con su
- * halo), pero al volver a la app relee el saldo en silencio: si cambio
- * mientras el telefono estaba bloqueado, el numero sube con la animacion
- * normal, sin recargar la pantalla.
+ * Tarjeta de Beats del Inicio (constitution §2, v2.6.0): navy y plana, sin
+ * vidrio ni halo. Es la excepcion documentada a "el contador va en vidrio":
+ * en el Inicio rediseñado el numero manda por contraste, no por material.
  *
- * La card entera es el enlace a Beats: tocar el saldo para ver el detalle es
- * lo natural (spec de Beats §1). La etiqueta dice a donde lleva y conserva el
- * numero, que un lector de pantalla dejaria de leer si solo dijera "Ver mis
- * Beats".
+ * Al volver a la app relee el saldo en silencio: si cambio mientras el
+ * telefono estaba bloqueado, el numero sube con el conteo animado de siempre.
+ *
+ * La tarjeta entera es el enlace a Beats. La etiqueta dice a donde lleva y
+ * conserva el numero, que un lector de pantalla dejaria de leer si solo dijera
+ * "Ver mis Beats".
  */
-export function SaldoInicio({ saldoInicial }: { saldoInicial: number }) {
+export function SaldoInicio({
+  saldoInicial,
+  beatsSemana,
+}: {
+  saldoInicial: number;
+  /** Suma de los ultimos 7 dias; null mientras no cargan los movimientos. */
+  beatsSemana: number | null;
+}) {
   const [saldo, setSaldo] = useState(saldoInicial);
 
   const refrescar = useCallback(async () => {
@@ -36,9 +44,22 @@ export function SaldoInicio({ saldoInicial }: { saldoInicial: number }) {
     <Link
       href="/beats"
       aria-label={`Ver mis Beats. Tienes ${saldo} Beats`}
-      className="vidrio block w-full px-6 py-10 text-center outline-none focus-visible:ring-2 focus-visible:ring-secundario"
+      className="flex flex-col gap-[14px] rounded-[30px] bg-texto-principal px-6 py-[22px] outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secundario active:scale-[0.99] motion-reduce:active:scale-100"
     >
-      <ContadorBeatsVivo valor={saldo} />
+      {/* Alto fijo para la fila: el chip aparece cuando cargan los movimientos
+          y no puede empujar el numero. */}
+      <span className="flex min-h-[26px] items-center justify-between gap-3">
+        <span className="text-[14px] text-texto-sobre-navy">Beats acumulados</span>
+        {beatsSemana !== null && beatsSemana > 0 ? (
+          <span
+            data-chip-semana=""
+            className="shrink-0 rounded-full bg-primario px-3 py-[5px] text-[12px] font-bold text-texto-principal"
+          >
+            +{beatsSemana} esta semana
+          </span>
+        ) : null}
+      </span>
+      <ContadorBeatsVivo valor={saldo} variante="navy" />
     </Link>
   );
 }

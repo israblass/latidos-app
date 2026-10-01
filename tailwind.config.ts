@@ -25,6 +25,12 @@ const config: Config = {
         // Tarjetas, hojas y modales: blanco puro sobre el crema, para que se
         // lean como piezas apoyadas encima de la pagina.
         superficie: "#FFFFFF",
+        // Celestes del Inicio (constitution §2, v2.6.0): circulos de icono de
+        // los acordeones y panel de las ilustraciones de fase.
+        celeste: "#DDF3FB",
+        "celeste-claro": "#EAF6FB",
+        // Chip apagado ("Próximamente").
+        "gris-chip": "#F0F2F5",
         "fondo-alterno": "#F5F7FA",
         // Uso puntual, para bloques que necesitan contraste fuerte (el contador
         // de Beats, el hero de Beats). Nunca como base de pantalla.
@@ -51,6 +57,8 @@ const config: Config = {
           terciario: "#9CA3AF",
           // Para texto sobre superficies oscuras o sobre el amarillo.
           inverso: "#FFFFFF",
+          // Texto secundario sobre navy (la tarjeta de Beats del Inicio).
+          "sobre-navy": "#C9D1DE",
         },
 
         exito: "#2EA043",

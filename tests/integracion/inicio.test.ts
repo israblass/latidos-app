@@ -197,12 +197,20 @@ test.describe("banners", () => {
   });
 });
 
+/** "Qué es Latidos" nace cerrado: se abre desde su acordeon (v2.6.0). */
+async function abrirQueEsLatidos(page: Page) {
+  const boton = page.getByRole("heading", { level: 2, name: /Qué es Latidos/ }).getByRole("button");
+  if ((await boton.getAttribute("aria-expanded")) !== "true") await boton.click();
+  await expect(boton).toHaveAttribute("aria-expanded", "true");
+}
+
 test.describe("Qué es Latidos", () => {
   test("parrafo y tres fases con su estado", async ({ page }) => {
     await cuentaEnInicio(page);
+    await abrirQueEsLatidos(page);
 
     const seccion = page.getByRole("region", { name: "Qué es Latidos" });
-    await expect(seccion.getByRole("heading", { level: 2, name: "Qué es Latidos" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: /Qué es Latidos/ })).toBeVisible();
     await expect(seccion).toContainText(
       "Latidos es el programa de la UCV que une a estudiantes, marcas y comunidad durante seis meses, de septiembre de 2026 a marzo de 2027.",
     );
@@ -226,6 +234,7 @@ test.describe("Qué es Latidos", () => {
   test("a 360 px se lee y la pagina no se desplaza de lado", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 740 });
     await cuentaEnInicio(page);
+    await abrirQueEsLatidos(page);
 
     const ancho = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(ancho).toBeLessThanOrEqual(360);
@@ -238,17 +247,23 @@ test.describe("Qué es Latidos", () => {
     expect(desborda).toBe(false);
   });
 
-  test("orden: saludo, contador, banners y Qué es Latidos", async ({ page }) => {
+  test("orden: pildoras, saludo, contador, Escanear, banners y acordeones", async ({ page }) => {
     await cuentaEnInicio(page);
     const y = async (selector: ReturnType<Page["locator"]>) => (await selector.boundingBox())!.y;
 
-    const saludo = await y(page.getByText(/^Hola,/));
+    const pildoras = await y(page.getByRole("button", { name: "Cómo gano Beats" }));
+    const saludo = await y(page.locator("[data-saludo]"));
     const contador = await y(page.getByRole("region", { name: "Tu balance de Beats" }));
+    const escanear = await y(page.getByRole("main").getByRole("link", { name: "Escanear QR" }));
     const banners = await y(carrusel(page));
-    const queEs = await y(page.getByRole("region", { name: "Qué es Latidos" }));
+    const actividad = await y(page.getByRole("heading", { level: 2, name: /Actividad reciente/ }));
+    const queEs = await y(page.getByRole("heading", { level: 2, name: /Qué es Latidos/ }));
+    expect(pildoras).toBeLessThan(saludo);
     expect(saludo).toBeLessThan(contador);
-    expect(contador).toBeLessThan(banners);
-    expect(banners).toBeLessThan(queEs);
+    expect(contador).toBeLessThan(escanear);
+    expect(escanear).toBeLessThan(banners);
+    expect(banners).toBeLessThan(actividad);
+    expect(actividad).toBeLessThan(queEs);
   });
 
   test("el contador sigue llevando a Beats", async ({ page }) => {

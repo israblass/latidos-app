@@ -3,14 +3,13 @@ import Image from "next/image";
 import { ILUSTRACIONES, type Ilustracion } from "@/lib/ilustraciones";
 
 /**
- * "Qué es Latidos" en Inicio: un parrafo sobre el programa y sus tres fases.
+ * Contenido de "Qué es Latidos" en el Inicio: un parrafo sobre el programa y
+ * sus tres fases. Vive dentro de su acordeon (PanelInicio), que pone el
+ * titulo.
  *
- * Las fases van en tarjetas con scroll horizontal y no en acordeon: son tres,
- * cortas y del mismo peso, y la siguiente asoma por el borde, que es la pista
- * de que hay mas. Un acordeon escondería las fechas detras de un toque.
- *
- * Los datos coinciden con la pantalla 1 del onboarding (mismas fases y
- * fechas); aqui cada fase lleva ademas su estado.
+ * Las fases van en tarjetas con scroll horizontal: son tres, cortas y del
+ * mismo peso, y la siguiente asoma por el borde, que es la pista de que hay
+ * mas. Los datos coinciden con la pantalla 1 del onboarding.
  */
 
 type Fase = {
@@ -58,21 +57,15 @@ export const FASES: Fase[] = [
   },
 ];
 
-/**
- * Chip de estado. El texto es de 11px, asi que va en navy o gris (regla del
- * azul): "En curso" se distingue por el borde y el punto azules.
- */
+/** Chip de estado: amarillo "En curso" y gris "Próximamente", texto navy o gris. */
 function ChipEstado({ estado }: { estado: Fase["estado"] }) {
   const enCurso = estado === "En curso";
   return (
     <span
-      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-etiqueta ${
-        enCurso
-          ? "border-secundario/50 bg-superficie text-texto-principal"
-          : "border-sutil bg-fondo-alterno text-texto-secundario"
+      className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+        enCurso ? "bg-primario text-texto-principal" : "bg-gris-chip text-texto-secundario"
       }`}
     >
-      {enCurso ? <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-secundario" /> : null}
       {estado}
     </span>
   );
@@ -80,14 +73,8 @@ function ChipEstado({ estado }: { estado: Fase["estado"] }) {
 
 export function QueEsLatidos() {
   return (
-    <section aria-labelledby="que-es-latidos" className="w-full">
-      <h2
-        id="que-es-latidos"
-        className="font-display text-[26px] uppercase leading-none text-texto-principal"
-      >
-        Qué es Latidos
-      </h2>
-      <p className="mt-3 text-[15px] text-texto-secundario">
+    <>
+      <p className="mb-3 text-[14px] leading-[1.45] text-texto-secundario">
         Latidos es el programa de la UCV que une a estudiantes, marcas y comunidad durante seis
         meses, de septiembre de 2026 a marzo de 2027. Participas, sumas Beats y los cambias por
         cosas que te importan.
@@ -95,45 +82,45 @@ export function QueEsLatidos() {
 
       {/*
         El contenedor se puede enfocar para que el teclado tambien desplace la
-        fila. Se sale del margen de la pantalla para que las tarjetas lleguen
-        al borde y la siguiente asome.
+        fila. Se sale del margen de la tarjeta para que las fases lleguen al
+        borde y la siguiente asome.
       */}
       <ul
         aria-label="Fases del programa"
         tabIndex={0}
-        className="-mx-5 mt-4 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secundario"
+        className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2.5 overflow-x-auto px-4 pb-0.5 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-secundario"
       >
         {FASES.map((fase) => (
           <li
             key={fase.nombre}
-            className="superficie flex w-[78%] max-w-[300px] shrink-0 snap-start flex-col p-4"
+            className="relative flex w-[262px] shrink-0 snap-start flex-col rounded-[22px] border border-texto-principal/[0.08] bg-fondo p-3.5"
           >
             {/* Por debajo del pliegue: carga diferida (la de next/image por
                 defecto). El alto fijo reserva el espacio antes de que llegue. */}
-            <div className="mb-3 flex h-24 items-center justify-center">
+            <div className="mb-2.5 flex h-[84px] items-center justify-center overflow-hidden rounded-2xl bg-celeste-claro">
               <Image
                 src={fase.ilustracion.src}
                 alt={fase.descripcion}
-                width={Math.round((96 * fase.ilustracion.ancho) / fase.ilustracion.alto)}
-                height={96}
+                width={Math.round((70 * fase.ilustracion.ancho) / fase.ilustracion.alto)}
+                height={70}
                 loading="lazy"
-                className="h-24 w-auto"
+                className="h-[70px] w-auto"
               />
             </div>
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-display text-[22px] uppercase leading-none text-texto-principal">
+              <h3 className="font-display text-[20px] uppercase leading-[1.05] tracking-[0.02em] text-texto-principal">
                 {fase.nombre}
               </h3>
               <ChipEstado estado={fase.estado} />
             </div>
-            <p className="mt-2 text-[13px] font-medium text-texto-principal">
+            <p className="my-1.5 text-[13px] font-semibold text-texto-principal">
               <span aria-hidden="true">{fase.fechas}</span>
               <span className="sr-only">{fase.fechasCompletas}</span>
             </p>
-            <p className="mt-2 text-[14px] text-texto-secundario">{fase.detalle}</p>
+            <p className="text-[13px] leading-[1.4] text-texto-secundario">{fase.detalle}</p>
           </li>
         ))}
       </ul>
-    </section>
+    </>
   );
 }

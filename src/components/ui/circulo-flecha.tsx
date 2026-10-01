@@ -10,6 +10,7 @@ export function CirculoFlecha({ tamano = 48 }: { tamano?: 32 | 40 | 48 }) {
   return (
     <span aria-hidden="true" className="circulo-flecha" style={{ width: tamano, height: tamano }}>
       <svg
+        aria-hidden="true"
         width={flecha}
         height={flecha}
         viewBox="0 0 24 24"

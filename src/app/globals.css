@@ -28,6 +28,16 @@
      */
     --alto-barra: 64px;
     --margen-barra: 8px;
+    /*
+     * Degradado de marca del Inicio (.fondo-inicio, constitution §2, v2.6.0).
+     * Los colores viven aqui, no escritos en la regla.
+     */
+    --inicio-amarillo: #fbf9a8;
+    --inicio-amarillo-0: rgba(251, 249, 168, 0);
+    --inicio-celeste: #b5e3f5;
+    --inicio-celeste-0: rgba(181, 227, 245, 0);
+    --inicio-cielo-arriba: #ddeff0;
+    --inicio-cielo-medio: #e9f3e4;
   }
 
   input,
@@ -75,8 +85,8 @@
 @layer components {
   /*
    * El cielo (src/components/marca/fondo-app.tsx). Detras de todo el
-   * contenido y sin capturar toques. Solo en bienvenida, onboarding y el
-   * header de Inicio; el resto de la app es crema solido.
+   * contenido y sin capturar toques. Solo en bienvenida y onboarding; el
+   * Inicio usa .fondo-inicio y el resto de la app es crema solido.
    */
   .fondo-app {
     position: fixed;
@@ -89,33 +99,6 @@
      * capa lo evita. No he podido comprobarlo en un iOS real desde aqui.
      */
     transform: translateZ(0);
-  }
-
-  /*
-   * Variante cabecera: una franja que se funde con el crema hacia abajo. La
-   * mascara hace la transicion; sin ella el cielo terminaria en un corte recto.
-   */
-  .fondo-app--cabecera {
-    position: absolute;
-    inset: 0 0 auto 0;
-    /*
-     * Cielo pleno detras de todo el contador (para que su vidrio tenga nubes
-     * que desenfocar) y desvanecido justo despues, antes del texto gris de
-     * abajo, que queda sobre crema.
-     */
-    --cielo-pleno: 286px;
-    height: calc(var(--cielo-pleno) + 24px);
-    -webkit-mask-image: linear-gradient(to bottom, #000 var(--cielo-pleno), transparent calc(var(--cielo-pleno) + 24px));
-    mask-image: linear-gradient(to bottom, #000 var(--cielo-pleno), transparent calc(var(--cielo-pleno) + 24px));
-  }
-
-  /*
-   * En la cabecera el velo es mas liviano que en la bienvenida: encima solo
-   * hay texto navy (el saludo) y el contador de vidrio, y las nubes tienen que
-   * verse. Con el texto gris de la bienvenida no alcanzaria AA.
-   */
-  .fondo-app--cabecera .fondo-app__velo {
-    background: rgba(255, 255, 255, 0.45);
   }
 
   .fondo-app__cielo,
@@ -149,6 +132,23 @@
     opacity: 0.35;
     mix-blend-mode: soft-light;
   }
+  /*
+   * Fondo del Inicio: degradado de marca en CSS puro, sin foto ni desenfoque.
+   * Un div aria-hidden absoluto detras del contenido, dentro de un <main>
+   * relative isolate.
+   */
+  .fondo-inicio {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 640px;
+    z-index: -10;
+    pointer-events: none;
+    background:
+      radial-gradient(468px 464px at 95% 24px, var(--inicio-amarillo) 0%, var(--inicio-amarillo-0) 70%),
+      radial-gradient(429px 488px at 0% 268px, var(--inicio-celeste) 0%, var(--inicio-celeste-0) 72%),
+      linear-gradient(180deg, var(--inicio-cielo-arriba) 0%, var(--inicio-cielo-medio) 50%, var(--color-fondo) 100%);
+  }
+
   .titulo-pantalla {
     @apply font-display text-[28px] uppercase leading-tight text-texto-principal;
   }
@@ -265,8 +265,14 @@
     @apply flex shrink-0 items-center justify-center rounded-full;
   }
 
+  /*
+   * Circulo navy con icono amarillo: la flecha de los botones claros y el
+   * chevron de los acordeones. Es el unico lugar donde el amarillo es color de
+   * trazo, y siempre sobre navy (15:1), nunca sobre crema ni blanco.
+   */
   .boton-primario .circulo-flecha,
-  .boton-secundario .circulo-flecha {
+  .boton-secundario .circulo-flecha,
+  .circulo-navy {
     @apply bg-texto-principal text-primario;
   }
 
