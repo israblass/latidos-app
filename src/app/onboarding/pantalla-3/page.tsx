@@ -26,7 +26,7 @@ export default function PantallaCierre() {
         descripcion="Una figura amarilla que sostiene un pequeño corazón"
       />
       <div className="vidrio mt-3 px-5 py-7 text-center">
-        <TituloConAcento etiqueta="Todo listo" detalle="Tu cuenta esta activa y tu contador arranca en cero.">
+        <TituloConAcento etiqueta="Todo listo" detalle="Tu cuenta está activa y ya tienes tu bono de bienvenida.">
           Empieza a
           <br />
           sumar

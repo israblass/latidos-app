@@ -173,3 +173,15 @@ test("saltar tambien marca el onboarding como visto", async ({ page }) => {
   await page.goto("/onboarding/pantalla-2");
   await expect(page).toHaveURL(/\/inicio/);
 });
+
+test("los textos del onboarding van con tildes y no contradicen el bono de bienvenida", async ({ page }) => {
+  await reciénRegistrada(page);
+  await expect(page.getByText("Gaitazo y Misa de Acción de Gracias, con marcas invitadas.")).toBeVisible();
+
+  await page.getByRole("button", { name: "Siguiente" }).click();
+  await page.waitForURL("**/pantalla-2");
+  await page.getByRole("button", { name: "Siguiente" }).click();
+  await page.waitForURL("**/pantalla-3");
+  await expect(page.getByText("Tu cuenta está activa y ya tienes tu bono de bienvenida.")).toBeVisible();
+  await expect(page.getByText(/arranca en cero/)).toHaveCount(0);
+});
