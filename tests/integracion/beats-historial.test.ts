@@ -226,9 +226,13 @@ test("con 20 dias se cargan 7, luego 7 mas al bajar, y al final nada mas", async
     await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 10, diasAtras: dia, marcaId: MARCA_KFC });
   }
 
+  // Solo los pedidos de la pantalla de Beats: desde la v2.6.0 el Inicio
+  // tambien lee el lote mas reciente (actividad y chip de la semana).
   const pedidos: string[] = [];
   page.on("request", (r) => {
-    if (r.url().includes("/rpc/historial_beats")) pedidos.push(r.postData() ?? "");
+    if (r.url().includes("/rpc/historial_beats") && new URL(r.frame().url()).pathname === "/beats") {
+      pedidos.push(r.postData() ?? "");
+    }
   });
 
   await abrirBeats(page);
