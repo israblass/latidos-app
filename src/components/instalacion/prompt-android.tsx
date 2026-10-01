@@ -65,7 +65,7 @@ export function PromptAndroid({ onCerrar }: Props) {
             quedar en la pantalla de inicio si acepta instalar. */}
         <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-control">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon-192.png" alt="" width={44} height={44} className="h-11 w-11 rounded-control" />
+          <img src="/icons/icon-512.png" alt="" width={44} height={44} className="h-11 w-11 rounded-control" />
         </span>
 
         <div className="min-w-0 flex-1">

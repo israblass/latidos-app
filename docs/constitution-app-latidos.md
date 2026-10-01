@@ -2,11 +2,12 @@
 tipo: constitution
 producto: Latidos App
 slug: latidos-app
-version: 2.2.0
+version: 2.3.0
 fecha-creacion: 2026-08-20
-ultima-modificacion: 2026-09-29
+ultima-modificacion: 2026-10-01
 <!-- v2.0.0 | 2026-08-26 | Cambio de stack a PWA (Next.js + Capacitor) para lanzar en Android e iOS el 15 sept sin esperar aprobacion de tiendas. Fase 1 reordenada segun acuerdo con Kevin: prioriza registro + QR + Beats sobre Pulso completo. Beats por QR de marca ahora configurables en cualquier momento por el admin. -->
 <!-- v2.1.0 | 2026-09-10 | Cambio de design system: base clara/blanca en vez de fondo oscuro solido. El cliente pidio explicitamente alejarse del fondo oscuro por no ir con la tematica festiva del evento. Referencia de atmosfera: apps tipo Cashea/Yummy. La paleta de marca (amarillo/azul) y la tipografia no cambian, solo la base y los tonos de superficie. Pantallas ya construidas (bienvenida, registro, onboarding, Inicio) requieren pasada de restyle. -->
+<!-- v2.3.0 | 2026-10-01 | Base crema #FFFFF5 (unica definicion: --color-fondo en globals.css) con tarjetas, hojas y modales en blanco puro #FFFFFF. Regla del amarillo y regla del azul. Liquid glass renovado en CSS puro y definido en un solo lugar (.vidrio, .vidrio-barra, .vidrio-hoja), maximo dos capas a la vez. El cielo solo en bienvenida, onboarding y header de Inicio. Texto secundario #565E6D. Icono nuevo de la app. -->
 <!-- v2.2.0 | 2026-09-29 | Se documenta lo ya construido y pedido por el cliente: vidrio esmerilado (liquid glass) claro sobre un lienzo de cielo con velo blanco, y contador de Beats en navy con barra y halo amarillo (sin card oscura). Se agrega el bono de bienvenida (5 Beats configurables, una vez por cuenta, al confirmar el correo) y las reglas de consistencia saldo/historial, historial en vivo y marcas en el historial. Salen de la historia de Beats: balance e historial. -->
 ---
 
@@ -53,17 +54,30 @@ Heredada del branding oficial (LAF.psd), misma paleta de marca que la web. Base 
 
 - **Primario (Amarillo Latidos)**: `#FDFB05` — CTAs, acentos de atencion, indicadores de Beats, badges de logro. Color protagonista.
 - **Secundario (Azul UCV)**: `#0090FF` — acentos institucionales, links, iconografia, barras de progreso.
-- **Fondo principal app**: `#FFFFFF` — fondo base claro de la app. Limpio, luminoso, coherente con la tematica festiva del programa.
-- **Fondo secundario**: `#F5F7FA` — secciones alternas, zonas de respiro entre bloques de contenido.
-- **Fondo cards/superficies**: `#FFFFFF` con sombra sutil `0 2px 12px rgba(0,0,0,0.06)`, o `#F5F7FA` para cards planas sin elevacion.
+- **Fondo principal app (crema)**: `#FFFFF5` — fondo de pagina de toda la app (revision v2.3.0). Se define UNA sola vez como `--color-fondo` en `globals.css`; Tailwind (`bg-fondo`) apunta a la variable y ningun componente lleva el valor escrito. Solo el manifest y el meta `theme-color` lo repiten, porque no pueden leer CSS.
+- **Superficies (tarjetas, hojas, modales)**: `#FFFFFF` puro sobre el crema, con borde `rgba(26,35,50,0.06)` y sombra corta. Es lo que da profundidad: la pieza blanca se lee apoyada sobre la pagina crema.
+- **Fondo secundario**: `#F5F7FA` — inputs, chips apagados y zonas de respiro dentro de una superficie.
 - **Fondo oscuro (uso puntual)**: `#0D1117` — reservado para elementos que necesitan contraste fuerte puntual (ej. tarjetas de "logro" destacado, contador de Beats grande en Inicio si se decide destacarlo asi), NO como base general de pantalla.
 - **Borde sutil**: `rgba(0,0,0,0.08)` — separadores y bordes de cards sobre fondo claro.
 - **Texto principal**: `#1A2332` — titulos, nombres, datos destacados (no negro puro).
-- **Texto secundario**: `#6B7280` — descripciones, metadata, timestamps.
+- **Texto secundario**: `#565E6D` — descripciones, metadata, timestamps. (Antes `#6B7280`, que sobre superficies translucidas bajaba de AA.)
 - **Texto terciario**: `#9CA3AF` — placeholders, hints.
 - **Exito**: `#2EA043` — confirmaciones, donacion completada, Beats sumados.
 - **Alerta**: `#D29922` — advertencias, limites cercanos.
 - **Error**: `#F85149` — errores de validacion, QR invalido.
+
+### Regla del amarillo (v2.3.0)
+
+El `#FDFB05` queda en 1.1:1 contra el crema y el blanco: es invisible como trazo.
+
+- **Nunca** como color de texto ni como linea fina (bordes, subrayados, separadores, anillos) sobre crema o blanco.
+- **Si** como relleno de botones, chips y acentos con texto navy `#1A2332` encima, o en formas grandes (el circulo de Escanear, el banner provisional, el halo del contador).
+- La barra de acento bajo titulos y contadores es una pastilla de 10px con un canto navy suave, no una linea.
+
+### Regla del azul (v2.3.0)
+
+- El azul `#0090FF` va en texto grande (>= 18px bold o >= 24px), iconos, bordes y rellenos.
+- El texto chico va en navy `#1A2332` o en gris `#565E6D`: botones secundarios y ghost (el ghost lleva subrayado azul), etiqueta del tab activo, chips.
 
 ### Tipografia
 
@@ -82,37 +96,41 @@ Heredada del branding oficial (LAF.psd), misma paleta de marca que la web. Base 
 ### Componentes mobile
 
 - **Botones primarios**: fondo `#FDFB05`, texto `#1A2332`, border-radius 12px, altura minima 48px (touch target), font-weight 500.
-- **Botones secundarios**: borde 1px `#0090FF`, texto `#0090FF`, fondo transparente o blanco.
-- **Botones ghost**: sin borde, texto `#0090FF`, fondo transparente. Para acciones secundarias.
-- **Cards**: border-radius 16px, padding 16px. Los contenedores de primer nivel son de vidrio esmerilado (ver "Vidrio esmerilado" abajo). Las cards opacas (`#FFFFFF` o `#F5F7FA`, sombra sutil `0 2px 12px rgba(0,0,0,0.06)`) quedan para piezas que deben leerse como solidas, como la tarjeta de exito del escaneo.
-- **Bottom navigation**: 5 tabs maximo, iconos + label, barra de vidrio esmerilado (nivel medio), tab activo en `#0090FF` (el amarillo no alcanza contraste como texto sobre la barra clara). El tab central Escanear es un circulo amarillo solido con icono navy. Un tab cuya fase no ha llegado se muestra apagado y sin enlace, nunca se omite.
-- **Bottom sheets**: border-radius 24px top, fondo `#FFFFFF`, handle bar centrado, sombra superior.
+- **Botones secundarios**: borde 1px `#0090FF`, texto navy `#1A2332`, fondo blanco.
+- **Botones ghost**: sin borde, texto navy `#1A2332` subrayado en `#0090FF`, fondo transparente. Para acciones secundarias.
+- **Cards**: border-radius 16px, padding 16px, superficie blanca `#FFFFFF` sobre el crema (clase `.superficie` / `.tarjeta`). El vidrio queda para la barra, las hojas y una pieza destacada sobre el cielo (ver "Liquid glass").
+- **Bottom navigation**: 5 tabs maximo, iconos + label, barra de vidrio (`.vidrio-barra`) por la que el contenido pasa por debajo; las pantallas reservan su alto mas la zona segura (`.espacio-barra`). Tab activo con icono azul y etiqueta navy. El tab central Escanear es un circulo amarillo solido con icono navy. Un tab cuya fase no ha llegado se muestra apagado y sin enlace, nunca se omite.
+- **Bottom sheets**: border-radius 24px top, vidrio casi opaco (`.vidrio-hoja`, blanco al 94%), handle bar centrado, sobre un velo navy al 40% sin desenfoque.
 - **Inputs**: border-radius 12px, borde 1px `rgba(0,0,0,0.12)`, fondo `#F5F7FA`, altura 48px, texto `#1A2332`, placeholder `#9CA3AF`.
 - **Barras de progreso**: fondo `#F5F7FA` o `rgba(0,0,0,0.08)`, fill `#0090FF`, border-radius full (pill), altura 8px.
 - **Badges de Beats**: fondo `#FDFB05`, texto `#1A2332`, border-radius full, DM Sans 700.
 - **Toast/Snackbar**: fondo `#FFFFFF` con sombra, borde izquierdo 3px color semantico (exito/error/alerta), border-radius 12px.
 
-### Vidrio esmerilado (liquid glass)
+### Liquid glass (v2.3.0)
 
-Pedido explicito del cliente, alineado con el estilo de la web. Es vidrio CLARO (a diferencia de la web, que usa vidrio oscuro sobre cielo).
+Pedido explicito del cliente. Vidrio CLARO, en CSS puro: sin WebGL, sin html-to-image y sin filtros SVG de refraccion (no funcionan en Safari iOS y pesan). La receta vive en un solo lugar, `globals.css`, y ningun componente escribe un `backdrop-filter` propio (lo vigila una prueba).
 
-- **Lienzo**: una capa fija detras de toda la app con tres niveles: el cielo del branding en version reducida, un velo blanco que baja el contraste para que el texto navy se lea, y el degradado de marca en `soft-light` que tine el conjunto de azul y amarillo. El contenido scrollea por encima y el cielo queda quieto. Si la imagen no carga, queda el blanco del body y la app sigue legible.
-- **Vidrio medio** (contenedores de primer nivel, barra inferior, card del contador): fondo `rgba(255,255,255,0.72)`, desenfoque 32px con saturacion 180%, sombra muy suave.
-- **Vidrio sutil** (piezas que viven dentro de otra pieza de vidrio): fondo `rgba(255,255,255,0.55)`, desenfoque 20px.
-- **Canto iluminado**: anillo de 1px con degradado blanco de arriba hacia abajo. Es lo que hace que se lea como cristal y no como un rectangulo translucido.
-- **Regla**: el vidrio solo funciona sobre el lienzo. Sobre un color plano se ve como un rectangulo gris. Nunca sombras oscuras marcadas debajo de una superficie de vidrio: se ven a traves y lo ensucian.
+- **Clases**: `.vidrio` (pieza suelta sobre el cielo: contador de Inicio, card de la bienvenida, titulo del onboarding), `.vidrio-barra` (barra de tabs), `.vidrio-hoja` (hojas inferiores).
+- **Receta**: fondo `rgba(255,255,255,.55)`; `backdrop-filter: blur(20px) saturate(180%)` (y `-webkit-`); borde `1px solid rgba(255,255,255,.65)`; sombras `inset 0 1px 0 rgba(255,255,255,.8)`, `inset 0 -1px 0 rgba(26,35,50,.04)`, `0 8px 32px rgba(26,35,50,.10)`, `0 1px 3px rgba(26,35,50,.06)`.
+- **Brillo especular**: `::before` con degradado blanco a transparente y mascara, de modo que solo se ve el aro de 1px.
+- **Hojas**: misma receta con el fondo al 94%: llevan texto largo y van sobre un velo oscuro.
+- **Limite**: como mucho dos capas con desenfoque visibles a la vez. Por eso las tarjetas de contenido son blancas y no vidrio.
+- **Respaldos**: sin soporte de `backdrop-filter`, fondo `rgba(255,255,255,.92)`; con `prefers-reduced-transparency: reduce`, blanco solido sin desenfoque.
+- **Legibilidad**: el texto sobre vidrio cumple AA contra el crema y contra el pixel mas oscuro del cielo del header (lo verifica una prueba).
 
 ### Atmosfera
 
-La app usa fondo claro/blanco como base (revision v2.1.0 — el cliente pidio explicitamente alejarse de un fondo oscuro por no encajar con la tematica festiva del evento). Referencia de atmosfera: apps tipo Cashea/Yummy — blanco limpio, secciones bien segmentadas con cards y bloques de color, no un lienzo oscuro. La textura de cielo del branding NO se usa a sangre como fondo de pantallas: vive siempre debajo del velo blanco como lienzo del vidrio (ver arriba). A tamano completo y sin velo se reserva para momentos puntuales de marca:
-- Splash screen al abrir la app (imagen del branding como fondo, "LATIDOS" amarillo, badge UCV)
-- Header del perfil del usuario como fondo decorativo sutil
+Base crema `#FFFFF5` con superficies blancas (v2.3.0). Referencia de atmosfera: apps tipo Cashea/Yummy — fondo claro, secciones bien segmentadas con cards y bloques de color.
 
-El resto de la app es claro y limpio, con jerarquia via sombras suaves y bloques de color de marca (amarillo, azul) en vez de niveles de gris/negro.
+El cielo del branding (con su velo blanco y el tinte de marca en `soft-light`) va SOLO en:
+- La bienvenida y el onboarding, a pantalla completa y fijo.
+- El header de Inicio, como franja que se funde con el crema.
+
+En el resto de la app: crema solido. A tamano completo y sin velo, el cielo se reserva para el splash screen.
 
 ### Firma visual
 
-El momento memorable de la app es el contador de Beats: un numero grande en Anton, en navy `#1A2332`, dentro de una card de vidrio medio. El amarillo `#FDFB05` no se usa como color del numero (no alcanza contraste sobre superficie clara): pasa a una barra de acento debajo del numero y a un halo radial detras que late despacio (se queda quieto con `prefers-reduced-motion`). Con animacion de incremento cuando se suman puntos. Es lo primero que el usuario ve en su pantalla principal, y se ve igual en Inicio y en la pantalla de Beats para que se reconozca como el mismo numero.
+El momento memorable de la app es el contador de Beats: un numero grande en Anton, en navy `#1A2332`; en Inicio, dentro de una card de vidrio sobre el cielo del header, y en Beats, en una superficie blanca. El amarillo `#FDFB05` no se usa como color del numero (no alcanza contraste sobre superficie clara): pasa a una barra de acento debajo del numero y a un halo radial detras que late despacio (se queda quieto con `prefers-reduced-motion`). Con animacion de incremento cuando se suman puntos. Es lo primero que el usuario ve en su pantalla principal, y se ve igual en Inicio y en la pantalla de Beats para que se reconozca como el mismo numero.
 
 ## 3. Tono y Copy
 

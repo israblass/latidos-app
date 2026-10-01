@@ -168,7 +168,7 @@ test("modal de instalacion en iOS", async ({ browser }) => {
 test.describe("pantalla de Beats (T049)", () => {
   test("con historial, dias abiertos y cerrados", async ({ page }) => {
     const { id } = await cuentaConId(page);
-    await cambiarMarca(MARCA_PEPSI, { logo_url: "/icon-32.png" });
+    await cambiarMarca(MARCA_PEPSI, { logo_url: "/favicon-32.png" });
     await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 10, marcaId: MARCA_KFC });
     await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 5, diasAtras: 1, marcaId: MARCA_PEPSI });
     await sembrarMovimiento({ usuarioId: id, tipo: "ajuste", beats: -2, diasAtras: 1, horaCaracas: 20 });
@@ -232,7 +232,7 @@ test.describe("pantalla de Beats (T049)", () => {
     await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
     await page.reload();
     await expect
-      .poll(() => page.evaluate(() => caches.open("latidos-shell-v5").then((c) => c.match("/beats")).then(Boolean)))
+      .poll(() => page.evaluate(() => caches.open("latidos-shell-v6").then((c) => c.match("/beats")).then(Boolean)))
       .toBe(true);
 
     await cortarRed(context);

@@ -70,7 +70,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="Navegacion principal"
-      className="vidrio-medio fixed inset-x-0 bottom-0 z-40 rounded-none pb-[env(safe-area-inset-bottom)]"
+      className="vidrio-barra fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)]"
     >
       <ul className="mx-auto flex max-w-md items-stretch">
         {TABS.map((tab) => {
@@ -113,11 +113,11 @@ export function TabBar() {
           );
 
           const clases = `flex min-h-touch flex-1 flex-col items-center justify-center gap-1 py-2 transition-[color,transform] duration-200 ease-out active:scale-95 ${
-            // Tab activo en azul y no en amarillo: sobre la barra blanca el
-            // amarillo no alcanza contraste (constitution §2 lo contempla). Los
-            // inactivos en gris secundario y no terciario, que se queda en
-            // 2.5:1 y vuelve la etiqueta ilegible.
-            activo ? "text-secundario-texto" : "text-texto-secundario"
+            // Tab activo: icono azul y etiqueta navy. La etiqueta es texto de
+            // 10px, y el azul queda para iconos y texto grande (regla del azul,
+            // constitution §2). Los inactivos en gris secundario y no
+            // terciario, que se queda en 2.5:1 y vuelve la etiqueta ilegible.
+            activo ? "text-texto-principal" : "text-texto-secundario"
           }`;
 
           return (

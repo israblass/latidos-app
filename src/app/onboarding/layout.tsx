@@ -1,11 +1,14 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { FondoApp } from "@/components/marca/fondo-app";
 import { exigirPerfil } from "@/lib/usuario/sesion";
 
 /**
  * El onboarding se ve una sola vez en la vida de la cuenta (spec §9 regla 5).
  * Quien ya lo vio entra directo a Inicio, aunque escriba la URL a mano.
+ *
+ * Es una de las pantallas con el cielo de la marca de fondo (constitution §2).
  */
 export default async function LayoutOnboarding({
   children,
@@ -15,5 +18,10 @@ export default async function LayoutOnboarding({
   const perfil = await exigirPerfil();
   if (perfil.onboarding_visto) redirect("/inicio");
 
-  return <>{children}</>;
+  return (
+    <>
+      <FondoApp />
+      {children}
+    </>
+  );
 }

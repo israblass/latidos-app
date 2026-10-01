@@ -13,9 +13,15 @@
     line-height: 1.6;
   }
 
-  /* Base clara (constitution §2, v2.1.0). */
+  /*
+   * Base crema (constitution §2, v2.3.0). Es la UNICA definicion del color de
+   * fondo de pagina: Tailwind (`bg-fondo`) apunta a esta variable, y ningun
+   * componente lleva el valor escrito. El manifest y el theme-color del
+   * layout lo repiten porque no pueden leer CSS.
+   */
   :root {
     color-scheme: light;
+    --color-fondo: #fffff5;
   }
 
   input,
@@ -62,7 +68,9 @@
 
 @layer components {
   /*
-   * Capa de fondo fija. Detras de todo el contenido y sin capturar toques.
+   * El cielo (src/components/marca/fondo-app.tsx). Detras de todo el
+   * contenido y sin capturar toques. Solo en bienvenida, onboarding y el
+   * header de Inicio; el resto de la app es crema solido.
    */
   .fondo-app {
     position: fixed;
@@ -70,11 +78,23 @@
     z-index: -1;
     pointer-events: none;
     /*
-     * Capa propia de composicion. En Safari iOS el backdrop-filter sobre un
+     * Capa propia de composicion. En Safari iOS el desenfoque sobre un
      * position:fixed se rompe con el rebote del scroll; promoverlo a su propia
      * capa lo evita. No he podido comprobarlo en un iOS real desde aqui.
      */
     transform: translateZ(0);
+  }
+
+  /*
+   * Variante cabecera: una franja que se funde con el crema hacia abajo. La
+   * mascara hace la transicion; sin ella el cielo terminaria en un corte recto.
+   */
+  .fondo-app--cabecera {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 380px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
   }
 
   .fondo-app__cielo,
@@ -193,15 +213,22 @@
   /*
    * El secundario se eleva menos, no igual. Con la misma sombra que el primario
    * los dos pesarian lo mismo y se perderia cual es la accion y cual la salida.
+   *
+   * Regla del azul (constitution §2, v2.3.0): el azul es borde, icono o texto
+   * grande; el texto de 15px va en navy.
    */
   .boton-secundario {
-    @apply elevado-bajo flex min-h-touch w-full items-center justify-center rounded-control border border-secundario px-5 text-[15px] font-medium text-secundario-texto disabled:opacity-40 disabled:shadow-none;
+    @apply elevado-bajo flex min-h-touch w-full items-center justify-center rounded-control border border-secundario px-5 text-[15px] font-medium text-texto-principal disabled:opacity-40 disabled:shadow-none;
     background-image: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
   }
 
-  /* El ghost es texto que se toca: no es una superficie y no se eleva. */
+  /*
+   * El ghost es texto que se toca: no es una superficie y no se eleva. Navy y
+   * no azul (texto chico, regla del azul); el subrayado azul es lo que lo
+   * distingue de un texto cualquiera.
+   */
   .boton-ghost {
-    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-secundario-texto active:scale-[0.97] active:opacity-80;
+    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-texto-principal underline decoration-secundario decoration-2 underline-offset-4 active:scale-[0.97] active:opacity-80;
   }
 
   /*
@@ -223,16 +250,25 @@
   }
 
   .campo {
-    @apply min-h-touch w-full rounded-control border border-black/[0.12] bg-fondo-alterno px-4 text-[16px] text-texto-principal outline-none transition-colors focus:border-secundario focus:bg-fondo;
+    @apply min-h-touch w-full rounded-control border border-black/[0.12] bg-fondo-alterno px-4 text-[16px] text-texto-principal outline-none transition-colors focus:border-secundario focus:bg-superficie;
   }
 
   .campo-error {
     @apply border-error focus:border-error;
   }
 
+  /*
+   * Superficie: blanco puro sobre el crema, con un borde apenas visible y
+   * sombra corta. Es la pieza base de tarjetas, hojas y modales; `.tarjeta`
+   * le suma el padding estandar.
+   */
+  .superficie {
+    @apply elevado-bajo relative rounded-card border border-texto-principal/[0.06] bg-superficie;
+  }
+
   /* Card estandar: blanca, elevada, sin borde marcado. */
   .tarjeta {
-    @apply elevado-bajo rounded-card bg-fondo p-4;
+    @apply superficie p-4;
   }
 
   /*
@@ -252,45 +288,75 @@
 
   /* Card que tiene que leerse como el elemento principal de la pantalla. */
   .tarjeta-elevada {
-    @apply elevado-alto rounded-card bg-fondo p-4;
+    @apply elevado-alto rounded-card bg-superficie p-4;
   }
 
   /*
-   * Vidrio esmerilado, en tres niveles.
+   * Liquid glass (constitution §2, v2.3.0). La receta vive SOLO aqui: ningun
+   * componente escribe un backdrop-filter propio (lo vigila
+   * tests/integracion/diseno.test.ts). Es CSS puro: sin WebGL ni filtros SVG
+   * de refraccion, que no funcionan en Safari iOS y pesan.
    *
-   * Solo funcionan sobre la capa .fondo-app: el desenfoque necesita algo con
-   * variacion detras. Sobre un color plano los tres se ven igual, como un
-   * rectangulo gris.
+   * - .vidrio        piezas sueltas sobre el cielo (contador de Inicio, card de
+   *                  la bienvenida, titulo del onboarding).
+   * - .vidrio-barra  la barra de tabs: el contenido pasa por debajo.
+   * - .vidrio-hoja   hojas inferiores. Casi opaca: una hoja lleva texto largo y
+   *                  va sobre el velo oscuro del modal, y a 0.55 el texto
+   *                  perderia contraste segun lo que hubiera detras.
+   *
+   * Como mucho dos capas con desenfoque a la vez en pantalla (el desenfoque es
+   * caro y se acumula): por eso las tarjetas de contenido son .superficie
+   * blanca y no vidrio.
    */
-  .vidrio-sutil,
-  .vidrio-medio,
-  .vidrio-oscuro {
+  .vidrio,
+  .vidrio-barra,
+  .vidrio-hoja {
+    --vidrio-fondo: rgba(255, 255, 255, 0.55);
+    background: var(--vidrio-fondo);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(26, 35, 50, 0.04),
+      0 8px 32px rgba(26, 35, 50, 0.1),
+      0 1px 3px rgba(26, 35, 50, 0.06);
+  }
+
+  .vidrio {
     position: relative;
     border-radius: theme("borderRadius.card");
-    /* El desenfoque se calcula en su propia capa: sin esto el navegador lo
-       rehace en cada cuadro de scroll y se nota el tiron. */
-    transform: translateZ(0);
+  }
+
+  /* La barra va pegada abajo: solo el canto de arriba. */
+  .vidrio-barra {
+    border-width: 1px 0 0;
+    border-radius: 0;
+  }
+
+  .vidrio-hoja {
+    --vidrio-fondo: rgba(255, 255, 255, 0.94);
+    border-radius: theme("borderRadius.sheet") theme("borderRadius.sheet") 0 0;
   }
 
   /*
-   * El canto iluminado es lo que de verdad vende el efecto: un borde plano se
-   * lee como un rectangulo translucido, no como un canto de vidrio. Se hace
-   * con un anillo de un pixel recortado por mascara, porque un borde con
-   * degradado de verdad exigiria pintar el fondo del elemento y eso taparia el
-   * desenfoque.
+   * Brillo especular del canto: un aro de 1px con degradado blanco que se
+   * apaga hacia abajo. La mascara recorta el centro, asi que solo se ve el
+   * aro y el desenfoque de debajo queda intacto.
    */
-  .vidrio-sutil::after,
-  .vidrio-medio::after {
+  .vidrio::before,
+  .vidrio-barra::before,
+  .vidrio-hoja::before {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: -1px;
     padding: 1px;
     border-radius: inherit;
     background: linear-gradient(
       to bottom,
       rgba(255, 255, 255, 0.95),
-      rgba(255, 255, 255, 0.25) 45%,
-      rgba(255, 255, 255, 0.12)
+      rgba(255, 255, 255, 0.3) 40%,
+      rgba(255, 255, 255, 0) 75%
     );
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
@@ -303,102 +369,36 @@
     pointer-events: none;
   }
 
-  .vidrio-oscuro::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: inherit;
-    background: linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.28),
-      rgba(255, 255, 255, 0.06)
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  /* Nivel menor: para lo que ya vive dentro de otra pieza de vidrio. */
-  .vidrio-sutil {
-    background: rgba(255, 255, 255, 0.55);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    backdrop-filter: blur(20px) saturate(160%);
-    box-shadow:
-      0 1px 2px rgba(26, 35, 50, 0.06),
-      0 4px 12px -3px rgba(26, 35, 50, 0.10);
-  }
-
-  /* Nivel principal: contenedores de primer nivel. */
-  .vidrio-medio {
-    background: rgba(255, 255, 255, 0.72);
-    -webkit-backdrop-filter: blur(32px) saturate(180%);
-    backdrop-filter: blur(32px) saturate(180%);
-    /*
-     * Menos sombra que una card opaca, aunque el resto de la app suba. Una
-     * sombra oscura debajo de una superficie translucida se ve a traves del
-     * propio vidrio y lo ensucia: deja de leerse como cristal y empieza a
-     * leerse como plastico gris.
-     */
-    box-shadow:
-      0 1px 2px rgba(26, 35, 50, 0.07),
-      0 8px 20px -5px rgba(26, 35, 50, 0.14),
-      0 18px 34px -12px rgba(26, 35, 50, 0.10);
-  }
-
   /*
-   * SIN USO desde v2.1.2. Ninguna card de la app lleva fondo oscuro: el
-   * amarillo de marca ya no se sostiene con una superficie oscura debajo, sino
-   * que deja de ser color de texto y pasa a acento (ver TituloConAcento). Se
-   * deja definido porque la constitution todavia contempla el oscuro como uso
-   * puntual, pero si nada lo usa en la proxima fase, se puede borrar.
-   */
-  .vidrio-oscuro {
-    background: rgba(13, 17, 23, 0.82);
-    -webkit-backdrop-filter: blur(32px) saturate(140%);
-    backdrop-filter: blur(32px) saturate(140%);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
-    @apply text-texto-inverso;
-  }
-
-  /*
-   * En pantallas chicas el desenfoque se baja, mismo criterio que el
-   * globals.css de la web (breakpoint 767px): a 32px el scroll da tirones en
-   * telefonos de gama media, que son la mayoria en el evento.
-   */
-  @media (max-width: 767px) {
-    .vidrio-sutil {
-      -webkit-backdrop-filter: blur(12px) saturate(160%);
-      backdrop-filter: blur(12px) saturate(160%);
-    }
-
-    .vidrio-medio,
-    .vidrio-oscuro {
-      -webkit-backdrop-filter: blur(18px) saturate(180%);
-      backdrop-filter: blur(18px) saturate(180%);
-    }
-  }
-
-  /*
-   * Sin backdrop-filter (Safari viejo, Firefox sin la bandera) el fondo se
-   * vuelve casi opaco: translucido y sin desenfoque, el texto quedaria sobre
-   * el cielo a pelo y perderia contraste.
+   * Sin desenfoque (navegadores viejos) el fondo se vuelve casi opaco:
+   * translucido y sin desenfoque, el texto quedaria sobre el contenido a pelo.
    */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .vidrio-sutil,
-    .vidrio-medio {
-      background: rgba(255, 255, 255, 0.92);
+    .vidrio,
+    .vidrio-barra,
+    .vidrio-hoja {
+      --vidrio-fondo: rgba(255, 255, 255, 0.92);
     }
+  }
 
-    .vidrio-oscuro {
-      background: rgba(13, 17, 23, 0.95);
+  /* Quien pidio menos transparencia recibe blanco solido, sin desenfoque. */
+  @media (prefers-reduced-transparency: reduce) {
+    .vidrio,
+    .vidrio-barra,
+    .vidrio-hoja {
+      --vidrio-fondo: #ffffff;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
+  }
+
+  /*
+   * Lo que va debajo de la barra de tabs: el contenido scrollea por detras
+   * del vidrio, y este espacio hace que el ultimo elemento no quede tapado
+   * (incluida la zona segura del iPhone).
+   */
+  .espacio-barra {
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
   }
 
   /*
@@ -416,7 +416,7 @@
    * sobre blanco, asi que cuando tiene que brillar se le pone debajo una
    * superficie que lo sostenga (constitution §2, firma visual).
    */
-  /* SIN USO desde v2.1.2, misma razon que .vidrio-oscuro. */
+  /* SIN USO desde v2.1.2: ninguna card de la app lleva fondo oscuro. */
   .bloque-oscuro {
     @apply rounded-card bg-oscuro text-texto-inverso;
   }

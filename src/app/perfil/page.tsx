@@ -20,12 +20,12 @@ export default async function Perfil() {
 
   return (
     <>
-      <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
+      <main className="flex min-h-dvh flex-col px-5 espacio-barra pt-6">
         <header className="flex min-h-touch items-center">
           <h1 className="titulo-pantalla">Perfil</h1>
         </header>
 
-        <section aria-label="Tu cuenta" className="vidrio-medio mt-4 px-5 py-5">
+        <section aria-label="Tu cuenta" className="superficie mt-4 px-5 py-5">
           <p className="etiqueta">Correo</p>
           <p className="mt-1 break-all text-[15px] text-texto-principal">{correo}</p>
         </section>

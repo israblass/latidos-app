@@ -55,7 +55,7 @@ export default function PantallaQueEsLatidos() {
         descripcion="Un corazón amarillo con la línea de un latido"
       />
 
-      <div className="vidrio-medio mt-3 px-5 py-7 text-center">
+      <div className="vidrio mt-3 px-5 py-7 text-center">
         <TituloConAcento
           etiqueta="Programa UCV"
           detalle="Un programa en tres fases, de septiembre a marzo."
@@ -70,17 +70,17 @@ export default function PantallaQueEsLatidos() {
         {FASES.map((fase) => (
           <li
             key={fase.nombre}
-            className={`vidrio-medio overflow-hidden border-l-4 p-4 ${fase.acento}`}
+            className={`superficie overflow-hidden border-l-4 p-4 ${fase.acento}`}
           >
             <div className="flex items-center justify-between gap-3">
-              <h3 className="flex min-w-0 items-center">
+              <h2 className="flex min-w-0 items-center">
                 <ImagenMarca
                   src={fase.lettering}
                   alt={fase.nombre}
                   alto={30}
                   className="max-w-[60%]"
                 />
-              </h3>
+              </h2>
               <span className="shrink-0 text-xs text-texto-secundario">
                 {fase.fechas}
               </span>

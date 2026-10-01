@@ -36,7 +36,7 @@ export function SaldoInicio({ saldoInicial }: { saldoInicial: number }) {
     <Link
       href="/beats"
       aria-label={`Ver mis Beats. Tienes ${saldo} Beats`}
-      className="vidrio-medio block w-full px-6 py-10 text-center outline-none focus-visible:ring-2 focus-visible:ring-secundario"
+      className="vidrio block w-full px-6 py-10 text-center outline-none focus-visible:ring-2 focus-visible:ring-secundario"
     >
       <ContadorBeatsVivo valor={saldo} />
     </Link>

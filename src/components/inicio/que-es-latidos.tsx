@@ -58,16 +58,21 @@ export const FASES: Fase[] = [
   },
 ];
 
+/**
+ * Chip de estado. El texto es de 11px, asi que va en navy o gris (regla del
+ * azul): "En curso" se distingue por el borde y el punto azules.
+ */
 function ChipEstado({ estado }: { estado: Fase["estado"] }) {
   const enCurso = estado === "En curso";
   return (
     <span
-      className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-etiqueta ${
+      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-etiqueta ${
         enCurso
-          ? "border-secundario/40 bg-fondo text-secundario-texto"
+          ? "border-secundario/50 bg-superficie text-texto-principal"
           : "border-sutil bg-fondo-alterno text-texto-secundario"
       }`}
     >
+      {enCurso ? <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-secundario" /> : null}
       {estado}
     </span>
   );
@@ -101,7 +106,7 @@ export function QueEsLatidos() {
         {FASES.map((fase) => (
           <li
             key={fase.nombre}
-            className="vidrio-medio flex w-[78%] max-w-[300px] shrink-0 snap-start flex-col rounded-card p-4"
+            className="superficie flex w-[78%] max-w-[300px] shrink-0 snap-start flex-col p-4"
           >
             {/* Por debajo del pliegue: carga diferida (la de next/image por
                 defecto). El alto fijo reserva el espacio antes de que llegue. */}

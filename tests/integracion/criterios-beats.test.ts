@@ -60,7 +60,7 @@ async function prepararCopia(page: Page) {
   await page.reload();
   await expect
     .poll(() =>
-      page.evaluate(() => caches.open("latidos-shell-v5").then((c) => c.match("/beats")).then(Boolean)),
+      page.evaluate(() => caches.open("latidos-shell-v6").then((c) => c.match("/beats")).then(Boolean)),
     )
     .toBe(true);
 }
@@ -180,13 +180,13 @@ test.describe("spec de Beats", () => {
   test("13 — una marca renombrada con logo nuevo se ve asi en filas viejas, mismos Beats", async ({ page }) => {
     const { id } = await cuentaConId(page);
     await sembrarMovimiento({ usuarioId: id, tipo: "escaneo", beats: 10, diasAtras: 3, marcaId: MARCA_KFC });
-    await cambiarMarca(MARCA_KFC, { nombre: "KFC Plaza", logo_url: "/icon-32.png" });
+    await cambiarMarca(MARCA_KFC, { nombre: "KFC Plaza", logo_url: "/favicon-32.png" });
     await abrirBeats(page);
     await lineaDelDia(page, etiquetaDia(haceDias(3))).click();
     const fila = page.locator(`#dia-${haceDias(3)} li`).first();
     await expect(fila).toContainText("KFC Plaza");
     await expect(fila).toContainText("+10");
-    await expect(fila.locator("img[src='/icon-32.png']")).toBeVisible();
+    await expect(fila.locator("img[src='/favicon-32.png']")).toBeVisible();
   });
 
   test("14 — si el admin cambia los Beats del QR, los escaneos viejos conservan los suyos", async ({ page }) => {
@@ -205,7 +205,7 @@ test.describe("spec de Beats", () => {
     await abrirBeats(page);
     const fila = page.locator(`#dia-${hoy()} li`).filter({ hasText: "Bienvenida a Latidos" });
     await expect(fila).toContainText("+5");
-    await expect(fila.locator("img[src*='icon-192']")).toHaveCount(1);
+    await expect(fila.locator("img[src*='icon-512']")).toHaveCount(1);
   });
 
   test("16 — sin escaneos: explicacion desplegada, linea guia y Escanear", async ({ page }) => {

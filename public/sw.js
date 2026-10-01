@@ -10,13 +10,15 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v5";
+const VERSION = "v6";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
 // (plan de Beats §3, "Pantalla de Beats disponible sin conexion").
 // v5: llegan las ilustraciones definitivas. La de sin conexion y error se
 // precachea con el shell, y la vieja de estados-vacios deja de existir.
+// v6: el manifest pasa al crema (#FFFFF5) y llega el icono nuevo (/icons/),
+// ambos precacheados en el shell.
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 
@@ -47,8 +49,8 @@ const RECURSOS_SIN_RED = {
 const SHELL = [
   RUTA_SIN_CONEXION,
   "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
   ILUSTRACION_SIN_SENAL,
 ];
 

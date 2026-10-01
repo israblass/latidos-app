@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { CarruselBanners } from "@/components/inicio/carrusel-banners";
+import { FondoApp } from "@/components/marca/fondo-app";
 import { QueEsLatidos } from "@/components/inicio/que-es-latidos";
 import { SaldoInicio } from "@/components/inicio/saldo-inicio";
 import { TabBar } from "@/components/navegacion/tab-bar";
@@ -29,7 +30,9 @@ export default async function Inicio() {
 
   return (
     <>
-      <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
+      <main className="relative isolate flex min-h-dvh flex-col px-5 espacio-barra pt-6">
+        {/* El cielo solo en la cabecera: se funde con el crema hacia abajo. */}
+        <FondoApp variante="cabecera" />
         <header className="flex items-center justify-between gap-3">
           {/* El diseño no lleva titulo visible (el contador es el heroe), pero
               sin un h1 un lector de pantalla no sabe anunciar donde esta. */}

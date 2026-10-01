@@ -16,16 +16,25 @@ export function ListaComoGanar({
   titulo,
   idTitulo,
   nivel = 3,
+  region = true,
 }: {
   items: readonly ItemComoGanar[];
   titulo: string;
   idTitulo: string;
   /** Nivel del titulo de seccion segun donde viva la lista. */
   nivel?: 2 | 3;
+  /**
+   * Si la lista es una region con nombre. Dentro de la hoja no lo es: la
+   * pantalla de Beats ya tiene una region "Cómo los ganas" (el estado inicial),
+   * y dos regiones con el mismo nombre no se distinguen con lector de
+   * pantalla.
+   */
+  region?: boolean;
 }) {
   const Titulo = nivel === 2 ? "h2" : "h3";
+  const Contenedor = region ? "section" : "div";
   return (
-    <section aria-labelledby={idTitulo}>
+    <Contenedor aria-labelledby={region ? idTitulo : undefined}>
       <Titulo id={idTitulo} className="etiqueta mb-3 mt-7">
         {titulo}
       </Titulo>
@@ -36,11 +45,11 @@ export function ListaComoGanar({
             <li
               key={item.titulo}
               data-estado={item.estado}
-              className="vidrio-medio flex items-center gap-3 p-4"
+              className="superficie flex items-center gap-3 p-4"
             >
               <span
                 aria-hidden="true"
-                className={`vidrio-sutil flex h-10 w-10 shrink-0 items-center justify-center rounded-control ${
+                className={`flex h-10 w-10 bg-fondo shrink-0 items-center justify-center rounded-control ${
                   pronto ? "opacity-50" : ""
                 }`}
               >
@@ -72,6 +81,6 @@ export function ListaComoGanar({
           );
         })}
       </ul>
-    </section>
+    </Contenedor>
   );
 }

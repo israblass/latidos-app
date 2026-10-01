@@ -133,7 +133,7 @@ export function PantallaBeats() {
   if (!tieneDatos && fallo && !enLinea) {
     return (
       <>
-        <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
+        <main className="flex min-h-dvh flex-col px-5 espacio-barra pt-6">
           <h1 className="titulo-pantalla">Beats</h1>
           <SinConexionBeats />
         </main>
@@ -144,7 +144,7 @@ export function PantallaBeats() {
 
   return (
     <>
-      <main className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
+      <main className="flex min-h-dvh flex-col px-5 espacio-barra pt-6">
         {tieneDatos && !enLinea ? (
           <AvisoEstado tipo="sin-conexion" actualizadoEn={historial.actualizadoEn} />
         ) : tieneDatos && fallo ? (
@@ -165,7 +165,7 @@ export function PantallaBeats() {
         </header>
 
         <section aria-label="Tu balance de Beats" className="mt-4">
-          <div className="vidrio-medio px-6 py-8 text-center">
+          <div className="superficie px-6 py-8 text-center">
             {resumen ? (
               // Sin animacion de entrada (spec §10.11): el numero aparece
               // directo. Solo se anima si cambia con la pantalla abierta.
@@ -191,7 +191,7 @@ export function PantallaBeats() {
           ) : !tieneDatos ? (
             // Con red, sin nada guardado y con la carga fallida: el mismo
             // mensaje del aviso, en lugar del historial (spec §8.4).
-            <div className="vidrio-medio flex flex-col items-center gap-3 px-5 py-6 text-center">
+            <div className="superficie flex flex-col items-center gap-3 px-5 py-6 text-center">
               <p className="text-texto-principal">No pudimos actualizar.</p>
               <button
                 type="button"
@@ -203,7 +203,7 @@ export function PantallaBeats() {
               </button>
             </div>
           ) : (
-            <div className="vidrio-medio px-4">
+            <div className="superficie px-4">
               <ul>
                 {dias.map((dia) => (
                   <DiaHistorial

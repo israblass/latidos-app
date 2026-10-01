@@ -25,7 +25,7 @@ function IconoFila({ movimiento }: { movimiento: Movimiento }) {
   if (esMovimientoDeLatidos(movimiento.tipo)) {
     return (
       <Image
-        src="/icon-192.png"
+        src="/icons/icon-512.png"
         alt=""
         aria-hidden="true"
         width={LADO}
@@ -51,7 +51,7 @@ function IconoFila({ movimiento }: { movimiento: Movimiento }) {
         height={LADO}
         loading="lazy"
         onError={() => setLogoRoto(true)}
-        className="h-9 w-9 shrink-0 rounded-full bg-fondo object-contain"
+        className="h-9 w-9 shrink-0 rounded-full bg-superficie object-contain"
       />
     );
   }

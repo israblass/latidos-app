@@ -13,11 +13,17 @@ import {
 export function HojaComoGanar({ abierta, alCerrar }: { abierta: boolean; alCerrar: () => void }) {
   return (
     <HojaInferior abierta={abierta} alCerrar={alCerrar} titulo="¿Cómo gano Beats?">
-      <ListaComoGanar items={FORMAS_DE_GANAR} titulo={TITULO_COMO_GANAR} idTitulo="hoja-como-ganar" />
+      <ListaComoGanar
+        items={FORMAS_DE_GANAR}
+        titulo={TITULO_COMO_GANAR}
+        idTitulo="hoja-como-ganar"
+        region={false}
+      />
       <ListaComoGanar
         items={EN_QUE_LOS_CAMBIAS}
         titulo={TITULO_EN_QUE_CAMBIAS}
         idTitulo="hoja-en-que-cambias"
+        region={false}
       />
     </HojaInferior>
   );
