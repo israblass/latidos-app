@@ -274,6 +274,55 @@ test.describe("RLS", () => {
     });
   });
 
+  test.describe("banners", () => {
+    test("Ana lee los tres banners activos de la semilla, en orden", async () => {
+      const filas = await comoAna(`select titulo, imagen_url, enlace_url from public.banners order by orden`);
+      expect(filas).toEqual([
+        { titulo: "Tu marca aquí", imagen_url: "/banners/tu-marca-aqui-corazon.webp", enlace_url: null },
+        { titulo: "Tu marca aquí", imagen_url: "/banners/tu-marca-aqui-donaciones.webp", enlace_url: null },
+        { titulo: "Tu marca aquí", imagen_url: "/banners/tu-marca-aqui-ecg.webp", enlace_url: null },
+      ]);
+    });
+
+    test("un banner inactivo no se ve", async () => {
+      const { rows } = await pool.query(
+        `insert into public.banners (titulo, orden, activo) values ('Apagado', 9, false) returning id`);
+      try {
+        const filas = await comoAna(`select id from public.banners where id = $1`, [rows[0].id]);
+        expect(filas).toEqual([]);
+      } finally {
+        await pool.query(`delete from public.banners where id = $1`, [rows[0].id]);
+      }
+    });
+
+    test("Ana no puede crear, cambiar ni borrar banners", async () => {
+      expect(await comoAnaDebeFallar(
+        `insert into public.banners (titulo) values ('Mio')`)).toMatch(/permission denied/i);
+      expect(await comoAnaDebeFallar(
+        `update public.banners set activo = false`)).toMatch(/permission denied/i);
+      expect(await comoAnaDebeFallar(
+        `delete from public.banners`)).toMatch(/permission denied/i);
+      const { rows } = await pool.query(`select count(*)::int as total from public.banners where activo`);
+      expect(rows[0].total).toBe(3);
+    });
+
+    test("el rol anonimo no los lee", async () => {
+      const conexion = await conexionComoUsuario(BASE, ana);
+      try {
+        await conexion.query("set role anon");
+        let fallo = null;
+        try {
+          await conexion.query(`select id from public.banners`);
+        } catch (error) {
+          fallo = (error as Error).message;
+        }
+        expect(fallo, "anon pudo leer banners").toMatch(/permission denied/i);
+      } finally {
+        await conexion.end();
+      }
+    });
+  });
+
   test.describe("la funcion de canje no se puede torcer", () => {
     test("acredita a quien llama, no a quien se le indique", async () => {
       // La funcion no recibe usuario_id: lo toma de auth.uid(). Si lo recibiera

@@ -3,7 +3,10 @@ import Link from "next/link";
 import { ContadorBeats } from "@/components/marca/contador-beats";
 import { redirect } from "next/navigation";
 
+import { CarruselBanners } from "@/components/inicio/carrusel-banners";
+import { QueEsLatidos } from "@/components/inicio/que-es-latidos";
 import { TabBar } from "@/components/navegacion/tab-bar";
+import { leerBannersActivos } from "@/lib/banners/leer-banners";
 import { exigirPerfil } from "@/lib/usuario/sesion";
 
 /**
@@ -13,12 +16,18 @@ import { exigirPerfil } from "@/lib/usuario/sesion";
  * grande en navy dentro de una card de vidrio, lo primero que se ve. Recien
  * registrada la persona ya tiene el bono de bienvenida, asi que el numero
  * nunca arranca en cero.
+ *
+ * Orden de arriba a abajo: saludo, contador, banners y "Qué es Latidos" con
+ * sus fases. El contador sigue siendo lo primero y lo mas grande; lo demas va
+ * debajo, sin competirle.
  */
 export default async function Inicio() {
   const perfil = await exigirPerfil();
 
   // Quien todavia no vio el onboarding pasa por el antes de llegar aqui.
   if (!perfil.onboarding_visto) redirect("/onboarding/pantalla-1");
+
+  const banners = await leerBannersActivos();
 
   return (
     <>
@@ -37,7 +46,7 @@ export default async function Inicio() {
 
         <section
           aria-label="Tu balance de Beats"
-          className="flex flex-1 flex-col items-center justify-center"
+          className="mt-6 flex flex-col items-center"
         >
           {/*
             La card entera es el enlace a Beats: tocar el saldo para ver el
@@ -60,9 +69,17 @@ export default async function Inicio() {
             vacio salieron (criterio 12).
           */}
           <p className="mt-4 max-w-[16rem] text-center text-texto-secundario">
-            Sigue participando para sumar mas.
+            Sigue participando para sumar más.
           </p>
         </section>
+
+        <div className="mt-8">
+          <CarruselBanners banners={banners} />
+        </div>
+
+        <div className="mt-8">
+          <QueEsLatidos />
+        </div>
       </main>
 
       <TabBar />

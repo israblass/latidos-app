@@ -33,8 +33,15 @@ const SEMILLA = {
     { id: "b2000000-0000-4000-8000-000000000003", marca_id: "a1000000-0000-4000-8000-000000000002", beats_otorgados: 5, limite_total_escaneos: 2, escaneos_totales_contador: 2, estado: "activo" },
     { id: "b2000000-0000-4000-8000-000000000004", marca_id: "a1000000-0000-4000-8000-000000000003", beats_otorgados: 20, limite_total_escaneos: null, escaneos_totales_contador: 0, estado: "inactivo" },
   ],
+  // Espejo del seed de la migracion de banners.
+  banners: [
+    { id: "c3000000-0000-4000-8000-000000000001", titulo: "Tu marca aquí", imagen_url: "/banners/tu-marca-aqui-corazon.webp", enlace_url: null, orden: 0, activo: true },
+    { id: "c3000000-0000-4000-8000-000000000002", titulo: "Tu marca aquí", imagen_url: "/banners/tu-marca-aqui-donaciones.webp", enlace_url: null, orden: 1, activo: true },
+    { id: "c3000000-0000-4000-8000-000000000003", titulo: "Tu marca aquí", imagen_url: "/banners/tu-marca-aqui-ecg.webp", enlace_url: null, orden: 2, activo: true },
+  ],
 };
 
+let banners;
 let marcas, qrs, escaneos, movimientos, configuracion, usuariosAuth, perfiles, tokens, ultimoEnlace;
 // Fallas simuladas por nombre de RPC (Fase 5: "No pudimos actualizar").
 let fallas;
@@ -42,6 +49,7 @@ let fallas;
 /** Devuelve el mock al estado semilla. Las pruebas lo llaman antes de cada caso. */
 function reiniciar() {
   marcas = SEMILLA.marcas.map((m) => ({ ...m }));
+  banners = SEMILLA.banners.map((b) => ({ ...b }));
   qrs = SEMILLA.qrs.map((q) => ({ ...q }));
   escaneos = [];
   movimientos = [];
@@ -259,6 +267,12 @@ const servidor = http.createServer((req, res) => {
       }
       return json(200, { ok: true });
     }
+    // Reemplaza los banners (filas tal cual llegarian de la tabla).
+    if (url.pathname === "/prueba/banners" && req.method === "POST") {
+      const { filas } = JSON.parse(cuerpo || "{}");
+      banners = (filas || []).map((f, i) => ({ id: crypto.randomUUID(), orden: i, activo: true, enlace_url: null, ...f }));
+      return json(200, { banners });
+    }
     // Hace fallar una RPC con 500 hasta que se apague.
     if (url.pathname === "/prueba/falla" && req.method === "POST") {
       const { rpc, activa } = JSON.parse(cuerpo);
@@ -432,6 +446,16 @@ const servidor = http.createServer((req, res) => {
       if (!id) return json(401, { message: "no auth" });
       const { p_antes_de, p_cantidad_dias } = JSON.parse(cuerpo || "{}");
       return json(200, historialDe(id, p_antes_de, p_cantidad_dias));
+    }
+
+    // Espeja banners_select_activos: solo con sesion y solo los activos.
+    if (url.pathname === "/rest/v1/banners" && req.method === "GET") {
+      if (fallas.has("banners")) return json(500, { code: "XX000", message: "falla simulada" });
+      if (!sujeto()) return json(401, { message: "no auth" });
+      const filas = banners.filter((b) => b.activo)
+        .sort((a, b) => a.orden - b.orden)
+        .map(({ id, titulo, imagen_url, enlace_url }) => ({ id, titulo, imagen_url, enlace_url }));
+      return json(200, filas);
     }
 
     // Marcas: cualquiera con sesion las lee (marcas_select_autenticado).
