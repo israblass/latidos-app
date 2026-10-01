@@ -336,7 +336,7 @@ No se editó ninguna migración de la Fase 1. Esto es lo que sugiero revisar:
 
 ## 8. Banners de Inicio, refresco y cierre de sesión local
 
-1. **Migración `20261001120000_banners.sql`**: crea `public.banners` (RLS, solo lectura para `authenticated`) y siembra los tres banners "Tu marca aquí". No se aplicó en ninguna base: hay que pegarla una sola vez en el SQL Editor de producción. No es idempotente (sin `if not exists`): correrla dos veces falla en el `create table`, y eso evita duplicar la semilla.
+1. **Migración `20261001120000_banners.sql`**: crea `public.banners` (RLS, solo lectura para `authenticated`) y siembra los tres banners "Tu marca aquí". No se aplicó en ninguna base: hay que pegarla en el SQL Editor de producción. Es idempotente, como las demás: si se corre dos veces no falla ni duplica la semilla (cada banner semilla entra solo si no hay otro con la misma imagen).
 2. **Imágenes**: los banners se sirven desde `public/banners/` y las ilustraciones desde `public/ilustraciones/` (generadas desde `recursos/ilustraciones/hd/`, que no se publica). Para cambiar un banner basta con editar su fila (`imagen_url`, `enlace_url`, `orden`, `activo`).
 3. **Service worker v5**: precachea la ilustración de sin conexión y error. Al publicar, los teléfonos cambian de versión solos y borran la caché v4.
 4. **Cerrar sesión** ahora usa `scope: "local"`: cierra solo el dispositivo donde se toca. No hace falta cambiar nada en Supabase.

@@ -115,8 +115,9 @@ test.describe("banners", () => {
     // La tarjeta entera: el enlace ocupa todo el banner.
     const cajaEnlace = await enlace.boundingBox();
     const cajaBanner = await anuncioActivo(page).boundingBox();
-    expect(Math.round(cajaEnlace!.width)).toBe(Math.round(cajaBanner!.width));
-    expect(Math.round(cajaEnlace!.height)).toBe(Math.round(cajaBanner!.height));
+    // Con 1 px de margen por el redondeo de subpixeles.
+    expect(Math.abs(cajaEnlace!.width - cajaBanner!.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(cajaEnlace!.height - cajaBanner!.height)).toBeLessThanOrEqual(1);
   });
 
   test("rota sola cada 5 s y se detiene mientras se toca", async ({ page }) => {

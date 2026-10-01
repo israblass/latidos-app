@@ -84,8 +84,11 @@ test.describe("Inicio", () => {
     const { id } = await cuentaConId(page);
     const lecturas = contarLecturasDeSaldo(page);
 
+    // Se espera la respuesta: sembrar antes podria colarse en esta lectura.
+    const primera = page.waitForResponse((r) => r.url().includes("/rest/v1/rpc/resumen_beats"));
     await volverAPrimerPlano(page);
-    await expect.poll(() => lecturas.total).toBe(1);
+    await primera;
+    expect(lecturas.total).toBe(1);
 
     // Tres regresos seguidos dentro de los 5 s: uno solo queda pendiente.
     await sembrarMovimiento({ usuarioId: id, tipo: "regalo", beats: 10 });
@@ -96,8 +99,9 @@ test.describe("Inicio", () => {
     expect(lecturas.total).toBe(1);
 
     // Al cumplirse el intervalo sale esa lectura pendiente, y solo esa.
-    await expect(numeroDeBeats(page)).toHaveText("15", { timeout: 8000 });
-    await page.waitForTimeout(1000);
+    await expect.poll(() => lecturas.total, { timeout: 8000 }).toBe(2);
+    await expect(numeroDeBeats(page)).toHaveText("15");
+    await page.waitForTimeout(1500);
     expect(lecturas.total).toBe(2);
   });
 });
