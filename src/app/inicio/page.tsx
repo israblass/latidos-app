@@ -1,10 +1,8 @@
-import Link from "next/link";
-
-import { ContadorBeats } from "@/components/marca/contador-beats";
 import { redirect } from "next/navigation";
 
 import { CarruselBanners } from "@/components/inicio/carrusel-banners";
 import { QueEsLatidos } from "@/components/inicio/que-es-latidos";
+import { SaldoInicio } from "@/components/inicio/saldo-inicio";
 import { TabBar } from "@/components/navegacion/tab-bar";
 import { leerBannersActivos } from "@/lib/banners/leer-banners";
 import { exigirPerfil } from "@/lib/usuario/sesion";
@@ -48,20 +46,8 @@ export default async function Inicio() {
           aria-label="Tu balance de Beats"
           className="mt-6 flex flex-col items-center"
         >
-          {/*
-            La card entera es el enlace a Beats: tocar el saldo para ver el
-            detalle es lo natural (spec de Beats §1). Se ve igual que antes; lo
-            unico nuevo es el anillo de foco para quien navega con teclado. La
-            etiqueta dice a donde lleva y conserva el numero, que un lector de
-            pantalla dejaria de leer si solo dijera "Ver mis Beats".
-          */}
-          <Link
-            href="/beats"
-            aria-label={`Ver mis Beats. Tienes ${perfil.beats_balance} Beats`}
-            className="vidrio-medio block w-full px-6 py-10 text-center outline-none focus-visible:ring-2 focus-visible:ring-secundario"
-          >
-            <ContadorBeats valor={perfil.beats_balance} />
-          </Link>
+          {/* Se relee al volver a la app (desbloqueo, segundo plano, red). */}
+          <SaldoInicio saldoInicial={perfil.beats_balance} />
 
           {/*
             Ya no hay caso cero: el perfil nace con el bono de bienvenida (spec

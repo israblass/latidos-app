@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useAlVolver } from "@/hooks/use-al-volver";
 import { useMovimientosEnVivo } from "@/hooks/use-movimientos-en-vivo";
 import { escribirCache } from "@/lib/beats/cache";
 import { leerHistorial, leerMarca, leerResumen } from "@/lib/beats/consultas";
@@ -31,6 +32,11 @@ import type {
  * dispositivo, y cada carga exitosa o evento en vivo la vuelve a escribir.
  * `origen` dice si lo que se ve salio de la red en esta visita o de la copia,
  * y `actualizadoEn` de cuando es, para el aviso "Asi estaban tus Beats a las".
+ *
+ * Al volver a la app (pantalla desbloqueada, regreso desde segundo plano, red
+ * recuperada) y al rehacerse el canal, se vuelven a pedir saldo e historial en
+ * silencio y se mezclan con lo que ya se ve: sin duplicar filas (por id), sin
+ * spinners y con la animacion normal del contador si el saldo cambio.
  */
 
 export type EstadoHistorial = "esperando" | "cargando" | "listo" | "error";
@@ -192,9 +198,62 @@ export function useHistorialBeats({
     }
   }, []);
 
+  /**
+   * Refresco silencioso: relee el saldo y el lote mas reciente y mete en su
+   * dia cada movimiento que todavia no estaba. Los dias anteriores ya
+   * cargados se quedan como estan. Si falla, no se avisa: lo que se ve sigue
+   * siendo valido y el proximo regreso lo vuelve a intentar.
+   */
+  const enVuelo = useRef(false);
+  const refrescar = useCallback(async () => {
+    if (enVuelo.current) return;
+    enVuelo.current = true;
+    try {
+      const [actual, pagina] = await Promise.all([leerResumen(), leerHistorial()]);
+      let siguientes = diasActuales.current;
+      const nuevos: string[] = [];
+      for (const dia of pagina.dias) {
+        for (const movimiento of dia.movimientos) {
+          const resultado = insertarMovimiento(
+            siguientes,
+            dia.dia_local,
+            movimiento,
+            hayMasActual.current,
+          );
+          if (!resultado) continue;
+          if (resultado.diaNuevo) nuevos.push(dia.dia_local);
+          siguientes = resultado.dias;
+        }
+      }
+      if (siguientes !== diasActuales.current) {
+        diasActuales.current = siguientes;
+        setDias(siguientes);
+      }
+      if (nuevos.length) {
+        setAbiertos((previos) => {
+          const abiertosAhora = new Set(previos);
+          for (const dia of nuevos) abiertosAhora.add(dia);
+          return abiertosAhora;
+        });
+      }
+      if (actual) setResumen(actual);
+      setActualizadoEn(new Date().toISOString());
+    } catch {
+      // Sin red todavia: se queda lo que hay.
+    } finally {
+      enVuelo.current = false;
+    }
+  }, []);
+
+  // Solo sobre datos frescos: con la copia guardada a la vista, al volver la
+  // red la pantalla ya hace la carga completa (pantalla-beats.tsx).
+  useAlVolver(() => void refrescar(), { activo: origen === "red" });
+
   // Solo con datos frescos: sin red no hay canal, y suscribirse sobre la copia
   // mezclaria eventos nuevos con dias viejos.
-  useMovimientosEnVivo(origen === "red" ? usuarioId : null, alLlegarMovimiento);
+  useMovimientosEnVivo(origen === "red" ? usuarioId : null, alLlegarMovimiento, () => {
+    void refrescar();
+  });
 
   const alternarDia = useCallback((dia: string) => {
     setAbiertos((previos) => {
