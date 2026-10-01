@@ -64,7 +64,7 @@ function ChipEstado({ estado }: { estado: Fase["estado"] }) {
     <span
       className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-etiqueta ${
         enCurso
-          ? "border-secundario/40 bg-fondo text-secundario-texto"
+          ? "border-secundario/40 bg-superficie text-secundario-texto"
           : "border-sutil bg-fondo-alterno text-texto-secundario"
       }`}
     >
@@ -101,7 +101,7 @@ export function QueEsLatidos() {
         {FASES.map((fase) => (
           <li
             key={fase.nombre}
-            className="vidrio-medio flex w-[78%] max-w-[300px] shrink-0 snap-start flex-col rounded-card p-4"
+            className="superficie flex w-[78%] max-w-[300px] shrink-0 snap-start flex-col p-4"
           >
             {/* Por debajo del pliegue: carga diferida (la de next/image por
                 defecto). El alto fijo reserva el espacio antes de que llegue. */}

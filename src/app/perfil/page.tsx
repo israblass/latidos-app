@@ -25,7 +25,7 @@ export default async function Perfil() {
           <h1 className="titulo-pantalla">Perfil</h1>
         </header>
 
-        <section aria-label="Tu cuenta" className="vidrio-medio mt-4 px-5 py-5">
+        <section aria-label="Tu cuenta" className="superficie mt-4 px-5 py-5">
           <p className="etiqueta">Correo</p>
           <p className="mt-1 break-all text-[15px] text-texto-principal">{correo}</p>
         </section>

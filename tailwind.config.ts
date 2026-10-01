@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Tokens del design system de Latidos App (constitution §2, v2.1.0).
+ * Tokens del design system de Latidos App (constitution §2, v2.3.0).
  *
  * Base clara. El amarillo de marca es muy luminoso: sirve como FONDO con texto
  * oscuro encima, no como color de texto sobre blanco. Por eso los tokens
@@ -19,7 +19,12 @@ const config: Config = {
         primario: "#FDFB05",
         secundario: "#0090FF",
 
-        fondo: "#FFFFFF",
+        // Fondo de pagina: el crema de la marca. El valor vive UNA sola vez,
+        // en --color-fondo de globals.css; aqui solo se apunta a la variable.
+        fondo: "var(--color-fondo)",
+        // Tarjetas, hojas y modales: blanco puro sobre el crema, para que se
+        // lean como piezas apoyadas encima de la pagina.
+        superficie: "#FFFFFF",
         "fondo-alterno": "#F5F7FA",
         // Uso puntual, para bloques que necesitan contraste fuerte (el contador
         // de Beats, el hero de Beats). Nunca como base de pantalla.

@@ -117,7 +117,7 @@ export function HojaInferior({
         aria-labelledby={idTitulo}
         tabIndex={-1}
         style={{ transform: desplazamiento ? `translateY(${desplazamiento}px)` : undefined }}
-        className="relative flex max-h-[85dvh] w-full max-w-md flex-col rounded-t-sheet bg-fondo shadow-barra outline-none motion-safe:animate-entrar-tarjeta"
+        className="relative flex max-h-[85dvh] w-full max-w-md flex-col rounded-t-sheet bg-superficie shadow-barra outline-none motion-safe:animate-entrar-tarjeta"
       >
         {/* Zona de arrastre: el asa y la cabecera. El contenido de abajo
             conserva su propio desplazamiento. */}

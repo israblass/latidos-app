@@ -13,9 +13,15 @@
     line-height: 1.6;
   }
 
-  /* Base clara (constitution §2, v2.1.0). */
+  /*
+   * Base crema (constitution §2, v2.3.0). Es la UNICA definicion del color de
+   * fondo de pagina: Tailwind (`bg-fondo`) apunta a esta variable, y ningun
+   * componente lleva el valor escrito. El manifest y el theme-color del
+   * layout lo repiten porque no pueden leer CSS.
+   */
   :root {
     color-scheme: light;
+    --color-fondo: #fffff5;
   }
 
   input,
@@ -223,16 +229,25 @@
   }
 
   .campo {
-    @apply min-h-touch w-full rounded-control border border-black/[0.12] bg-fondo-alterno px-4 text-[16px] text-texto-principal outline-none transition-colors focus:border-secundario focus:bg-fondo;
+    @apply min-h-touch w-full rounded-control border border-black/[0.12] bg-fondo-alterno px-4 text-[16px] text-texto-principal outline-none transition-colors focus:border-secundario focus:bg-superficie;
   }
 
   .campo-error {
     @apply border-error focus:border-error;
   }
 
+  /*
+   * Superficie: blanco puro sobre el crema, con un borde apenas visible y
+   * sombra corta. Es la pieza base de tarjetas, hojas y modales; `.tarjeta`
+   * le suma el padding estandar.
+   */
+  .superficie {
+    @apply elevado-bajo relative rounded-card border border-texto-principal/[0.06] bg-superficie;
+  }
+
   /* Card estandar: blanca, elevada, sin borde marcado. */
   .tarjeta {
-    @apply elevado-bajo rounded-card bg-fondo p-4;
+    @apply superficie p-4;
   }
 
   /*
@@ -252,7 +267,7 @@
 
   /* Card que tiene que leerse como el elemento principal de la pantalla. */
   .tarjeta-elevada {
-    @apply elevado-alto rounded-card bg-fondo p-4;
+    @apply elevado-alto rounded-card bg-superficie p-4;
   }
 
   /*

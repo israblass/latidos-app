@@ -70,7 +70,7 @@ export default function PantallaQueEsLatidos() {
         {FASES.map((fase) => (
           <li
             key={fase.nombre}
-            className={`vidrio-medio overflow-hidden border-l-4 p-4 ${fase.acento}`}
+            className={`superficie overflow-hidden border-l-4 p-4 ${fase.acento}`}
           >
             <div className="flex items-center justify-between gap-3">
               <h3 className="flex min-w-0 items-center">

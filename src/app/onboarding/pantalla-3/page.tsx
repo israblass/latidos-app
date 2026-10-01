@@ -33,13 +33,13 @@ export default function PantallaCierre() {
         </TituloConAcento>
       </div>
 
-      <div className="vidrio-medio mt-4 p-4">
+      <div className="superficie mt-4 p-4">
         <div className="flex items-center gap-3">
           <span
             aria-hidden="true"
-            // Dentro de una card que ya es vidrio: baja un nivel, nunca dos
-            // seguidos de vidrio-medio (el desenfoque es caro y se acumula).
-            className="vidrio-sutil flex h-10 w-10 shrink-0 items-center justify-center rounded-control text-secundario"
+            // Dentro de una card blanca: un cuadro crema, sin otra capa de
+            // vidrio (como mucho dos capas con desenfoque a la vez).
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-fondo text-secundario"
           >
             {/*
               TODO(assets): falta `iconos/icono-notificacion.webp`. El encargo

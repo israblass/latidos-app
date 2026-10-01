@@ -45,7 +45,7 @@ export function PromptIOS({ onCerrar }: Props) {
         aria-modal="true"
         aria-labelledby="titulo-instalacion-ios"
         tabIndex={-1}
-        className="relative w-full max-w-md rounded-t-sheet bg-fondo px-5 pb-8 pt-5 shadow-elevado outline-none"
+        className="relative w-full max-w-md rounded-t-sheet bg-superficie px-5 pb-8 pt-5 shadow-elevado outline-none"
       >
         <div className="mx-auto mb-5 h-1 w-10 rounded-full bg-black/15" />
 

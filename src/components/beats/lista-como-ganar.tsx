@@ -36,11 +36,11 @@ export function ListaComoGanar({
             <li
               key={item.titulo}
               data-estado={item.estado}
-              className="vidrio-medio flex items-center gap-3 p-4"
+              className="superficie flex items-center gap-3 p-4"
             >
               <span
                 aria-hidden="true"
-                className={`vidrio-sutil flex h-10 w-10 shrink-0 items-center justify-center rounded-control ${
+                className={`flex h-10 w-10 bg-fondo shrink-0 items-center justify-center rounded-control ${
                   pronto ? "opacity-50" : ""
                 }`}
               >
