@@ -158,19 +158,6 @@
   }
 
   /*
-   * Respuesta al toque: el boton se hunde un poco ademas de bajar de opacidad.
-   * En un telefono no hay hover, y sin este hundido el toque se siente como un
-   * enlace de pagina web y no como un boton de app. El transform se anima
-   * aparte porque es lo unico que el navegador puede mover sin repintar.
-   */
-  .boton-primario,
-  .boton-secundario,
-  .boton-ghost {
-    @apply transition-[transform,opacity,box-shadow] duration-150 ease-out;
-    touch-action: manipulation;
-  }
-
-  /*
    * Elevacion. Un objeto apoyado sobre la pantalla proyecta mas de una sombra:
    * una corta y oscura justo debajo, que es el contacto, y otra larga y difusa
    * que es la que cuenta la altura. Con una sola sombra corta el elemento se lee
@@ -209,38 +196,82 @@
       0 2px 4px -1px rgba(16, 24, 40, 0.16);
   }
 
-  .boton-primario {
-    @apply elevado-alto flex min-h-touch w-full items-center justify-center rounded-control bg-primario px-5 text-[15px] font-medium text-texto-principal disabled:opacity-40 disabled:shadow-none;
-    /*
-     * El amarillo deja de ser plano: mas claro arriba y mas asentado abajo, como
-     * una superficie que recibe luz cenital. El rango es corto a proposito — el
-     * amarillo de marca se ensucia enseguida al oscurecerlo, y pasaria de verse
-     * con volumen a verse gastado.
-     */
-    background-image: linear-gradient(180deg, #fefd63 0%, #fdfb05 42%, #ece90a 100%);
+  /*
+   * Botones (constitution §2, v2.6.0): pildoras planas, como una app seria.
+   * Sin degradados ni sombras elevadas; el toque se nota porque el boton se
+   * achica un poco. El azul queda solo para el anillo de foco.
+   *
+   * - .boton-primario   amarillo, texto navy. La accion principal.
+   * - .boton-secundario blanco con borde navy al 15%.
+   * - .boton-oscuro     navy, texto blanco.
+   * - .boton--flecha    modificador: etiqueta a la izquierda y un circulo con
+   *                     flecha a la derecha (<CirculoFlecha />).
+   *
+   * Copy: infinitivo, maximo dos palabras ("Escanear QR", "Ver historial").
+   */
+  .boton-primario,
+  .boton-secundario,
+  .boton-oscuro {
+    @apply flex min-h-[52px] w-full items-center justify-center rounded-full px-6 text-[16px] font-semibold transition-[transform,opacity] duration-150 ease-out;
+    touch-action: manipulation;
   }
 
-  .boton-primario:active {
-    /* Invertido al hundirse: la luz que antes daba arriba ya no llega. */
-    background-image: linear-gradient(180deg, #f2f005 0%, #fdfb05 100%);
+  .boton-primario:active,
+  .boton-secundario:active,
+  .boton-oscuro:active {
+    transform: scale(0.98);
   }
 
-  .boton-primario:disabled {
-    /* Apagado no flota: sin sombra ni relieve no invita a tocarlo. */
-    background-image: none;
+  .boton-primario:disabled,
+  .boton-secundario:disabled,
+  .boton-oscuro:disabled,
+  .boton-primario[aria-disabled="true"],
+  .boton-secundario[aria-disabled="true"],
+  .boton-oscuro[aria-disabled="true"] {
+    opacity: 0.4;
     transform: none;
   }
 
-  /*
-   * El secundario se eleva menos, no igual. Con la misma sombra que el primario
-   * los dos pesarian lo mismo y se perderia cual es la accion y cual la salida.
-   *
-   * Regla del azul (constitution §2, v2.3.0): el azul es borde, icono o texto
-   * grande; el texto de 15px va en navy.
-   */
+  .boton-primario:focus-visible,
+  .boton-secundario:focus-visible,
+  .boton-oscuro:focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-secundario;
+  }
+
+  .boton-primario {
+    @apply bg-primario text-texto-principal;
+  }
+
   .boton-secundario {
-    @apply elevado-bajo flex min-h-touch w-full items-center justify-center rounded-control border border-secundario px-5 text-[15px] font-medium text-texto-principal disabled:opacity-40 disabled:shadow-none;
-    background-image: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+    @apply border border-texto-principal/15 bg-superficie text-texto-principal;
+  }
+
+  .boton-oscuro {
+    @apply bg-texto-principal text-texto-inverso;
+  }
+
+  /*
+   * Etiqueta a la izquierda y circulo con flecha a la derecha. El circulo es
+   * navy con flecha amarilla en el primario, y amarillo con flecha navy en el
+   * oscuro: siempre el color opuesto al del boton.
+   */
+  .boton--flecha {
+    @apply justify-between text-left;
+    padding-left: 24px;
+    padding-right: 6px;
+  }
+
+  .circulo-flecha {
+    @apply flex shrink-0 items-center justify-center rounded-full;
+  }
+
+  .boton-primario .circulo-flecha,
+  .boton-secundario .circulo-flecha {
+    @apply bg-texto-principal text-primario;
+  }
+
+  .boton-oscuro .circulo-flecha {
+    @apply bg-primario text-texto-principal;
   }
 
   /*

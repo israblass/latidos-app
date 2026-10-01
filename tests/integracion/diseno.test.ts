@@ -93,6 +93,14 @@ test.describe("reglas en el codigo", () => {
   });
 
   test("el amarillo nunca es color de texto, borde ni linea", () => {
+    // Unica excepcion: la flecha del circulo navy de los botones con flecha
+    // (.boton-primario .circulo-flecha). Es amarillo SOBRE NAVY, no sobre
+    // crema ni blanco: ahi el contraste es de 15:1.
+    const css = readFileSync(GLOBALS, "utf8");
+    expect(css).toMatch(
+      /\.boton-primario \.circulo-flecha,\s*\.boton-secundario \.circulo-flecha \{\s*@apply bg-texto-principal text-primario;/,
+    );
+    const permitidos = ["src/app/globals.css: text-primario"];
     const usos = archivos(SRC)
       .flatMap((ruta) => {
         const codigo = sinComentarios(readFileSync(ruta, "utf8"));
@@ -100,7 +108,7 @@ test.describe("reglas en el codigo", () => {
           (uso) => `${relative(RAIZ, ruta)}: ${uso}`,
         );
       });
-    expect(usos).toEqual([]);
+    expect(usos).toEqual(permitidos);
   });
 });
 
