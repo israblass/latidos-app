@@ -3,6 +3,7 @@
 import { ListaComoGanar } from "@/components/beats/lista-como-ganar";
 import { CarruselOnboarding } from "@/components/onboarding/carrusel-onboarding";
 import { IlustracionOnboarding } from "@/components/onboarding/ilustracion";
+import { ILUSTRACIONES } from "@/lib/ilustraciones";
 import { TituloConAcento } from "@/components/marca/titulo-con-acento";
 import {
   EN_QUE_LOS_CAMBIAS,
@@ -28,8 +29,8 @@ export default function PantallaComoGanarBeats() {
   return (
     <CarruselOnboarding pantalla={2} textoAvance="Siguiente">
       <IlustracionOnboarding
-        nombre="onboarding-2-escanear"
-        descripcion="Una persona escaneando el código QR de una marca con su teléfono"
+        ilustracion={ILUSTRACIONES.cajaCorazon}
+        descripcion="Una caja azul abierta de la que sale un corazón amarillo"
       />
 
       <div className="vidrio-medio mt-3 px-5 py-7 text-center">

@@ -24,7 +24,7 @@ const imagenesRotas = (page: Page) =>
       .filter((i) => i.getBoundingClientRect().width > 0 && (!i.complete || i.naturalWidth === 0))
       .map((i) => i.getAttribute("src")),
   );
-const CACHE_SW = "latidos-shell-v4";
+const CACHE_SW = "latidos-shell-v5";
 
 /**
  * Deja la pantalla lista para abrirse sin red: el service worker controlando
@@ -124,7 +124,7 @@ test("sin red y sin nada guardado: la pantalla completa de sin conexion", async 
   await expect(pantalla).toContainText(
     "Necesitas conexión para ver tus Beats por primera vez. Vuelve a intentarlo cuando tengas señal.",
   );
-  await expect(pantalla.locator("img[src*='vacio-sin-conexion']")).toBeVisible();
+  await expect(pantalla.locator("img[src*='latido-ecg-ruido']")).toBeVisible();
   // La ilustracion solo se ve sin red: el service worker la guardo con la copia.
   await expect.poll(() => imagenesRotas(page)).toEqual([]);
   await expect(numeroDeBeats(page)).toHaveCount(0);

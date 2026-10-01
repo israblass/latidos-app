@@ -115,3 +115,12 @@ export const canalesDe = (id: string): Promise<{ canales: number }> =>
 /** Corre hacia atras todos los movimientos de una cuenta. */
 export const moverMovimientos = (usuarioId: string, dias: number) =>
   enviar("/prueba/mover-movimientos", { usuario_id: usuarioId, dias });
+
+/** Reemplaza los banners de Inicio. Sin filas, la tabla queda vacia. */
+export const ponerBanners = (
+  filas: { titulo: string; imagen_url: string | null; enlace_url?: string | null }[],
+) => enviar("/prueba/banners", { filas });
+
+/** Los cierres de sesion que recibio el mock, con su alcance. */
+export const cierresDeSesion = (): Promise<{ cierres: { usuario: string | null; alcance: string }[] }> =>
+  pedir("/prueba/cierres");

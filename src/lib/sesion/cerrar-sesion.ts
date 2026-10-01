@@ -26,9 +26,11 @@ export function limpiarDatosDeLaPersona() {
  *
  * 1. Cierra los canales en vivo (el de movimientos de Beats) antes de soltar
  *    la sesion, para que no quede un socket abierto con el token viejo.
- * 2. signOut revoca la sesion en Supabase y la borra del navegador. Aunque la
- *    revocacion falle (sin red), auth-js igual borra la sesion local y emite
- *    SIGNED_OUT: quien toca "Cerrar sesion" sale siempre.
+ * 2. signOut con `scope: "local"` revoca en Supabase solo la sesion de este
+ *    dispositivo y la borra del navegador. Las sesiones de la misma cuenta en
+ *    otros telefonos siguen abiertas: el default ("global") las cerraba
+ *    todas. Aunque la revocacion falle (sin red), auth-js igual borra la
+ *    sesion local y emite SIGNED_OUT: quien toca "Cerrar sesion" sale siempre.
  * 3. La limpieza de datos la hace el escucha de SIGNED_OUT
  *    (src/components/pwa/limpiar-cache-sesion.tsx), que cubre tambien un
  *    cierre que no pase por este boton. Aqui solo se comprueba que haya
@@ -37,6 +39,6 @@ export function limpiarDatosDeLaPersona() {
 export async function cerrarSesion() {
   const supabase = crearClienteNavegador();
   await supabase.removeAllChannels().catch(() => null);
-  await supabase.auth.signOut().catch(() => null);
+  await supabase.auth.signOut({ scope: "local" }).catch(() => null);
   if (hayCachesGuardadas()) limpiarDatosDeLaPersona();
 }

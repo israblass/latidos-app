@@ -10,7 +10,13 @@ import {
   datosDeRegistro,
   type DatosDeRegistro,
 } from "../ayudantes/cuenta";
-import { canalesDe, reiniciarMock, sembrarMovimiento, simularFalla } from "../ayudantes/mock";
+import {
+  canalesDe,
+  cierresDeSesion,
+  reiniciarMock,
+  sembrarMovimiento,
+  simularFalla,
+} from "../ayudantes/mock";
 
 /**
  * Entrar y salir: /entrar, el Perfil minimo y "Cerrar sesión".
@@ -253,6 +259,8 @@ test.describe("cerrar sesion", () => {
 
     expect(await clavesDeBeats(page)).toEqual([]);
     expect(await canalesDe(id)).toEqual({ canales: 0 });
+    // Solo este dispositivo: el cierre llego a Supabase con scope=local.
+    expect((await cierresDeSesion()).cierres).toEqual([{ usuario: id, alcance: "local" }]);
     const cookies = await page.context().cookies();
     expect(cookies.filter((c) => c.name.startsWith("sb-")).map((c) => c.name)).toEqual([]);
 
@@ -266,6 +274,32 @@ test.describe("cerrar sesion", () => {
     await expect(page.getByText(datos.correo)).toHaveCount(0);
     await expect(page.getByText("41")).toHaveCount(0);
     await expect(page).not.toHaveURL(/\/(perfil|beats|inicio)$/);
+  });
+
+  test("cerrar sesion en un telefono no cierra la de otro", async ({ page, browser }) => {
+    const { id, datos } = await cuentaConId(page);
+
+    // La misma cuenta, abierta en otro dispositivo.
+    const otro = await browser.newContext({ ...test.info().project.use });
+    const otroTelefono = await otro.newPage();
+    await entrarCon(otroTelefono, datos.correo, datos.contrasena);
+    await otroTelefono.waitForURL("**/inicio");
+
+    await page.goto("/perfil");
+    await page.getByRole("button", { name: "Cerrar sesión" }).click();
+    await page.waitForURL((url) => url.pathname === "/");
+    expect((await cierresDeSesion()).cierres).toEqual([{ usuario: id, alcance: "local" }]);
+
+    // Este telefono quedo sin sesion...
+    await page.goto("/perfil");
+    await page.waitForURL((url) => url.pathname === "/");
+
+    // ...y el otro sigue dentro, tambien despues de recargar.
+    await otroTelefono.goto("/perfil");
+    await expect(otroTelefono.getByText(datos.correo)).toBeVisible();
+    await otroTelefono.reload();
+    await expect(otroTelefono.getByText(datos.correo)).toBeVisible();
+    await otro.close();
   });
 
   test("otra cuenta que entra en el mismo navegador no ve nada de la anterior", async ({ page, browser }) => {
@@ -317,7 +351,7 @@ test.describe("cerrar sesion", () => {
     await expect(numeroDeBeats(page)).toBeVisible();
 
     const copia = await page.evaluate(async () => {
-      const cache = await caches.open("latidos-shell-v4");
+      const cache = await caches.open("latidos-shell-v5");
       const respuesta = await cache.match("/beats");
       return respuesta ? respuesta.text() : null;
     });
@@ -326,7 +360,7 @@ test.describe("cerrar sesion", () => {
     expect(copia).not.toContain(datos.nombre);
     // Y ninguna otra respuesta guardada es una pantalla con sesion.
     const guardadas = await page.evaluate(async () =>
-      (await (await caches.open("latidos-shell-v4")).keys()).map((r) => new URL(r.url).pathname),
+      (await (await caches.open("latidos-shell-v5")).keys()).map((r) => new URL(r.url).pathname),
     );
     expect(guardadas.filter((ruta) => /^\/(inicio|perfil|onboarding|escanear|api|auth)/.test(ruta))).toEqual([]);
   });

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { MensajeFriccion } from "@/components/escaneo/mensaje-friccion";
-import { IconoEstado } from "@/components/escaneo/icono-estado";
+import { IlustracionSinSenal } from "@/components/marca/ilustracion-sin-senal";
 
 /**
  * Sin señal al intentar validar o canjear (T058).
@@ -12,7 +12,7 @@ import { IconoEstado } from "@/components/escaneo/icono-estado";
 export function MensajeSinConexion({ acciones }: { acciones: ReactNode }) {
   return (
     <MensajeFriccion
-      icono={<IconoEstado nombre="vacio-sin-conexion" carpeta="estados-vacios" />}
+      icono={<IlustracionSinSenal ancho={180} />}
       titulo="Te quedaste sin señal"
       detalle="Intenta de nuevo cuando tengas conexion."
       acciones={acciones}

@@ -10,6 +10,7 @@ import type {
   ResumenBeats,
   TipoMovimiento,
 } from "@/types/beats";
+import type { Banner } from "@/types/banner";
 import type { ConfiguracionApp } from "@/types/configuracion";
 import type { Escaneo, EstadoQR, Marca, QRMarca } from "@/types/qr";
 import type { TipoUsuario, Usuario } from "@/types/usuario";
@@ -66,6 +67,13 @@ export type Database = {
         Row: MovimientoBeats;
         // El cliente no escribe en el libro: no hay policies de insert, update
         // ni delete. Los tipos lo reflejan para que ni siquiera compile.
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      banners: {
+        Row: Banner;
+        // Solo lectura para el cliente: los banners los carga el admin.
         Insert: never;
         Update: never;
         Relationships: [];

@@ -34,7 +34,6 @@ export type ClaveAsset = keyof typeof ASSETS;
  * fases que faltan:
  *
  * - fondos/fondo-header-perfil       -> cabecera de Perfil (tab aun sin pantalla)
- * - fondos/fondo-banner-publicitario -> slot de banner en Inicio (Fase 1 constitution)
  * - fondos/fondo-notificacion        -> arte de las push (Fase 2)
  * - fondos/fondo-feature-graphic     -> ficha de las tiendas, no va dentro de la app
  * - badges/*                         -> niveles de logro (sistema aun no construido)
@@ -43,12 +42,14 @@ export type ClaveAsset = keyof typeof ASSETS;
  * - iconos/icono-exito-check, icono-codigo-inactivo, icono-ya-escaneado,
  *   icono-marco-escaneo-solido -> pantallas de escaneo; hoy usan SVG en linea
  *   que ya pasan contraste. Sustituirlos es cosmetico y se hara en el Frente 3.
- * - estados-vacios/vacio-sin-jornadas, -sin-escaneos, -sin-notificaciones,
- *   -sin-conexion -> pantallas de lista que aun no existen.
+ *
+ * Las ilustraciones ya no viven aqui: las definitivas estan en
+ * src/lib/ilustraciones.ts (archivos en public/ilustraciones). Las provisionales
+ * de assets/ilustraciones y assets/estados-vacios se borraron al llegar.
+ * Para los estados vacios que falten, la guia de la ilustradora sugiere
+ * figura-amarilla-corazon (recursos/ilustraciones/LEEME.md).
  *
  * Y lo que falta y hace falta:
  *
  * - TODO(assets) iconos/icono-notificacion    -> card "Avisos del programa"
- * - TODO(assets) ilustraciones/onboarding-3-* -> tercera pantalla del onboarding
- * - TODO(assets) el sexto estado vacio        -> sin asignar
  */
