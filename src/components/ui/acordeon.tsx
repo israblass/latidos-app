@@ -4,7 +4,7 @@ import { useId, useState, type ReactNode } from "react";
 
 /**
  * Seccion plegable (constitution §2, v2.6.0): cabecera con icono en circulo
- * celeste, titulo, subtitulo y un circulo navy con chevron amarillo que gira
+ * azul al 12%, titulo, subtitulo y un circulo navy con chevron amarillo que gira
  * al abrir.
  *
  * Accesible como el patron de acordeon de WAI-ARIA: <h2><button> con
@@ -55,7 +55,7 @@ export function Acordeon({
         >
           <span
             aria-hidden="true"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-celeste text-texto-principal"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secundario/[0.12] text-texto-principal"
           >
             {icono}
           </span>

@@ -29,15 +29,15 @@
     --alto-barra: 64px;
     --margen-barra: 8px;
     /*
-     * Degradado de marca del Inicio (.fondo-inicio, constitution §2, v2.6.0).
-     * Los colores viven aqui, no escritos en la regla.
+     * Degradado de marca del Inicio (.fondo-inicio, constitution §2, v2.7.0).
+     * Solo colores de la paleta con transparencia: el amarillo #FDFB05 al 34%
+     * y el azul #0090FF al 22%, sobre el crema de la pagina. Viven aqui, no
+     * escritos en la regla.
      */
-    --inicio-amarillo: #fbf9a8;
-    --inicio-amarillo-0: rgba(251, 249, 168, 0);
-    --inicio-celeste: #b5e3f5;
-    --inicio-celeste-0: rgba(181, 227, 245, 0);
-    --inicio-cielo-arriba: #ddeff0;
-    --inicio-cielo-medio: #e9f3e4;
+    --inicio-amarillo: rgba(253, 251, 5, 0.34);
+    --inicio-amarillo-0: rgba(253, 251, 5, 0);
+    --inicio-azul: rgba(0, 144, 255, 0.22);
+    --inicio-azul-0: rgba(0, 144, 255, 0);
   }
 
   input,
@@ -143,10 +143,12 @@
     height: 640px;
     z-index: -10;
     pointer-events: none;
+    /* Las medidas de la referencia (120% x 38% y 110% x 40% de una pantalla
+       de 390 x 1220), en px para que no dependan del alto de esta franja. */
     background:
       radial-gradient(468px 464px at 95% 24px, var(--inicio-amarillo) 0%, var(--inicio-amarillo-0) 70%),
-      radial-gradient(429px 488px at 0% 268px, var(--inicio-celeste) 0%, var(--inicio-celeste-0) 72%),
-      linear-gradient(180deg, var(--inicio-cielo-arriba) 0%, var(--inicio-cielo-medio) 50%, var(--color-fondo) 100%);
+      radial-gradient(429px 488px at 0% 268px, var(--inicio-azul) 0%, var(--inicio-azul-0) 72%),
+      var(--color-fondo);
   }
 
   .titulo-pantalla {
@@ -171,16 +173,16 @@
    */
   .elevado-alto {
     box-shadow:
-      0 1px 2px rgba(16, 24, 40, 0.12),
-      0 10px 20px -6px rgba(16, 24, 40, 0.22),
-      0 22px 40px -12px rgba(16, 24, 40, 0.18);
+      0 1px 2px rgba(26, 35, 50, 0.12),
+      0 10px 20px -6px rgba(26, 35, 50, 0.22),
+      0 22px 40px -12px rgba(26, 35, 50, 0.18);
   }
 
   .elevado-bajo {
     box-shadow:
-      0 1px 2px rgba(16, 24, 40, 0.08),
-      0 4px 10px -3px rgba(16, 24, 40, 0.12),
-      0 10px 20px -8px rgba(16, 24, 40, 0.10);
+      0 1px 2px rgba(26, 35, 50, 0.08),
+      0 4px 10px -3px rgba(26, 35, 50, 0.12),
+      0 10px 20px -8px rgba(26, 35, 50, 0.10);
   }
 
   /*
@@ -192,8 +194,8 @@
   .elevado-bajo:active {
     transform: translateY(2px) scale(0.985);
     box-shadow:
-      0 1px 1px rgba(16, 24, 40, 0.14),
-      0 2px 4px -1px rgba(16, 24, 40, 0.16);
+      0 1px 1px rgba(26, 35, 50, 0.14),
+      0 2px 4px -1px rgba(26, 35, 50, 0.16);
   }
 
   /*
@@ -355,11 +357,12 @@
    * tests/integracion/diseno.test.ts). Es CSS puro: sin WebGL ni filtros SVG
    * de refraccion, que no funcionan en Safari iOS y pesan.
    *
-   * - .vidrio        piezas sueltas sobre el cielo (contador de Inicio, card de
-   *                  la bienvenida, titulo del onboarding).
+   * - .vidrio        piezas sueltas sobre el cielo o el degradado (tarjeta de
+   *                  Beats del Inicio, card de la bienvenida, titulo del
+   *                  onboarding).
    * - .vidrio-barra  el menu inferior: una pildora flotante por la que el
-   *                  contenido pasa por debajo (tinte 0.80 -> 0.77).
-   * - .vidrio-hoja   hojas inferiores (tinte 0.80 -> 0.77): llevan texto
+   *                  contenido pasa por debajo (tinte 0.85).
+   * - .vidrio-hoja   hojas inferiores (tinte 0.85): llevan texto
    *                  largo y van sobre el velo del modal.
    *
    * La "refraccion" se aproxima con desenfoque + saturacion + brillo, el
@@ -375,12 +378,13 @@
    * solo cambia la opacidad del tinte (arriba -> abajo).
    *
    * Opacidades minimas por contraste (AA 4.5:1 en el PEOR caso):
-   * - .vidrio va siempre sobre el cielo (contador de Inicio, bienvenida,
-   *   onboarding): su peor caso es el pixel mas oscuro del cielo con su velo,
-   *   y ahi el tinte 0.62 -> 0.48 alcanza.
+   * - .vidrio va sobre el cielo (bienvenida, onboarding) o el degradado del
+   *   Inicio (tarjeta de Beats): su peor caso es el pixel mas oscuro del cielo
+   *   con su velo, y ahi el tinte 0.62 -> 0.48 alcanza.
    * - .vidrio-barra y .vidrio-hoja pueden tener cualquier cosa debajo; se
-   *   calcula sobre negro puro. El gris de sus textos es --vidrio-texto-tenue
-   *   (#4A5160), que pide al menos 0.77 de blanco (el #565E6D pediria 0.85).
+   *   calcula sobre negro puro. Desde la v2.7.0 (principio de paleta) su gris
+   *   es el secundario #565E6D y no el #4A5160 que se usaba solo aqui: pide
+   *   al menos 0.85 de blanco.
    */
   .vidrio,
   .vidrio-barra,
@@ -391,7 +395,7 @@
     --vidrio-borde: rgba(255, 255, 255, 0.75);
     --vidrio-sombra: inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(26, 35, 50, 0.06),
       0 10px 30px rgba(26, 35, 50, 0.14), 0 2px 6px rgba(26, 35, 50, 0.08);
-    --vidrio-texto-tenue: #4a5160;
+    --vidrio-texto-tenue: theme("colors.texto.secundario");
     background: linear-gradient(to bottom, var(--vidrio-tinte-arriba), var(--vidrio-tinte-abajo));
     -webkit-backdrop-filter: var(--vidrio-filtro);
     backdrop-filter: var(--vidrio-filtro);
@@ -406,20 +410,21 @@
 
   /* Pildora flotante: separada de los bordes, con el canto completo. */
   .vidrio-barra {
-    --vidrio-tinte-arriba: rgba(255, 255, 255, 0.8);
-    --vidrio-tinte-abajo: rgba(255, 255, 255, 0.77);
+    --vidrio-tinte-arriba: rgba(255, 255, 255, 0.85);
+    --vidrio-tinte-abajo: rgba(255, 255, 255, 0.85);
     border-radius: 9999px;
   }
 
   .vidrio-hoja {
-    --vidrio-tinte-arriba: rgba(255, 255, 255, 0.8);
-    --vidrio-tinte-abajo: rgba(255, 255, 255, 0.77);
+    --vidrio-tinte-arriba: rgba(255, 255, 255, 0.85);
+    --vidrio-tinte-abajo: rgba(255, 255, 255, 0.85);
     border-radius: theme("borderRadius.sheet") theme("borderRadius.sheet") 0 0;
   }
 
   /*
-   * El gris de los textos sobre vidrio: un paso mas oscuro que el secundario,
-   * para que pase AA con el tinte mas translucido.
+   * El gris de los textos sobre vidrio. Desde la v2.7.0 es el mismo
+   * secundario de la paleta; la variable se queda para que las pruebas de
+   * contraste lean el valor que el navegador aplica.
    */
   .vidrio .text-texto-secundario,
   .vidrio .etiqueta,
@@ -463,13 +468,14 @@
       rgba(255, 255, 255, 0.35) 40%,
       rgba(255, 255, 255, 0) 75%
     );
+    /* La mascara solo usa el alfa: el color es indiferente (blanco, de la paleta). */
     -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     mask-composite: exclude;
     pointer-events: none;
   }
@@ -516,7 +522,7 @@
    */
   .tarjeta-plana {
     @apply elevado-bajo rounded-card p-4;
-    background-image: linear-gradient(180deg, #ffffff 0%, #f2f5f9 100%);
+    background-image: linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%);
   }
 
   /*

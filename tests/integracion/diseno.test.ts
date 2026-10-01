@@ -112,6 +112,84 @@ test.describe("reglas en el codigo", () => {
   });
 });
 
+/**
+ * Principio de paleta (constitution §2, v2.7.0): en src solo hay colores de la
+ * paleta, opacos o con transparencia. Ningun otro hex ni rgb()/rgba().
+ */
+const PALETA: Record<string, string> = {
+  "255,255,245": "crema #FFFFF5",
+  "255,255,255": "blanco",
+  "253,251,5": "amarillo #FDFB05",
+  "0,144,255": "azul #0090FF",
+  "26,35,50": "navy #1A2332",
+  "86,94,109": "gris texto #565E6D",
+  "245,247,250": "fondo secundario #F5F7FA",
+  "13,17,23": "oscuro #0D1117",
+};
+
+/**
+ * Excepcion documentada: los colores de una marca patrocinante. La linea que
+ * lleve uno se marca con el comentario `paleta: marca patrocinante` y no se
+ * revisa.
+ */
+const MARCA_PATROCINANTE = /paleta: marca patrocinante/;
+
+const canales = (hex: string) => {
+  const h = hex.slice(1);
+  const largo = h.length === 3 || h.length === 4 ? 1 : 2;
+  return [0, 1, 2].map((i) => parseInt(largo === 1 ? h[i] + h[i] : h.slice(i * 2, i * 2 + 2), 16)).join(",");
+};
+
+/** Los colores escritos en un archivo que no son de la paleta. */
+function coloresFueraDePaleta(texto: string) {
+  const codigo = sinComentarios(
+    texto
+      .split("\n")
+      .filter((linea) => !MARCA_PATROCINANTE.test(linea))
+      .join("\n"),
+  );
+  const fuera: string[] = [];
+  for (const [hex] of Array.from(codigo.matchAll(/#(?:[0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3,4})\b/gi))) {
+    if (!PALETA[canales(hex)]) fuera.push(hex);
+  }
+  for (const [, r, g, b] of Array.from(codigo.matchAll(/rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/gi))) {
+    if (!PALETA[`${r},${g},${b}`]) fuera.push(`rgb(${r}, ${g}, ${b})`);
+  }
+  return fuera;
+}
+
+test.describe("principio de paleta", () => {
+  test("en src no hay colores escritos fuera de la paleta", () => {
+    const fuera = archivos(SRC).flatMap((ruta) =>
+      coloresFueraDePaleta(readFileSync(ruta, "utf8")).map((c) => `${relative(RAIZ, ruta)}: ${c}`),
+    );
+    expect(fuera).toEqual([]);
+  });
+
+  test("el detector encuentra un hex o un rgba fuera de paleta y respeta la excepcion de marca", () => {
+    expect(coloresFueraDePaleta('const a = "#DDF3FB";')).toEqual(["#DDF3FB"]);
+    expect(coloresFueraDePaleta("box-shadow: 0 1px 2px rgba(16, 24, 40, 0.1);")).toEqual(["rgb(16, 24, 40)"]);
+    expect(coloresFueraDePaleta('const b = "#fdfb05"; const c = "rgba(0, 144, 255, 0.12)";')).toEqual([]);
+    expect(coloresFueraDePaleta("const d = '#fff';")).toEqual([]);
+    // Lo que solo se menciona en un comentario no cuenta.
+    expect(coloresFueraDePaleta("/* antes era #4A5160 */")).toEqual([]);
+    expect(coloresFueraDePaleta('const kfc = "#E4002B"; // paleta: marca patrocinante')).toEqual([]);
+  });
+
+  test("los tokens fuera de paleta del PR #8 ya no existen", () => {
+    const tailwind = sinComentarios(readFileSync(join(RAIZ, "tailwind.config.ts"), "utf8"));
+    for (const viejo of ["#DDF3FB", "#EAF6FB", "#F0F2F5", "#C9D1DE", "celeste", "gris-chip", "sobre-navy"]) {
+      expect(tailwind, viejo).not.toContain(viejo);
+    }
+    const usos = archivos(SRC).filter((ruta) =>
+      /\b(bg|text|border)-(celeste|celeste-claro|gris-chip|texto-sobre-navy)\b|--inicio-cielo/.test(
+        sinComentarios(readFileSync(ruta, "utf8")),
+      ),
+    );
+    expect(usos.map((r) => relative(RAIZ, r))).toEqual([]);
+  });
+});
+
 /** Colores en pantalla que rompen las reglas del amarillo y del azul. */
 async function incumplimientosDeColor(page: Page) {
   return page.evaluate(() => {
@@ -177,9 +255,10 @@ test.describe("en pantalla", () => {
     expect(await fondo.evaluate((el) => getComputedStyle(el).backgroundImage)).toContain("radial-gradient");
     expect(await fondo.evaluate((el) => getComputedStyle(el).backdropFilter)).toBe("none");
 
-    // La tarjeta de Beats es navy plana: la unica capa grande es la barra.
+    // Dos capas grandes: la tarjeta de Beats (vidrio desde la v2.7.0) y la
+    // barra.
     const capas = await capasDeVidrio(page);
-    expect(capas).toEqual(["vidrio-barra"]);
+    expect(capas).toEqual(["vidrio", "vidrio-barra"]);
     // La capsula de puntos del banner es vidrio, pero chica: no cuenta.
     const capsula = (await page.locator("[data-capsula-puntos]").boundingBox())!;
     expect(capsula.width * capsula.height).toBeLessThan(AREA_CAPA_GRANDE);
@@ -193,6 +272,61 @@ test.describe("en pantalla", () => {
     expect(ultimo!.y + ultimo!.height).toBeLessThanOrEqual(barra!.y);
 
     expect(await incumplimientosDeColor(page)).toEqual([]);
+
+    // Con la hoja de notificaciones abierta no se pasa de dos: la hoja es
+    // blanca y opaca.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.getByRole("button", { name: "Notificaciones" }).click();
+    await expect(page.getByRole("dialog", { name: "Notificaciones" })).toBeVisible();
+    const conHoja = await capasDeVidrio(page);
+    expect(conHoja.length).toBeLessThanOrEqual(2);
+    expect(conHoja).not.toContain("vidrio-hoja");
+    await expect(page.getByRole("dialog", { name: "Notificaciones" })).toHaveCSS(
+      "background-color",
+      "rgb(255, 255, 255)",
+    );
+  });
+
+  test("Inicio: el texto de la tarjeta de vidrio pasa AA sobre el degradado real", async ({ page }) => {
+    await cuentaEnInicio(page);
+    const tarjeta = page.locator("section[aria-label='Tu balance de Beats'] > a");
+    await expect(tarjeta).toBeVisible();
+    const receta = await recetaDe(tarjeta);
+    // Lo que hay detras: se esconde la tarjeta y se mira el pixel mas oscuro
+    // de esa zona del degradado.
+    const caja = (await tarjeta.boundingBox())!;
+    await tarjeta.evaluate((el: HTMLElement) => (el.style.visibility = "hidden"));
+    const captura = await page.screenshot({ clip: caja });
+    await tarjeta.evaluate((el: HTMLElement) => (el.style.visibility = ""));
+    const oscuro = await page.evaluate(async (b64) => {
+      const imagen = new Image();
+      imagen.src = `data:image/png;base64,${b64}`;
+      await imagen.decode();
+      const lienzo = document.createElement("canvas");
+      lienzo.width = imagen.naturalWidth;
+      lienzo.height = imagen.naturalHeight;
+      const ctx = lienzo.getContext("2d")!;
+      ctx.drawImage(imagen, 0, 0);
+      const datos = ctx.getImageData(0, 0, lienzo.width, lienzo.height).data;
+      const lum = (r: number, g: number, b: number) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      let px = [255, 255, 255];
+      for (let i = 0; i < datos.length; i += 4) {
+        if (lum(datos[i], datos[i + 1], datos[i + 2]) < lum(px[0], px[1], px[2])) {
+          px = [datos[i], datos[i + 1], datos[i + 2]];
+        }
+      }
+      return px;
+    }, captura.toString("base64"));
+    const fondo = sobre(receta.tinte, filtrar(oscuro as Rgb, receta.saturacion, receta.brillo));
+    const gris = aColor(
+      await tarjeta.getByText("Beats acumulados").evaluate((el) => getComputedStyle(el).color),
+    ).rgb;
+    expect(gris).toEqual([86, 94, 109]);
+    expect(contraste(gris, fondo), "gris sobre la tarjeta").toBeGreaterThanOrEqual(4.5);
+    expect(contraste(NAVY, fondo), "navy sobre la tarjeta").toBeGreaterThanOrEqual(4.5);
+    // Y sin el vidrio, el peor pixel del degradado tambien da AA (el tinte
+    // solo aclara).
+    expect(contraste(gris, oscuro as Rgb), "gris sobre el degradado").toBeGreaterThanOrEqual(4.5);
   });
 
   test("Beats y Perfil: crema solido, sin cielo; con la hoja abierta, dos capas", async ({ page }) => {

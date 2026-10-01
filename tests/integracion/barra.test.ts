@@ -64,8 +64,9 @@ test("las cinco pestañas de siempre, con etiqueta y area tactil", async ({ page
   await expect(pestana(page, "Inicio")).toHaveAttribute("aria-current", "page");
   await expect(pestana(page, "Inicio")).toHaveCSS("color", "rgb(26, 35, 50)");
   await expect(pestana(page, "Inicio").locator("span").last()).toHaveCSS("font-weight", "700");
-  // Gris de texto sobre vidrio (--vidrio-texto-tenue, #4A5160).
-  await expect(pestana(page, "Beats")).toHaveCSS("color", "rgb(74, 81, 96)");
+  // Gris de texto sobre vidrio: desde la v2.7.0 es el secundario de la
+  // paleta, #565E6D (--vidrio-texto-tenue).
+  await expect(pestana(page, "Beats")).toHaveCSS("color", "rgb(86, 94, 109)");
   await expect(pildora(page)).toHaveCSS("background-color", "rgb(253, 251, 5)");
   expect(await pildoraSobre(page, "Inicio")).toBeLessThanOrEqual(2);
 
