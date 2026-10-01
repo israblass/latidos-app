@@ -69,24 +69,14 @@ test("bienvenida y onboarding: el vidrio desenfoca el cielo", async ({ page }) =
   await comprobar(page, "onboarding", page.locator("main .vidrio").first());
 });
 
-test("Inicio: contador sobre el cielo, capsula sobre el banner y la barra", async ({ page }) => {
+test("Inicio: capsula sobre el banner y la barra; la tarjeta de Beats es plana", async ({ page }) => {
   await cuentaConId(page);
   await page.waitForTimeout(600);
-  const contador = page.locator("section[aria-label='Tu balance de Beats'] .vidrio");
-  await comprobar(page, "contador", contador);
-
-  // El contador queda entero sobre el cielo pleno de la cabecera.
-  const cajaContador = (await contador.boundingBox())!;
-  const cielo = await page.locator("[data-cielo='cabecera']").evaluate((el) => {
-    const c = el.getBoundingClientRect();
-    const pleno = parseFloat(getComputedStyle(el).getPropertyValue("--cielo-pleno"));
-    return { arriba: c.top, pleno };
-  });
-  expect(cajaContador.y + cajaContador.height).toBeLessThanOrEqual(cielo.arriba + cielo.pleno);
-  // Y el texto gris de abajo ya queda sobre crema, fuera del cielo (24px de
-  // desvanecido), donde su contraste no depende de las nubes.
-  const debajo = (await page.getByText("Sigue participando para sumar más.").boundingBox())!;
-  expect(debajo.y).toBeGreaterThanOrEqual(cielo.arriba + cielo.pleno + 24);
+  // Excepcion documentada (v2.6.0): la tarjeta de Beats del Inicio es navy
+  // plana, sin vidrio.
+  const tarjeta = page.locator("section[aria-label='Tu balance de Beats'] > a");
+  expect(await filtroDe(tarjeta)).toBe("none");
+  await expect(tarjeta).toHaveCSS("background-color", "rgb(26, 35, 50)");
 
   const capsula = page.locator("[data-capsula-puntos]");
   await capsula.scrollIntoViewIfNeeded();

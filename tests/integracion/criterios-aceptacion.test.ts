@@ -230,7 +230,7 @@ test("12 — Inicio muestra el contador con el bono de bienvenida, sin estado en
   // la ilustracion y el texto del caso cero ya no existen.
   await cuentaEnInicio(page);
   await expect(contadorDeBeats(page)).toHaveText(String(BIENVENIDA));
-  await expect(page.getByText("Sigue participando para sumar más.")).toBeVisible();
+  // "Sigue participando para sumar más." salio con el Inicio de la v2.6.0.
   await expect(page.getByText("Escanea un QR de marca para empezar a sumar.")).toHaveCount(0);
   await expect(page.locator("img[src*='vacio-sin-beats']")).toHaveCount(0);
 });

@@ -93,6 +93,14 @@ test.describe("reglas en el codigo", () => {
   });
 
   test("el amarillo nunca es color de texto, borde ni linea", () => {
+    // Unica excepcion: el circulo navy con icono amarillo (flecha de los
+    // botones claros y chevron de los acordeones), definido una sola vez en
+    // globals.css. Es amarillo SOBRE NAVY (15:1), nunca sobre crema ni blanco.
+    const css = readFileSync(GLOBALS, "utf8");
+    expect(css).toMatch(
+      /\.boton-primario \.circulo-flecha,\s*\.boton-secundario \.circulo-flecha,\s*\.circulo-navy \{\s*@apply bg-texto-principal text-primario;/,
+    );
+    const permitidos = ["src/app/globals.css: text-primario"];
     const usos = archivos(SRC)
       .flatMap((ruta) => {
         const codigo = sinComentarios(readFileSync(ruta, "utf8"));
@@ -100,7 +108,7 @@ test.describe("reglas en el codigo", () => {
           (uso) => `${relative(RAIZ, ruta)}: ${uso}`,
         );
       });
-    expect(usos).toEqual([]);
+    expect(usos).toEqual(permitidos);
   });
 });
 
@@ -158,23 +166,30 @@ const capasDeVidrio = (page: Page) =>
 const fondoDelBody = (page: Page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 
 test.describe("en pantalla", () => {
-  test("Inicio: cielo solo en la cabecera, dos capas de vidrio y nada tapado por la barra", async ({ page }) => {
+  test("Inicio: degradado de marca sin foto, una capa de vidrio grande y nada tapado por la barra", async ({ page }) => {
     await cuentaEnInicio(page);
     expect(await fondoDelBody(page)).toBe("rgb(255, 255, 245)");
-    await expect(page.locator("[data-cielo]")).toHaveCount(1);
-    await expect(page.locator("[data-cielo='cabecera']")).toHaveCount(1);
+    // El cielo de foto quedo solo en bienvenida y onboarding (v2.6.0).
+    await expect(page.locator("[data-cielo]")).toHaveCount(0);
+    const fondo = page.locator(".fondo-inicio");
+    await expect(fondo).toHaveCount(1);
+    await expect(fondo).toHaveAttribute("aria-hidden", "true");
+    expect(await fondo.evaluate((el) => getComputedStyle(el).backgroundImage)).toContain("radial-gradient");
+    expect(await fondo.evaluate((el) => getComputedStyle(el).backdropFilter)).toBe("none");
 
+    // La tarjeta de Beats es navy plana: la unica capa grande es la barra.
     const capas = await capasDeVidrio(page);
-    expect(capas.length).toBeLessThanOrEqual(2);
-    expect([...capas].sort()).toEqual(["vidrio", "vidrio-barra"]);
+    expect(capas).toEqual(["vidrio-barra"]);
     // La capsula de puntos del banner es vidrio, pero chica: no cuenta.
     const capsula = (await page.locator("[data-capsula-puntos]").boundingBox())!;
     expect(capsula.width * capsula.height).toBeLessThan(AREA_CAPA_GRANDE);
 
     // Lo ultimo de la pagina queda por encima de la barra al llegar al fondo.
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(400);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     const barra = await page.getByRole("navigation", { name: "Principal" }).boundingBox();
-    const ultimo = await page.getByRole("list", { name: "Fases del programa" }).boundingBox();
+    const ultimo = await page.locator("main > *").last().boundingBox();
     expect(ultimo!.y + ultimo!.height).toBeLessThanOrEqual(barra!.y);
 
     expect(await incumplimientosDeColor(page)).toEqual([]);
@@ -223,8 +238,9 @@ test.describe("en pantalla", () => {
   });
 
   test("el texto sobre el vidrio pasa AA contra el crema y contra el cielo mas oscuro", async ({ page }) => {
-    await cuentaEnInicio(page);
-    // El pixel mas oscuro del cielo y el velo de la cabecera de Inicio.
+    // Desde la v2.6.0 el vidrio sobre el cielo vive en la bienvenida y el
+    // onboarding (el Inicio ya no lleva cielo de foto).
+    await page.goto("/");
     const cielo = await page.evaluate(async () => {
       const lum = ([r, g, b]: number[]) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
       const imagen = new Image();
@@ -243,11 +259,11 @@ test.describe("en pantalla", () => {
       }
       return {
         oscuro,
-        velo: getComputedStyle(document.querySelector("[data-cielo='cabecera'] .fondo-app__velo")!).backgroundColor,
+        velo: getComputedStyle(document.querySelector("[data-cielo='pantalla'] .fondo-app__velo")!).backgroundColor,
         crema: getComputedStyle(document.body).backgroundColor,
       };
     });
-    const receta = await recetaDe(page.locator("section[aria-label='Tu balance de Beats'] .vidrio"));
+    const receta = await recetaDe(page.locator("main .vidrio").first());
     const cieloConVelo = sobre(aColor(cielo.velo), cielo.oscuro as Rgb);
     // Lo que el vidrio deja ver: el cielo desenfocado, saturado y con brillo.
     const detras = filtrar(cieloConVelo, receta.saturacion, receta.brillo);
@@ -256,8 +272,8 @@ test.describe("en pantalla", () => {
       crema: sobre(receta.tinte, filtrar(aColor(cielo.crema).rgb, receta.saturacion, receta.brillo)),
     };
     const resultado: Record<string, number> = {
-      // El saludo va directo sobre el cielo, sin vidrio.
-      "saludo navy sobre el cielo": contraste(NAVY, cieloConVelo),
+      // Texto navy directo sobre el cielo, sin vidrio.
+      "navy sobre el cielo": contraste(NAVY, cieloConVelo),
     };
     for (const [f, fondo] of Object.entries(fondos)) {
       resultado[`navy sobre vidrio y ${f}`] = contraste(NAVY, fondo);

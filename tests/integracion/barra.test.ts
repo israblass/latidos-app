@@ -130,8 +130,12 @@ test("foco visible: contorno navy de 2px con separacion", async ({ page }) => {
 
 /** El ultimo elemento del <main>, ya con la pagina al final. */
 async function ultimoQuedaLibre(page: Page) {
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  await page.waitForTimeout(300);
+  // Dos veces: lo que carga despues (la actividad del Inicio, el historial
+  // de Beats) puede alargar la pagina tras el primer salto al final.
+  for (let vez = 0; vez < 2; vez++) {
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(400);
+  }
   const ultimo = await page.evaluate(() => {
     const hijos = Array.from(document.querySelector("main")!.children).filter((h) => {
       const c = h.getBoundingClientRect();
