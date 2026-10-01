@@ -98,9 +98,24 @@
   .fondo-app--cabecera {
     position: absolute;
     inset: 0 0 auto 0;
-    height: 380px;
-    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
-    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+    /*
+     * Cielo pleno detras de todo el contador (para que su vidrio tenga nubes
+     * que desenfocar) y desvanecido justo despues, antes del texto gris de
+     * abajo, que queda sobre crema.
+     */
+    --cielo-pleno: 286px;
+    height: calc(var(--cielo-pleno) + 24px);
+    -webkit-mask-image: linear-gradient(to bottom, #000 var(--cielo-pleno), transparent calc(var(--cielo-pleno) + 24px));
+    mask-image: linear-gradient(to bottom, #000 var(--cielo-pleno), transparent calc(var(--cielo-pleno) + 24px));
+  }
+
+  /*
+   * En la cabecera el velo es mas liviano que en la bienvenida: encima solo
+   * hay texto navy (el saludo) y el contador de vidrio, y las nubes tienen que
+   * verse. Con el texto gris de la bienvenida no alcanzaria AA.
+   */
+  .fondo-app--cabecera .fondo-app__velo {
+    background: rgba(255, 255, 255, 0.45);
   }
 
   .fondo-app__cielo,
@@ -298,7 +313,7 @@
   }
 
   /*
-   * Liquid glass (constitution §2, v2.3.0). La receta vive SOLO aqui: ningun
+   * Liquid glass (constitution §2, v2.5.0). La receta vive SOLO aqui: ningun
    * componente escribe un backdrop-filter propio (lo vigila
    * tests/integracion/diseno.test.ts). Es CSS puro: sin WebGL ni filtros SVG
    * de refraccion, que no funcionan en Safari iOS y pesan.
@@ -306,30 +321,45 @@
    * - .vidrio        piezas sueltas sobre el cielo (contador de Inicio, card de
    *                  la bienvenida, titulo del onboarding).
    * - .vidrio-barra  el menu inferior: una pildora flotante por la que el
-   *                  contenido pasa por debajo. Mas esmerilada (85%): sus
-   *                  etiquetas son de 11px y tienen que pasar AA aunque debajo
-   *                  pase contenido oscuro (un banner, una foto).
-   * - .vidrio-hoja   hojas inferiores. Casi opaca: una hoja lleva texto largo y
-   *                  va sobre el velo oscuro del modal, y a 0.55 el texto
-   *                  perderia contraste segun lo que hubiera detras.
+   *                  contenido pasa por debajo (tinte 0.80 -> 0.77).
+   * - .vidrio-hoja   hojas inferiores (tinte 0.80 -> 0.77): llevan texto
+   *                  largo y van sobre el velo del modal.
+   *
+   * La "refraccion" se aproxima con desenfoque + saturacion + brillo, el
+   * reflejo del tercio superior y el canto iluminado. Solo se nota si hay
+   * algo con color o textura detras (el cielo, un banner, una lista).
    *
    * Como mucho dos capas con desenfoque a la vez en pantalla (el desenfoque es
    * caro y se acumula): por eso las tarjetas de contenido son .superficie
    * blanca y no vidrio.
    */
+  /*
+   * Variables de la receta: un solo juego para las tres clases. Cada clase
+   * solo cambia la opacidad del tinte (arriba -> abajo).
+   *
+   * Opacidades minimas por contraste (AA 4.5:1 en el PEOR caso):
+   * - .vidrio va siempre sobre el cielo (contador de Inicio, bienvenida,
+   *   onboarding): su peor caso es el pixel mas oscuro del cielo con su velo,
+   *   y ahi el tinte 0.62 -> 0.48 alcanza.
+   * - .vidrio-barra y .vidrio-hoja pueden tener cualquier cosa debajo; se
+   *   calcula sobre negro puro. El gris de sus textos es --vidrio-texto-tenue
+   *   (#4A5160), que pide al menos 0.77 de blanco (el #565E6D pediria 0.85).
+   */
   .vidrio,
   .vidrio-barra,
   .vidrio-hoja {
-    --vidrio-fondo: rgba(255, 255, 255, 0.55);
-    background: var(--vidrio-fondo);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.65);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.8),
-      inset 0 -1px 0 rgba(26, 35, 50, 0.04),
-      0 8px 32px rgba(26, 35, 50, 0.1),
-      0 1px 3px rgba(26, 35, 50, 0.06);
+    --vidrio-tinte-arriba: rgba(255, 255, 255, 0.62);
+    --vidrio-tinte-abajo: rgba(255, 255, 255, 0.48);
+    --vidrio-filtro: blur(24px) saturate(200%) brightness(1.04);
+    --vidrio-borde: rgba(255, 255, 255, 0.75);
+    --vidrio-sombra: inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(26, 35, 50, 0.06),
+      0 10px 30px rgba(26, 35, 50, 0.14), 0 2px 6px rgba(26, 35, 50, 0.08);
+    --vidrio-texto-tenue: #4a5160;
+    background: linear-gradient(to bottom, var(--vidrio-tinte-arriba), var(--vidrio-tinte-abajo));
+    -webkit-backdrop-filter: var(--vidrio-filtro);
+    backdrop-filter: var(--vidrio-filtro);
+    border: 1px solid var(--vidrio-borde);
+    box-shadow: var(--vidrio-sombra);
   }
 
   .vidrio {
@@ -339,23 +369,52 @@
 
   /* Pildora flotante: separada de los bordes, con el canto completo. */
   .vidrio-barra {
-    --vidrio-fondo: rgba(255, 255, 255, 0.85);
+    --vidrio-tinte-arriba: rgba(255, 255, 255, 0.8);
+    --vidrio-tinte-abajo: rgba(255, 255, 255, 0.77);
     border-radius: 9999px;
   }
 
   .vidrio-hoja {
-    --vidrio-fondo: rgba(255, 255, 255, 0.94);
+    --vidrio-tinte-arriba: rgba(255, 255, 255, 0.8);
+    --vidrio-tinte-abajo: rgba(255, 255, 255, 0.77);
     border-radius: theme("borderRadius.sheet") theme("borderRadius.sheet") 0 0;
   }
 
   /*
-   * Brillo especular del canto: un aro de 1px con degradado blanco que se
-   * apaga hacia abajo. La mascara recorta el centro, asi que solo se ve el
-   * aro y el desenfoque de debajo queda intacto.
+   * El gris de los textos sobre vidrio: un paso mas oscuro que el secundario,
+   * para que pase AA con el tinte mas translucido.
+   */
+  .vidrio .text-texto-secundario,
+  .vidrio .etiqueta,
+  .vidrio-barra .text-texto-secundario,
+  .vidrio-hoja .text-texto-secundario,
+  .vidrio-hoja .etiqueta {
+    color: var(--vidrio-texto-tenue);
+  }
+
+  /*
+   * Reflejo: un degradado blanco que se apaga en el tercio superior, por
+   * debajo del contenido (z-index -1 dentro de la capa del vidrio).
    */
   .vidrio::before,
   .vidrio-barra::before,
   .vidrio-hoja::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 33%);
+    pointer-events: none;
+  }
+
+  /*
+   * Canto especular: un aro de 1px con degradado blanco que se apaga hacia
+   * abajo. La mascara recorta el centro, asi que solo se ve el aro.
+   */
+  .vidrio::after,
+  .vidrio-barra::after,
+  .vidrio-hoja::after {
     content: "";
     position: absolute;
     inset: -1px;
@@ -363,8 +422,8 @@
     border-radius: inherit;
     background: linear-gradient(
       to bottom,
-      rgba(255, 255, 255, 0.95),
-      rgba(255, 255, 255, 0.3) 40%,
+      rgba(255, 255, 255, 1),
+      rgba(255, 255, 255, 0.35) 40%,
       rgba(255, 255, 255, 0) 75%
     );
     -webkit-mask:
@@ -386,7 +445,8 @@
     .vidrio,
     .vidrio-barra,
     .vidrio-hoja {
-      --vidrio-fondo: rgba(255, 255, 255, 0.92);
+      --vidrio-tinte-arriba: rgba(255, 255, 255, 0.92);
+      --vidrio-tinte-abajo: rgba(255, 255, 255, 0.92);
     }
   }
 
@@ -395,7 +455,8 @@
     .vidrio,
     .vidrio-barra,
     .vidrio-hoja {
-      --vidrio-fondo: #ffffff;
+      --vidrio-tinte-arriba: #ffffff;
+      --vidrio-tinte-abajo: #ffffff;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }

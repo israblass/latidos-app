@@ -37,7 +37,9 @@ export default async function Inicio() {
           {/* El diseño no lleva titulo visible (el contador es el heroe), pero
               sin un h1 un lector de pantalla no sabe anunciar donde esta. */}
           <h1 className="sr-only">Inicio</h1>
-          <p className="text-[15px] text-texto-secundario">
+          {/* Navy y no gris: va sobre el cielo de la cabecera, con un velo
+              liviano para que las nubes se vean, y ahi el gris no pasa AA. */}
+          <p className="text-[15px] text-texto-principal">
             Hola,{" "}
             <span className="font-medium text-texto-principal">
               {perfil.nombre}
@@ -57,7 +59,7 @@ export default async function Inicio() {
             de registro §9.16), asi que la ilustracion y el texto del estado
             vacio salieron (criterio 12).
           */}
-          <p className="mt-4 max-w-[16rem] text-center text-texto-secundario">
+          <p className="mt-8 max-w-[16rem] text-center text-texto-secundario">
             Sigue participando para sumar más.
           </p>
         </section>

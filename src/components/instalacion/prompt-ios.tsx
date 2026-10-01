@@ -33,7 +33,7 @@ export function PromptIOS({ onCerrar }: Props) {
       {/* Velo sin desenfoque: la hoja ya es una capa de vidrio, y como mucho
           van dos a la vez (constitution §2). */}
       <div
-        className="absolute inset-0 bg-texto-principal/40"
+        className="absolute inset-0 bg-texto-principal/30"
         onClick={onCerrar}
         aria-hidden="true"
       />

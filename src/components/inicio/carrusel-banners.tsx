@@ -244,29 +244,39 @@ export function CarruselBanners({ banners }: { banners: BannerInicio[] }) {
             );
           })}
         </div>
-      </div>
 
-      {total > 1 ? (
-        <div className="mt-1 flex justify-center">
-          {lista.map((banner, indice) => (
-            <button
-              key={banner.id}
-              type="button"
-              aria-label={`Ver anuncio ${indice + 1} de ${total}`}
-              aria-current={indice === actual ? "true" : undefined}
-              onClick={() => irA(indice)}
-              className="flex h-12 w-12 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-secundario"
-            >
-              <span
-                aria-hidden="true"
-                className={`block h-2 rounded-full transition-all ${
-                  indice === actual ? "w-5 bg-secundario" : "w-2 bg-texto-terciario"
-                }`}
-              />
-            </button>
-          ))}
-        </div>
-      ) : null}
+        {/*
+          Los puntos van en una capsula de vidrio sobre la imagen: es donde el
+          desenfoque del banner de color se ve de verdad. Es un control chico,
+          asi que no cuenta para el limite de dos capas de vidrio grandes
+          (constitution §2). Tocarla no arrastra el carrusel.
+        */}
+        {total > 1 ? (
+          <div
+            data-capsula-puntos=""
+            onPointerDown={(evento) => evento.stopPropagation()}
+            className="vidrio absolute bottom-2 left-1/2 flex -translate-x-1/2 rounded-full px-1"
+          >
+            {lista.map((banner, indice) => (
+              <button
+                key={banner.id}
+                type="button"
+                aria-label={`Ver anuncio ${indice + 1} de ${total}`}
+                aria-current={indice === actual ? "true" : undefined}
+                onClick={() => irA(indice)}
+                className="flex h-12 w-9 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-texto-principal"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`block h-2 rounded-full transition-all ${
+                    indice === actual ? "w-5 bg-texto-principal" : "w-2 bg-texto-principal/40"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
