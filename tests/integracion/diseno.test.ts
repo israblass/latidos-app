@@ -178,11 +178,14 @@ test.describe("principio de paleta", () => {
 
   test("los tokens fuera de paleta del PR #8 ya no existen", () => {
     const tailwind = sinComentarios(readFileSync(join(RAIZ, "tailwind.config.ts"), "utf8"));
-    for (const viejo of ["#DDF3FB", "#EAF6FB", "#F0F2F5", "#C9D1DE", "celeste", "gris-chip", "sobre-navy"]) {
+    for (const viejo of ["#DDF3FB", "#EAF6FB", "#F0F2F5", "#C9D1DE", "celeste", "gris-chip"]) {
       expect(tailwind, viejo).not.toContain(viejo);
     }
+    // El texto sobre navy volvio en la v2.8.0 (hero de Beats), pero como
+    // blanco al 72% y no como el #C9D1DE de antes.
+    expect(tailwind).toContain('"sobre-navy": "rgb(255 255 255 / 0.72)"');
     const usos = archivos(SRC).filter((ruta) =>
-      /\b(bg|text|border)-(celeste|celeste-claro|gris-chip|texto-sobre-navy)\b|--inicio-cielo/.test(
+      /\b(bg|text|border)-(celeste|celeste-claro|gris-chip)\b|--inicio-cielo/.test(
         sinComentarios(readFileSync(ruta, "utf8")),
       ),
     );
@@ -329,15 +332,21 @@ test.describe("en pantalla", () => {
     expect(contraste(gris, oscuro as Rgb), "gris sobre el degradado").toBeGreaterThanOrEqual(4.5);
   });
 
-  test("Beats y Perfil: crema solido, sin cielo; con la hoja abierta, dos capas", async ({ page }) => {
+  test("Beats y Perfil: sin cielo ni vidrio propio; con la hoja abierta, dos capas", async ({ page }) => {
     await cuentaConId(page);
     await abrirBeats(page);
     expect(await fondoDelBody(page)).toBe("rgb(255, 255, 245)");
     await expect(page.locator("[data-cielo]")).toHaveCount(0);
+    // v2.8.0: Beats lleva el mismo degradado de marca del Inicio (una sola
+    // definicion) y ninguna capa de vidrio aparte de la barra.
+    await expect(page.locator(".fondo-inicio")).toHaveCount(1);
     expect(await capasDeVidrio(page)).toEqual(["vidrio-barra"]);
-    // Las tarjetas son blancas, no vidrio.
-    const contador = page.locator("section[aria-label='Tu balance de Beats'] > div");
-    await expect(contador).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    // El hero es navy opaco; Tu pulso y el historial son blancos opacos.
+    await expect(page.locator("section[aria-label='Tu balance de Beats']")).toHaveCSS(
+      "background-color",
+      "rgb(26, 35, 50)",
+    );
+    await expect(page.locator("[data-tu-pulso]")).toHaveCSS("background-color", "rgb(255, 255, 255)");
     expect(await incumplimientosDeColor(page)).toEqual([]);
 
     await page.getByRole("button", { name: "¿Cómo gano Beats?" }).click();

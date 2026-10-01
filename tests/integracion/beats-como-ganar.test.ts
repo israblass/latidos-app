@@ -49,7 +49,9 @@ test.describe("estado inicial", () => {
     await expect(page.getByText(/Sumaste 10 Beats/)).toBeVisible();
 
     await abrirBeats(page);
-    await expect(page.getByText("KFC")).toBeVisible();
+    // KFC sale en su fila del historial y, desde la v2.8.0, en el carrusel de
+    // marcas.
+    await expect(page.locator(`[id^='dia-'] li`).filter({ hasText: "KFC" })).toBeVisible();
     await expect(lineaGuia(page)).toHaveCount(0);
     await expect(page.getByRole("region", { name: "Cómo empezar a sumar" })).toHaveCount(0);
     // La explicacion queda en el boton.
