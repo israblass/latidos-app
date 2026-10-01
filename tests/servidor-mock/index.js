@@ -42,6 +42,10 @@ const SEMILLA = {
 };
 
 let banners;
+// Cierres de sesion: los que llegaron (con su alcance) y lo que dejaron
+// revocado. Supabase revoca la sesion del token con scope=local y todas las
+// de la persona con scope=global (el default).
+let cierres, sesionesRevocadas, revocadoAntesDe;
 let marcas, qrs, escaneos, movimientos, configuracion, usuariosAuth, perfiles, tokens, ultimoEnlace;
 // Fallas simuladas por nombre de RPC (Fase 5: "No pudimos actualizar").
 let fallas;
@@ -50,6 +54,9 @@ let fallas;
 function reiniciar() {
   marcas = SEMILLA.marcas.map((m) => ({ ...m }));
   banners = SEMILLA.banners.map((b) => ({ ...b }));
+  cierres = [];
+  sesionesRevocadas = new Set();
+  revocadoAntesDe = new Map(); // usuario -> segundos: tokens emitidos hasta ahi
   qrs = SEMILLA.qrs.map((q) => ({ ...q }));
   escaneos = [];
   movimientos = [];
@@ -174,6 +181,11 @@ const servidor = http.createServer((req, res) => {
     }
     const json = (c, d) => { res.writeHead(c, { "content-type": "application/json", ...cors }); res.end(JSON.stringify(d)); };
     const unico = () => (req.headers.accept || "").includes("pgrst.object");
+    const reclamos = () => {
+      const a = req.headers.authorization || "";
+      try { return JSON.parse(Buffer.from(a.split(" ")[1].split(".")[1], "base64url")); }
+      catch { return null; }
+    };
     const sujeto = () => {
       const a = req.headers.authorization || "";
       try { return JSON.parse(Buffer.from(a.split(" ")[1].split(".")[1], "base64url")).sub; }
@@ -267,6 +279,9 @@ const servidor = http.createServer((req, res) => {
       }
       return json(200, { ok: true });
     }
+    if (url.pathname === "/prueba/cierres" && req.method === "GET") {
+      return json(200, { cierres });
+    }
     // Reemplaza los banners (filas tal cual llegarian de la tabla).
     if (url.pathname === "/prueba/banners" && req.method === "POST") {
       const { filas } = JSON.parse(cuerpo || "{}");
@@ -336,8 +351,14 @@ const servidor = http.createServer((req, res) => {
       return json(200, sesion(reg.id, reg.correo, usuarioDe(reg)));
     }
 
-    // Cerrar sesion. El mock no revoca tokens: con eso basta para el cliente.
+    // Cerrar sesion, con el alcance de Supabase: local revoca solo esta
+    // sesion; global (el default), todas las de la persona.
     if (url.pathname === "/auth/v1/logout" && req.method === "POST") {
+      const r = reclamos();
+      const alcance = url.searchParams.get("scope") || "global";
+      cierres.push({ usuario: r && r.sub, alcance });
+      if (r && alcance === "local") sesionesRevocadas.add(r.session_id);
+      if (r && alcance === "global") revocadoAntesDe.set(r.sub, Math.floor(Date.now() / 1000));
       res.writeHead(204, cors);
       return res.end();
     }
@@ -359,6 +380,11 @@ const servidor = http.createServer((req, res) => {
     if (url.pathname === "/auth/v1/user" && req.method === "GET") {
       const id = sujeto();
       if (!id) return json(401, { message: "invalid claim" });
+      const r = reclamos();
+      if (sesionesRevocadas.has(r.session_id) ||
+          (revocadoAntesDe.has(id) && r.iat <= revocadoAntesDe.get(id))) {
+        return json(403, { code: "session_not_found", message: "Session from session_id claim in JWT does not exist" });
+      }
       const reg = [...usuariosAuth.values()].find((r) => r.id === id);
       return reg ? json(200, usuarioDe(reg)) : json(401, { message: "not found" });
     }
