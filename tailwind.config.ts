@@ -112,7 +112,11 @@ const config: Config = {
         },
       },
       animation: {
-        "entrar-pantalla": "entrar-pantalla 260ms cubic-bezier(0.22,1,0.36,1) both",
+        // `backwards` y no `both`: con `both` la animacion sigue "aplicada"
+        // al terminar, y Chromium trata al <main> animado como raiz del
+        // backdrop. El vidrio de adentro dejaba de ver el cielo de afuera y
+        // no desenfocaba nada (medido: diferencia 0 con y sin filtro).
+        "entrar-pantalla": "entrar-pantalla 260ms cubic-bezier(0.22,1,0.36,1) backwards",
         "aparecer-check": "aparecer-check 520ms cubic-bezier(0.34,1.56,0.64,1) 80ms both",
         "entrar-tarjeta": "entrar-tarjeta 340ms cubic-bezier(0.22,1,0.36,1) both",
         girar: "girar 700ms linear infinite",
