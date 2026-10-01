@@ -10,7 +10,7 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v6";
+const VERSION = "v7";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
@@ -19,6 +19,8 @@ const VERSION = "v6";
 // precachea con el shell, y la vieja de estados-vacios deja de existir.
 // v6: el manifest pasa al crema (#FFFFF5) y llega el icono nuevo (/icons/),
 // ambos precacheados en el shell.
+// v7: el CSS cambio (botones en pildora, Inicio nuevo) y la copia
+// precacheada de /sin-conexion apunta a la hoja de estilos anterior.
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 

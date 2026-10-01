@@ -2,11 +2,12 @@
 tipo: constitution
 producto: Latidos App
 slug: latidos-app
-version: 2.5.0
+version: 2.6.0
 fecha-creacion: 2026-08-20
 ultima-modificacion: 2026-10-01
 <!-- v2.0.0 | 2026-08-26 | Cambio de stack a PWA (Next.js + Capacitor) para lanzar en Android e iOS el 15 sept sin esperar aprobacion de tiendas. Fase 1 reordenada segun acuerdo con Kevin: prioriza registro + QR + Beats sobre Pulso completo. Beats por QR de marca ahora configurables en cualquier momento por el admin. -->
 <!-- v2.1.0 | 2026-09-10 | Cambio de design system: base clara/blanca en vez de fondo oscuro solido. El cliente pidio explicitamente alejarse del fondo oscuro por no ir con la tematica festiva del evento. Referencia de atmosfera: apps tipo Cashea/Yummy. La paleta de marca (amarillo/azul) y la tipografia no cambian, solo la base y los tonos de superficie. Pantallas ya construidas (bienvenida, registro, onboarding, Inicio) requieren pasada de restyle. -->
+<!-- v2.6.0 | 2026-10-01 | Inicio rediseñado (referencia aprobada por Isra): botones en pildora plana con modificador de flecha y boton oscuro; cabecera con pildoras de ayuda y perfil; tarjeta de Beats navy plana como excepcion al vidrio; fondo del Inicio en degradado de marca en CSS (el cielo de foto queda en bienvenida y onboarding); patron de acordeon; regla de copy de CTA. -->
 <!-- v2.5.0 | 2026-10-01 | Liquid glass que se nota: receta con variables (tinte en degradado, blur 24px + saturacion 200% + brillo, borde y reflejo marcados, sombra definida), opacidades minimas por contraste sobre negro, gris de texto sobre vidrio #4A5160, contenido con color detras de cada vidrio (cielo pleno bajo el contador de Inicio, capsula de puntos sobre el banner) y excepcion de controles chicos en el limite de dos capas. -->
 <!-- v2.4.0 | 2026-10-01 | Menu inferior como pildora flotante de vidrio (estilo Facebook iOS / BanescoMovil): separada de los bordes, pestaña activa en su propia pildora amarilla que se desliza, etiquetas visibles en todas las pestañas e iconos SVG de trazo uniforme. El espacio inferior de las pantallas sale de un solo token. -->
 <!-- v2.3.0 | 2026-10-01 | Base crema #FFFFF5 (unica definicion: --color-fondo en globals.css) con tarjetas, hojas y modales en blanco puro #FFFFFF. Regla del amarillo y regla del azul. Liquid glass renovado en CSS puro y definido en un solo lugar (.vidrio, .vidrio-barra, .vidrio-hoja), maximo dos capas a la vez. El cielo solo en bienvenida, onboarding y header de Inicio. Texto secundario #565E6D. Icono nuevo de la app. -->
@@ -97,9 +98,13 @@ El `#FDFB05` queda en 1.1:1 contra el crema y el blanco: es invisible como trazo
 
 ### Componentes mobile
 
-- **Botones primarios**: fondo `#FDFB05`, texto `#1A2332`, border-radius 12px, altura minima 48px (touch target), font-weight 500.
-- **Botones secundarios**: borde 1px `#0090FF`, texto navy `#1A2332`, fondo blanco.
-- **Botones ghost**: sin borde, texto navy `#1A2332` subrayado en `#0090FF`, fondo transparente. Para acciones secundarias.
+- **Botones (v2.6.0)**: pildoras planas, como una app seria. Definidos una sola vez en `globals.css`:
+  - `.boton-primario`: amarillo plano `#FDFB05`, texto navy, `rounded-full`, alto minimo 52px, DM Sans 16px semibold (600). Sin degradado ni sombras elevadas. Al tocar, `scale(.98)`; deshabilitado, opacidad 0.4.
+  - `.boton-secundario`: blanco, `rounded-full`, borde 1px navy al 15%, texto navy. El azul ya no es su borde: queda solo para el anillo de foco (2px, separado 2px).
+  - `.boton-oscuro`: navy plano, texto blanco, mismo alto.
+  - `.boton-ghost`: sin borde, texto navy subrayado en `#0090FF`. Para acciones secundarias.
+  - Modificador `.boton--flecha`: etiqueta a la izquierda (padding 24px) y un circulo con flecha a la derecha (padding 6px), componente `<CirculoFlecha>`. En el primario el circulo es navy con flecha amarilla (48px en el CTA grande de 64px, 32px en botones bajos); en el oscuro, amarillo con flecha navy. El circulo navy con icono amarillo (`.circulo-navy`) es el unico uso del amarillo como trazo, siempre sobre navy.
+  - Area tactil minima 48px (44px como piso absoluto) y contraste AA en todos.
 - **Cards**: border-radius 16px, padding 16px, superficie blanca `#FFFFFF` sobre el crema (clase `.superficie` / `.tarjeta`). El vidrio queda para la barra, las hojas y una pieza destacada sobre el cielo (ver "Liquid glass").
 - **Bottom navigation (menu inferior)**: pildora flotante de vidrio (`.vidrio-barra`, ver "Menu inferior flotante" abajo). 5 pestañas maximo, todas con icono y etiqueta. Una pestaña cuya fase no ha llegado se muestra apagada y sin enlace, nunca se omite.
 - **Bottom sheets**: border-radius 24px top, vidrio (`.vidrio-hoja`, tinte 0.80 -> 0.77), handle bar centrado, sobre un velo navy al 30% sin desenfoque.
@@ -112,14 +117,14 @@ El `#FDFB05` queda en 1.1:1 contra el crema y el blanco: es invisible como trazo
 
 Pedido explicito del cliente, con la barra inferior de Facebook iOS y de BanescoMovil como referencia. Vidrio CLARO, en CSS puro: sin WebGL, sin html-to-image y sin filtros SVG de refraccion (no funcionan en Safari iOS y pesan). La "refraccion" se aproxima con desenfoque + saturacion + brillo, el reflejo del tercio superior y el canto iluminado. La receta vive en un solo lugar, `globals.css`, y ningun componente escribe un `backdrop-filter` propio (lo vigila una prueba).
 
-- **Clases**: `.vidrio` (piezas sobre el cielo o una imagen: contador de Inicio, card de la bienvenida, titulo del onboarding, capsula de puntos del banner), `.vidrio-barra` (menu inferior), `.vidrio-hoja` (hojas inferiores).
+- **Clases**: `.vidrio` (piezas sobre el cielo o una imagen: card de la bienvenida, titulo del onboarding, capsula de puntos del banner; el contador del Inicio dejo de ser vidrio en la v2.6.0), `.vidrio-barra` (menu inferior), `.vidrio-hoja` (hojas inferiores).
 - **Variables compartidas**: `--vidrio-tinte-arriba` / `--vidrio-tinte-abajo` (fondo en degradado vertical), `--vidrio-filtro: blur(24px) saturate(200%) brightness(1.04)` (con y sin `-webkit-`), `--vidrio-borde: rgba(255,255,255,.75)`, `--vidrio-sombra` (`inset 0 1.5px 0 rgba(255,255,255,.95)`, `inset 0 -1px 0 rgba(26,35,50,.06)`, `0 10px 30px rgba(26,35,50,.14)`, `0 2px 6px rgba(26,35,50,.08)`) y `--vidrio-texto-tenue: #4A5160`.
 - **Reflejo**: `::before` con degradado blanco que se apaga en el tercio superior, por debajo del contenido; `::after` con el aro especular de 1px recortado por mascara.
 - **Opacidades** (minimo que da AA 4.5:1 en el peor caso):
   - `.vidrio`: 0.62 -> 0.48. Solo va sobre el cielo o el banner; el peor caso es el pixel mas oscuro del cielo con su velo.
   - `.vidrio-barra`: 0.80 -> 0.77, y `.vidrio-hoja`: 0.80 -> 0.77. Debajo puede pasar cualquier cosa: se calcula sobre negro puro. Con el gris `#4A5160` el minimo es 0.77 (con `#565E6D` seria 0.85).
 - **Texto sobre vidrio**: navy `#1A2332` o el gris `#4A5160` (`--vidrio-texto-tenue`), que reemplaza al `#565E6D` dentro de las tres clases.
-- **Que haya algo detras**: el vidrio solo se nota sobre color o textura. El contador de Inicio va entero sobre el cielo pleno de la cabecera (velo 45%, solo con texto navy encima); los puntos del banner van en una capsula de vidrio sobre la imagen; el contenido pasa por debajo de la barra; el velo de las hojas es navy al 30%, translucido.
+- **Que haya algo detras**: el vidrio solo se nota sobre color o textura. Los puntos del banner van en una capsula de vidrio sobre la imagen; el contenido pasa por debajo de la barra; el velo de las hojas es navy al 30%, translucido.
 - **Limite**: como mucho dos capas GRANDES con desenfoque visibles a la vez. Los controles chicos (menos de 8000 px², como la capsula de puntos) no cuentan: su costo es minimo.
 - **Ancestros**: ningun contenedor de un vidrio puede quedar como raiz del backdrop (opacidad, filtro, mascara o una animacion de opacidad que siga aplicada). La entrada de pantalla del `<main>` usa `animation-fill-mode: backwards` por eso: con `both`, el vidrio de la bienvenida y del onboarding no veia el cielo.
 - **Respaldos**: sin soporte de `backdrop-filter`, tinte al 0.92; con `prefers-reduced-transparency: reduce`, blanco solido sin desenfoque.
@@ -140,15 +145,30 @@ Patron de referencia: la barra inferior de Facebook iOS y de BanescoMovil.
 
 Base crema `#FFFFF5` con superficies blancas (v2.3.0). Referencia de atmosfera: apps tipo Cashea/Yummy — fondo claro, secciones bien segmentadas con cards y bloques de color.
 
-El cielo del branding (con su velo blanco y el tinte de marca en `soft-light`) va SOLO en:
-- La bienvenida y el onboarding, a pantalla completa y fijo.
-- El header de Inicio, como franja que se funde con el crema.
+- **Bienvenida y onboarding**: el cielo del branding (foto con velo blanco y tinte de marca en `soft-light`), a pantalla completa y fijo.
+- **Inicio (v2.6.0)**: degradado de marca en CSS puro, sin foto ni desenfoque (`.fondo-inicio`): un radial amarillo arriba a la derecha, uno celeste a la izquierda y un vertical de cielo a crema, en una franja de 640px detras del contenido. Sus colores viven como variables en `:root` (`--inicio-amarillo`, `--inicio-celeste`, `--inicio-cielo-arriba`, `--inicio-cielo-medio`), no escritos en la regla.
+- **Resto de la app**: crema solido. A tamaño completo y sin velo, el cielo se reserva para el splash screen.
 
-En el resto de la app: crema solido. A tamano completo y sin velo, el cielo se reserva para el splash screen.
+### Inicio (v2.6.0)
+
+Referencia aprobada por Isra (`referencia-inicio`, 390px). De arriba a abajo:
+
+1. **Pildoras de cabecera**: dos pildoras navy de 108x58, `rounded-full`. Izquierda, "Cómo gano Beats" (interrogacion en circulo), abre la hoja de ayuda. Derecha, perfil: circulo amarillo de 38px con la inicial del nombre en navy, enlaza a Perfil. No hay campana ni notificaciones (esa funcion no existe). Margen superior `max(22px, env(safe-area-inset-top))`.
+2. **Saludo**: DM Sans a 40px y line-height 1.1, "Hola," en 300 y el nombre en 700 con "!". Con nombres de mas de 10 caracteres baja a 32px. El `h1` es solo para lector de pantalla.
+3. **Tarjeta de Beats**: navy plana, radio 30px, padding 22/24, sin vidrio ni halo. Arriba "Beats acumulados" (14px, `#C9D1DE`) y, si hay, el chip amarillo "+N esta semana" (suma de los ultimos 7 dias calendario en hora de Caracas; no aparece si N <= 0 o si los datos no cargaron). Abajo el numero en Anton 68px blanco, con el conteo animado de siempre. Es el enlace a Beats. **Excepcion documentada** a "el contador va en vidrio".
+4. **Escanear QR**: `.boton-primario .boton--flecha`, 64px de alto, ancho completo, 17px bold, circulo navy de 48px.
+5. **Banners**: el carrusel de siempre.
+6. **Acordeones**: una tarjeta blanca (radio 28px, borde navy al 8%) con "Actividad reciente" (abierta al entrar: hasta 3 movimientos y "Ver historial") y "Qué es Latidos" (cerrada: parrafo y las 3 fases en tarjetas crema con panel celeste). El estado no se guarda.
+
+Margenes laterales del Inicio: 16px (las demas pantallas siguen en 20px). No hay barra de progreso ni "proximo nivel": los niveles no estan definidos.
+
+### Acordeon (v2.6.0)
+
+`src/components/ui/acordeon.tsx`. Cabecera `<h2><button>` con icono en circulo celeste de 44px, titulo (16px bold), subtitulo (13px, `#565E6D`) y un circulo navy de 36px con chevron amarillo que gira 180° al abrir. `aria-expanded`, `aria-controls` y una region nombrada por el titulo; cerrada, la region va `inert` (fuera del foco y del arbol accesible), tambien en el HTML del servidor. Abre con transicion de alto de 250ms (`grid-template-rows` 0fr -> 1fr); sin transicion con `prefers-reduced-motion`. Las secciones de una misma tarjeta se separan con una linea fina.
 
 ### Firma visual
 
-El momento memorable de la app es el contador de Beats: un numero grande en Anton, en navy `#1A2332`; en Inicio, dentro de una card de vidrio sobre el cielo del header, y en Beats, en una superficie blanca. El amarillo `#FDFB05` no se usa como color del numero (no alcanza contraste sobre superficie clara): pasa a una barra de acento debajo del numero y a un halo radial detras que late despacio (se queda quieto con `prefers-reduced-motion`). Con animacion de incremento cuando se suman puntos. Es lo primero que el usuario ve en su pantalla principal, y se ve igual en Inicio y en la pantalla de Beats para que se reconozca como el mismo numero.
+El momento memorable de la app es el contador de Beats: un numero grande en Anton. En Beats va en navy `#1A2332` sobre una superficie blanca; en el Inicio (v2.6.0) va en blanco sobre la tarjeta navy plana. El amarillo `#FDFB05` no se usa como color del numero (no alcanza contraste sobre superficie clara): pasa a una barra de acento debajo del numero y a un halo radial detras que late despacio (se queda quieto con `prefers-reduced-motion`). Con animacion de incremento cuando se suman puntos. Es lo primero que el usuario ve en su pantalla principal, y se ve igual en Inicio y en la pantalla de Beats para que se reconozca como el mismo numero.
 
 ## 3. Tono y Copy
 
@@ -159,7 +179,7 @@ Hereda las reglas de la constitution web con adaptaciones para mobile:
 - **Voz en notificaciones**: directa y breve. "Nueva jornada de Pulso: utiles escolares. Dona y suma Beats." No "Querido usuario, le informamos que..."
 - **Patrones prohibidos**: los mismos que la web. Ademas: no usar "Felicidades!" ni "Increible!" en confirmaciones. Ser concreto: "Donacion registrada. +10 Beats."
 - **Microcopy**: cada pantalla tiene un estado vacio con texto que guia a la accion, no que se disculpa. "Tu primer escaneo aparecera aqui." NO "Lo sentimos, no hay datos disponibles."
-- **CTAs mobile**: verbos cortos en infinitivo. "Donar", "Escanear", "Canjear", "Ver mas". Maximo 2 palabras.
+- **CTAs mobile**: verbos en infinitivo, maximo 2 palabras. "Escanear QR", "Ver historial", "Donar", "Canjear".
 
 ## 4. Stack Tecnico
 
