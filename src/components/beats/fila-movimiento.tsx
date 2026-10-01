@@ -25,7 +25,7 @@ function IconoFila({ movimiento }: { movimiento: Movimiento }) {
   if (esMovimientoDeLatidos(movimiento.tipo)) {
     return (
       <Image
-        src="/icon-192.png"
+        src="/icons/icon-512.png"
         alt=""
         aria-hidden="true"
         width={LADO}

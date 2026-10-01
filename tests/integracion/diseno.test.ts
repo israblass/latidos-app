@@ -70,12 +70,15 @@ test.describe("reglas en el codigo", () => {
     expect(viejos.map((r) => relative(RAIZ, r))).toEqual([]);
   });
 
-  test("el crema #FFFFF5 se escribe solo en globals.css", () => {
+  test("el crema #FFFFF5 se escribe solo en globals.css, el manifest y el theme-color", () => {
     const con = archivos(SRC)
       .filter((ruta) => /#fffff5/i.test(sinComentarios(readFileSync(ruta, "utf8"))))
       .map((ruta) => relative(RAIZ, ruta))
       .sort();
-    expect(con).toEqual(["src/app/globals.css"]);
+    expect(con).toEqual(["src/app/globals.css", "src/app/layout.tsx"]);
+    const manifest = JSON.parse(readFileSync(join(RAIZ, "public", "manifest.json"), "utf8"));
+    expect(manifest.theme_color).toBe("#FFFFF5");
+    expect(manifest.background_color).toBe("#FFFFF5");
     expect(readFileSync(GLOBALS, "utf8").match(/--color-fondo:\s*#fffff5/gi)).toHaveLength(1);
     const tailwind = readFileSync(join(RAIZ, "tailwind.config.ts"), "utf8");
     expect(tailwind).toContain('fondo: "var(--color-fondo)"');

@@ -31,22 +31,23 @@ export const metadata: Metadata = {
     // "Agregar a pantalla de inicio".
     capable: true,
     title: "Latidos",
-    // Base clara: barra de estado con contenido oscuro sobre el fondo blanco.
+    // Base clara: barra de estado con contenido oscuro sobre el fondo crema.
     statusBarStyle: "default",
   },
   icons: {
     icon: [
-      { url: "/icon-16.png", sizes: "16x16", type: "image/png" },
-      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
+  // El crema de la base (--color-fondo en globals.css). Aqui va escrito porque
+  // el meta theme-color no puede leer variables CSS.
+  themeColor: "#FFFFF5",
   width: "device-width",
   initialScale: 1,
   // Sin maximumScale: bloquear el zoom impide ampliar el texto a quien lo

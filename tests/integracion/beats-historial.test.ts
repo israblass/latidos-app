@@ -139,7 +139,7 @@ test.describe("pantalla", () => {
     const hoy = page.locator(`#dia-${haceDias(0)}`);
     await expect(hoy).toContainText("Bienvenida a Latidos");
     await expect(hoy).toContainText("+5");
-    await expect(hoy.locator("img[src*='icon-192']")).toHaveCount(1);
+    await expect(hoy.locator("img[src*='icon-512']")).toHaveCount(1);
   });
 
   test("abrir un dia no cierra otro, y las filas no se tocan", async ({ page }) => {
@@ -190,7 +190,7 @@ test.describe("pantalla", () => {
 
     await cambiarEstadoQR(QR.sinLimite, "inactivo");
     await cambiarBeatsDelQR(QR.sinLimite, 50);
-    await cambiarMarca(MARCA_KFC, { nombre: "KFC Venezuela", logo_url: "/icon-32.png" });
+    await cambiarMarca(MARCA_KFC, { nombre: "KFC Venezuela", logo_url: "/favicon-32.png" });
 
     await abrirBeats(page);
     const linea = lineaDelDia(page, etiquetaDia(haceDias(2)));
@@ -200,7 +200,7 @@ test.describe("pantalla", () => {
     const fila = page.locator(`#dia-${haceDias(2)} li`).first();
     await expect(fila).toContainText("KFC Venezuela");
     await expect(fila).toContainText("+10");
-    await expect(fila.locator("img[src='/icon-32.png']")).toBeVisible();
+    await expect(fila.locator("img[src='/favicon-32.png']")).toBeVisible();
   });
 });
 
