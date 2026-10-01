@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
+
 import { ContadorAnimado } from "@/components/escaneo/contador-animado";
-import { IconoEstado } from "@/components/escaneo/icono-estado";
 import { BarraAcento } from "@/components/marca/titulo-con-acento";
+import { ILUSTRACIONES } from "@/lib/ilustraciones";
 
 /**
  * Cierre de un canje confirmado (T053, T054).
@@ -31,10 +33,15 @@ export function TarjetaExito({
 }) {
   return (
     <div className="tarjeta-elevada animate-entrar-tarjeta flex flex-col items-center px-5 py-8 text-center">
-      {/* El check entra pasado de tamaño y asienta: es el momento que la
-          persona vino a ver, y aparecer sin mas lo deja en nada. */}
-      <IconoEstado
-        nombre="icono-exito-check"
+      {/* La caja con el corazon (Beats ganados) entra pasada de tamaño y
+          asienta: es el momento que la persona vino a ver, y aparecer sin mas
+          lo deja en nada. Decorativa: el titulo dice lo que paso. */}
+      <Image
+        src={ILUSTRACIONES.cajaCorazon.src}
+        alt=""
+        aria-hidden="true"
+        width={106}
+        height={88}
         className="animate-aparecer-check"
       />
 

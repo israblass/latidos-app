@@ -2,6 +2,8 @@
 
 import { CarruselOnboarding } from "@/components/onboarding/carrusel-onboarding";
 import { IconoCampana } from "@/components/onboarding/iconos";
+import { IlustracionOnboarding } from "@/components/onboarding/ilustracion";
+import { ILUSTRACIONES } from "@/lib/ilustraciones";
 import { usePermisoNotificaciones } from "@/hooks/use-permiso-notificaciones";
 import { TituloConAcento } from "@/components/marca/titulo-con-acento";
 
@@ -19,15 +21,11 @@ export default function PantallaCierre() {
     <CarruselOnboarding pantalla={3} textoAvance="Empezar">
       {/* Acento amarillo y no bloque amarillo: el boton de avanzar es el unico
           amarillo grande de la pantalla. */}
-      {/*
-        TODO(assets): falta la tercera ilustracion del onboarding. El zip trae
-        `onboarding-1-comunidad` y `onboarding-2-escanear`, pero no la de esta
-        pantalla, y el encargo describe tres slides. No se pone nada en su
-        lugar: un dibujo de libreria desentonaria con el par que si existe. Al
-        recibirla: <IlustracionOnboarding nombre="onboarding-3-..." /> aqui
-        arriba, con mt-2 en la card de abajo, igual que en las otras dos.
-      */}
-      <div className="vidrio-medio px-5 py-7 text-center">
+      <IlustracionOnboarding
+        ilustracion={ILUSTRACIONES.figuraAmarillaCorazon}
+        descripcion="Una figura amarilla que sostiene un pequeño corazón"
+      />
+      <div className="vidrio-medio mt-3 px-5 py-7 text-center">
         <TituloConAcento etiqueta="Todo listo" detalle="Tu cuenta esta activa y tu contador arranca en cero.">
           Empieza a
           <br />

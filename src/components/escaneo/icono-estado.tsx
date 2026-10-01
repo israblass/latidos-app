@@ -19,7 +19,7 @@ export function IconoEstado({
   className,
 }: {
   nombre: string;
-  carpeta?: "iconos" | "estados-vacios";
+  carpeta?: "iconos";
   className?: string;
 }) {
   return (

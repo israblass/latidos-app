@@ -1,15 +1,10 @@
+import { ContenidoSinConexion } from "@/components/marca/contenido-sin-conexion";
+
 /**
  * Pantalla que sirve el service worker cuando no hay señal y la navegacion
- * no se puede resolver contra la red.
+ * no se puede resolver contra la red. Su ilustracion esta precacheada, asi
+ * que se ve completa aunque no haya red desde que se instalo la app.
  */
 export default function SinConexion() {
-  return (
-    <main className="flex min-h-dvh flex-col justify-center px-5 pb-8 pt-4">
-      <p className="etiqueta">Sin conexion</p>
-      <h1 className="titulo-pantalla mt-3">Te quedaste sin señal</h1>
-      <p className="mt-4 text-texto-secundario">
-        Vuelve a intentar cuando tengas internet. Tus Beats siguen guardados.
-      </p>
-    </main>
-  );
+  return <ContenidoSinConexion />;
 }

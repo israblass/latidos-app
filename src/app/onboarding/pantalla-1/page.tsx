@@ -4,6 +4,7 @@ import { CarruselOnboarding } from "@/components/onboarding/carrusel-onboarding"
 import { ImagenMarca } from "@/components/marca/imagen-marca";
 import { ASSETS } from "@/lib/assets";
 import { IlustracionOnboarding } from "@/components/onboarding/ilustracion";
+import { ILUSTRACIONES } from "@/lib/ilustraciones";
 import { TituloConAcento } from "@/components/marca/titulo-con-acento";
 
 /**
@@ -50,8 +51,8 @@ export default function PantallaQueEsLatidos() {
       {/* Acento amarillo y no bloque amarillo: el boton de avanzar es el unico
           amarillo grande de la pantalla. */}
       <IlustracionOnboarding
-        nombre="onboarding-1-comunidad"
-        descripcion="Tres personas de la comunidad UCV llevando cajas de donaciones"
+        ilustracion={ILUSTRACIONES.corazonLatido}
+        descripcion="Un corazón amarillo con la línea de un latido"
       />
 
       <div className="vidrio-medio mt-3 px-5 py-7 text-center">

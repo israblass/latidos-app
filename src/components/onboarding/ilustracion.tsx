@@ -1,38 +1,37 @@
 import Image from "next/image";
 
+import type { Ilustracion } from "@/lib/ilustraciones";
+
 /**
  * Ilustracion de una pantalla del onboarding.
  *
- * Se dimensiona por ALTO y no por ancho, con el ancho libre. Las dos
- * ilustracion que existen tienen formas muy distintas —la de comunidad es
- * 1:1.17 y la de escanear 1:1.94—, asi que fijar el ancho las dejaria con
+ * Se dimensiona por ALTO y no por ancho, con el ancho libre. Las ilustraciones
+ * tienen formas muy distintas (el corazon es casi cuadrado, la figura amarilla
+ * es el doble de alta que ancha), asi que fijar el ancho las dejaria con
  * alturas que no se parecen y cada slide pesaria distinto. Fijando el alto,
  * todas ocupan la misma franja de pantalla.
  *
- * Se usan las versiones `-recortada`, sin el borde transparente del original.
- * El recorte no es cosmetico: ese vacio es parte de la imagen, asi que
- * cualquier caja que la contenga lo sigue reservando, y era el hueco muerto que
- * quedaba entre la ilustracion y la card. Si llega una ilustracion nueva, hay
- * que recortarla igual o entregarla ya ajustada a su arte.
+ * Los archivos ya vienen recortados al arte, sin el borde transparente del
+ * original: ese vacio es parte de la imagen, y cualquier caja que la contenga
+ * lo seguiria reservando como hueco muerto entre la ilustracion y la card.
  *
  * El alto se encoge con la pantalla: en un telefono corto la ilustracion cede
  * espacio antes que empujar el boton de avanzar fuera de la vista.
  */
 export function IlustracionOnboarding({
-  nombre,
+  ilustracion,
   descripcion,
 }: {
-  /** Nombre del archivo sin extension ni el sufijo `-recortada`. */
-  nombre: string;
+  ilustracion: Ilustracion;
   /** Que se ve. */
   descripcion: string;
 }) {
   return (
     <Image
-      src={`/assets/ilustraciones/${nombre}-recortada.webp`}
+      src={ilustracion.src}
       alt={descripcion}
-      width={716}
-      height={836}
+      width={ilustracion.ancho}
+      height={ilustracion.alto}
       priority
       sizes="(max-height: 700px) 30vh, 40vh"
       className="mx-auto h-[clamp(108px,19vh,176px)] w-auto"

@@ -1,3 +1,7 @@
+import Image from "next/image";
+
+import { ILUSTRACIONES, type Ilustracion } from "@/lib/ilustraciones";
+
 /**
  * "Qué es Latidos" en Inicio: un parrafo sobre el programa y sus tres fases.
  *
@@ -16,6 +20,9 @@ type Fase = {
   fechasCompletas: string;
   estado: "En curso" | "Próximamente";
   detalle: string;
+  ilustracion: Ilustracion;
+  /** Que se ve en la ilustracion. */
+  descripcion: string;
 };
 
 export const FASES: Fase[] = [
@@ -26,6 +33,8 @@ export const FASES: Fase[] = [
     estado: "En curso",
     detalle:
       "Responsabilidad social. Cada mes una jornada con los insumos que se necesitan para las comunidades afectadas por el terremoto de La Guaira. Dona en un centro de acopio y suma Beats.",
+    ilustracion: ILUSTRACIONES.donacionesCajasBandera,
+    descripcion: "Cajas de donaciones con insumos y la bandera de Venezuela",
   },
   {
     nombre: "Empuje",
@@ -34,6 +43,8 @@ export const FASES: Fase[] = [
     estado: "Próximamente",
     detalle:
       "Gaitazo y Misa de Acción de Gracias. Un encuentro de fe, tradición y unión para celebrar la resiliencia de la comunidad, con marcas invitadas, stands y QR para sumar Beats.",
+    ilustracion: ILUSTRACIONES.corazonGorroNavidad,
+    descripcion: "Un corazón amarillo con gorro navideño",
   },
   {
     nombre: "Late Venezuela",
@@ -42,6 +53,8 @@ export const FASES: Fase[] = [
     estado: "Próximamente",
     detalle:
       "Cinco días en la UCV: expo de marcas, expo automotriz, feria gastronómica, torneos deportivos y concierto de cierre el 27 de marzo.",
+    ilustracion: ILUSTRACIONES.estadioBeisbol,
+    descripcion: "El estadio de béisbol de la UCV visto desde arriba",
   },
 ];
 
@@ -90,6 +103,18 @@ export function QueEsLatidos() {
             key={fase.nombre}
             className="vidrio-medio flex w-[78%] max-w-[300px] shrink-0 snap-start flex-col rounded-card p-4"
           >
+            {/* Por debajo del pliegue: carga diferida (la de next/image por
+                defecto). El alto fijo reserva el espacio antes de que llegue. */}
+            <div className="mb-3 flex h-24 items-center justify-center">
+              <Image
+                src={fase.ilustracion.src}
+                alt={fase.descripcion}
+                width={Math.round((96 * fase.ilustracion.ancho) / fase.ilustracion.alto)}
+                height={96}
+                loading="lazy"
+                className="h-24 w-auto"
+              />
+            </div>
             <div className="flex items-start justify-between gap-2">
               <h3 className="font-display text-[22px] uppercase leading-none text-texto-principal">
                 {fase.nombre}

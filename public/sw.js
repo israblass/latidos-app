@@ -10,11 +10,13 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v4";
+const VERSION = "v5";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
 // (plan de Beats §3, "Pantalla de Beats disponible sin conexion").
+// v5: llegan las ilustraciones definitivas. La de sin conexion y error se
+// precachea con el shell, y la vieja de estados-vacios deja de existir.
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 
@@ -32,12 +34,23 @@ const PANTALLAS_CON_COPIA = ["/beats"];
  * se llega a pedir con red: se guarda junto con su copia. Sin esto, la
  * ilustracion de "sin conexion" de Beats se veria rota justo cuando hace falta.
  */
+const ILUSTRACION_SIN_SENAL = "/ilustraciones/latido-ecg-ruido.webp";
+
 const RECURSOS_SIN_RED = {
-  "/beats": ["/assets/estados-vacios/vacio-sin-conexion.webp"],
+  "/beats": [ILUSTRACION_SIN_SENAL],
 };
 
-// Lo minimo para que la app abra estando sin señal.
-const SHELL = [RUTA_SIN_CONEXION, "/manifest.json", "/icon-192.png", "/icon-512.png"];
+// Lo minimo para que la app abra estando sin señal. La ilustracion del latido
+// con ruido es la de las pantallas de sin conexion y de error: tiene que estar
+// antes de que falte la red. Es la unica ilustracion que se precachea (~21 KB);
+// las demas se guardan solo si se llegan a ver con red.
+const SHELL = [
+  RUTA_SIN_CONEXION,
+  "/manifest.json",
+  "/icon-192.png",
+  "/icon-512.png",
+  ILUSTRACION_SIN_SENAL,
+];
 
 self.addEventListener("install", (evento) => {
   evento.waitUntil(
