@@ -13,14 +13,22 @@ import { useId, useState, type ReactNode } from "react";
  * grid-template-rows 0fr -> 1fr en 250ms; con prefers-reduced-motion no hay
  * transicion.
  *
- * Va dentro de una tarjeta que la contiene (ver .acordeones en el Inicio); las
- * secciones se separan con una linea fina.
+ * Va dentro de una tarjeta que la contiene (los acordeones del Inicio, el
+ * historial de Beats); las secciones se separan con una linea fina.
+ *
+ * Por defecto guarda su propio estado. El historial de Beats (v2.8.0) lo
+ * controla desde fuera (`abierto` + `alAlternar`), porque el hook del
+ * historial decide que dia nace abierto y abre los dias que llegan en vivo.
  */
 export function Acordeon({
   titulo,
   subtitulo,
   icono,
   abiertoAlInicio = false,
+  abierto: abiertoControlado,
+  alAlternar,
+  nivel = 2,
+  idRegion: idRegionPropio,
   children,
 }: {
   titulo: string;
@@ -28,13 +36,24 @@ export function Acordeon({
   /** SVG de 22px, decorativo. */
   icono: ReactNode;
   abiertoAlInicio?: boolean;
+  /** Estado controlado desde fuera; con el, `alAlternar` hace el cambio. */
+  abierto?: boolean;
+  alAlternar?: () => void;
+  /** Nivel del encabezado: 3 cuando la seccion ya tiene su h2 (Historial). */
+  nivel?: 2 | 3;
+  /** Id fijo para la region (las pruebas y los enlaces la buscan por dia). */
+  idRegion?: string;
   children: ReactNode;
 }) {
-  const [abierto, setAbierto] = useState(abiertoAlInicio);
+  const [abiertoPropio, setAbiertoPropio] = useState(abiertoAlInicio);
+  const controlado = abiertoControlado !== undefined;
+  const abierto = controlado ? abiertoControlado : abiertoPropio;
+  const alternar = () => (controlado ? alAlternar?.() : setAbiertoPropio((a) => !a));
+  const Encabezado = nivel === 3 ? "h3" : "h2";
   const id = useId();
   const idBoton = `${id}-boton`;
   const idTitulo = `${id}-titulo`;
-  const idRegion = `${id}-region`;
+  const idRegion = idRegionPropio ?? `${id}-region`;
   // `inert` todavia no es una prop tipada en React 18, pero React pasa el
   // atributo tal cual. Va en el render (y no en un efecto) para que llegue
   // tambien en el HTML del servidor, antes de hidratar.
@@ -44,13 +63,13 @@ export function Acordeon({
 
   return (
     <section className="border-texto-principal/[0.08] [&+&]:border-t">
-      <h2>
+      <Encabezado>
         <button
           id={idBoton}
           type="button"
           aria-expanded={abierto}
           aria-controls={idRegion}
-          onClick={() => setAbierto((a) => !a)}
+          onClick={alternar}
           className="flex w-full items-center gap-3 p-4 text-left outline-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-secundario"
         >
           <span
@@ -87,7 +106,7 @@ export function Acordeon({
             </svg>
           </span>
         </button>
-      </h2>
+      </Encabezado>
       <div
         {...inerte}
         id={idRegion}

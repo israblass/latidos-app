@@ -46,6 +46,20 @@ export function etiquetaDia(dia: string, ahora: Date = new Date()): string {
   return `${DIAS_SEMANA[fecha.getUTCDay()]} ${d} ${MESES[m - 1]}`;
 }
 
+/**
+ * La etiqueta del dia como titulo de la fila del historial (v2.8.0): "Hoy",
+ * "Ayer" o "Miércoles 30 sept". Es la misma de `etiquetaDia`, en tipo oracion.
+ */
+export function tituloDia(dia: string, ahora: Date = new Date()): string {
+  const [primera, ...resto] = etiquetaDia(dia, ahora).toLocaleLowerCase("es").split(" ");
+  return [primera.charAt(0).toLocaleUpperCase("es") + primera.slice(1), ...resto].join(" ");
+}
+
+/** "1 movimiento", "3 movimientos". */
+export function conteoMovimientos(cantidad: number): string {
+  return cantidad === 1 ? "1 movimiento" : `${cantidad} movimientos`;
+}
+
 /** Hora de 12 horas con am/pm: "3:45 pm" (spec §10.5). */
 export function horaDe(instante: string | Date, zona: string = ZONA_HORARIA): string {
   const partes = Object.fromEntries(
