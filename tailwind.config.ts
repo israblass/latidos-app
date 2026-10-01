@@ -25,12 +25,10 @@ const config: Config = {
         // Tarjetas, hojas y modales: blanco puro sobre el crema, para que se
         // lean como piezas apoyadas encima de la pagina.
         superficie: "#FFFFFF",
-        // Celestes del Inicio (constitution §2, v2.6.0): circulos de icono de
-        // los acordeones y panel de las ilustraciones de fase.
-        celeste: "#DDF3FB",
-        "celeste-claro": "#EAF6FB",
-        // Chip apagado ("Próximamente").
-        "gris-chip": "#F0F2F5",
+        // Chips apagados ("Próximamente"), inputs y zonas de respiro. Los
+        // circulos de icono y los paneles claros no tienen token propio: son el
+        // azul de marca con transparencia (bg-secundario/[0.12] y /[0.08]),
+        // por el principio de paleta (constitution §2, v2.7.0).
         "fondo-alterno": "#F5F7FA",
         // Uso puntual, para bloques que necesitan contraste fuerte (el contador
         // de Beats, el hero de Beats). Nunca como base de pantalla.
@@ -57,8 +55,6 @@ const config: Config = {
           terciario: "#9CA3AF",
           // Para texto sobre superficies oscuras o sobre el amarillo.
           inverso: "#FFFFFF",
-          // Texto secundario sobre navy (la tarjeta de Beats del Inicio).
-          "sobre-navy": "#C9D1DE",
         },
 
         exito: "#2EA043",
@@ -85,9 +81,9 @@ const config: Config = {
         // Dos capas: una sombra corta que "pega" la card al fondo y una larga
         // y difusa que le da altura. Con una sola capa las cards se ven
         // planas, como recortadas sobre el blanco.
-        card: "0 1px 2px rgba(16,24,40,0.04), 0 8px 24px -4px rgba(16,24,40,0.10)",
-        elevado: "0 2px 4px rgba(16,24,40,0.05), 0 16px 40px -8px rgba(16,24,40,0.16)",
-        barra: "0 -1px 2px rgba(16,24,40,0.04), 0 -8px 28px -6px rgba(16,24,40,0.12)",
+        card: "0 1px 2px rgba(26,35,50,0.04), 0 8px 24px -4px rgba(26,35,50,0.10)",
+        elevado: "0 2px 4px rgba(26,35,50,0.05), 0 16px 40px -8px rgba(26,35,50,0.16)",
+        barra: "0 -1px 2px rgba(26,35,50,0.04), 0 -8px 28px -6px rgba(26,35,50,0.12)",
       },
       keyframes: {
         // Entrada de pantalla: sube unos pocos pixeles mientras aparece.

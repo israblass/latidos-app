@@ -9,14 +9,15 @@ import { beatsDeLaSemana, movimientosRecientes } from "../../src/lib/beats/activ
 import type { DiaHistorial } from "../../src/types/beats";
 
 /**
- * Inicio de la v2.6.0: pildoras de cabecera, saludo, tarjeta navy de Beats con
- * el chip de la semana, Escanear QR y los acordeones de actividad y "Qué es
- * Latidos". Viewport de la referencia aprobada (390 de ancho).
+ * Inicio de la v2.6.0, pulido en la v2.7.0: pildoras de cabecera (campana y
+ * avatar), saludo, tarjeta de Beats en vidrio con el chip de la semana,
+ * Escanear QR y los acordeones de actividad y "Qué es Latidos". Viewport de la
+ * referencia aprobada (390 de ancho).
  */
 test.use({ viewport: { width: 390, height: 844 } });
 test.beforeEach(reiniciarMock);
 
-const ayuda = (page: Page) => page.getByRole("button", { name: "Cómo gano Beats" });
+const campana = (page: Page) => page.getByRole("button", { name: "Notificaciones" });
 const perfil = (page: Page) => page.getByRole("main").getByRole("link", { name: "Mi perfil" });
 const acordeon = (page: Page, titulo: string) =>
   page.getByRole("heading", { level: 2, name: new RegExp(titulo) }).getByRole("button");
@@ -33,31 +34,99 @@ async function sinViolaciones(page: Page, caso: string) {
   expect(hallazgos, informe(caso, hallazgos)).toEqual([]);
 }
 
-test("pildoras de cabecera: nombre accesible, 44 px o mas y la inicial del nombre", async ({ page }) => {
+test("pildoras de cabecera: nombre accesible, 108 x 58, campana navy y avatar de marca", async ({ page }) => {
   await cuentaEnInicio(page, datosDeRegistro({ nombre: "Israel" }));
-  for (const pildora of [ayuda(page), perfil(page)]) {
+  for (const pildora of [campana(page), perfil(page)]) {
     const caja = (await pildora.boundingBox())!;
     expect(caja.width).toBeGreaterThanOrEqual(44);
     expect(caja.height).toBeGreaterThanOrEqual(44);
     expect(Math.round(caja.width)).toBe(108);
     expect(Math.round(caja.height)).toBe(58);
-    await expect(pildora).toHaveCSS("background-color", "rgb(26, 35, 50)");
   }
+  await expect(campana(page)).toHaveCSS("background-color", "rgb(26, 35, 50)");
+  await expect(campana(page)).toHaveAttribute("aria-haspopup", "dialog");
+  // La campana es un icono de trazo, como los demas.
+  await expect(campana(page).locator("svg")).toHaveAttribute("aria-hidden", "true");
+  await expect(campana(page).locator("svg")).toHaveAttribute("fill", "none");
+
+  // Avatar: el corazon con audifonos, decorativo, sobre una pildora blanca
+  // translucida. Ya no muestra la inicial.
   await expect(perfil(page)).toHaveAttribute("href", "/perfil");
-  await expect(perfil(page)).toHaveText("I");
-  // No hay campana ni notificaciones: esa funcion no existe.
-  await expect(page.getByRole("button", { name: /notificaci/i })).toHaveCount(0);
+  await expect(perfil(page)).toHaveText("");
+  await expect(perfil(page)).toHaveCSS("background-color", "rgba(255, 255, 255, 0.85)");
+  await expect(perfil(page)).toHaveCSS("border-top-color", "rgba(255, 255, 255, 0.9)");
+  // Tailwind antepone las sombras vacias de su anillo: se busca la nuestra.
+  expect(await perfil(page).evaluate((el) => getComputedStyle(el).boxShadow)).toContain(
+    "rgba(26, 35, 50, 0.08) 0px 6px 18px 0px",
+  );
+  const avatar = perfil(page).locator("img");
+  await expect(avatar).toHaveAttribute("alt", "");
+  await expect(avatar).toHaveAttribute("src", /corazon-audifonos/);
+  await expect.poll(() => avatar.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
+  expect(Math.round((await avatar.boundingBox())!.height)).toBe(46);
+  // La pildora de ayuda se fue: "Cómo gano Beats" vive en la pantalla de Beats.
+  await expect(page.getByRole("button", { name: /Cómo gano Beats/ })).toHaveCount(0);
 });
 
-test("la pildora de ayuda abre la hoja y le devuelve el foco al cerrarla", async ({ page }) => {
+test("la campana abre la hoja de notificaciones con teclado, Escape la cierra y el foco vuelve", async ({ page }) => {
   await cuentaEnInicio(page);
-  await ayuda(page).focus();
+  await campana(page).focus();
   await page.keyboard.press("Enter");
-  const hoja = page.getByRole("dialog", { name: "¿Cómo gano Beats?" });
+  const hoja = page.getByRole("dialog", { name: "Notificaciones" });
   await expect(hoja).toBeVisible();
+  await expect(hoja).toHaveAttribute("aria-modal", "true");
+  // Titulo en Anton mayusculas.
+  const titulo = hoja.getByRole("heading", { name: "Notificaciones" });
+  await expect(titulo).toHaveCSS("text-transform", "uppercase");
+  expect(await titulo.evaluate((el) => getComputedStyle(el).fontFamily)).toMatch(/Anton/i);
+  // Estado vacio.
+  await expect(hoja.getByText("Sin notificaciones recientes")).toBeVisible();
+  await expect(hoja.getByText("Sin notificaciones recientes")).toHaveCSS("font-weight", "600");
+  await expect(hoja.getByText("Cuando haya novedades de Latidos, las verás aquí.")).toHaveCSS(
+    "color",
+    "rgb(86, 94, 109)",
+  );
+  const circulo = hoja.locator("[data-notificaciones-vacio] > span").first();
+  await expect(circulo).toHaveCSS("background-color", "rgba(0, 144, 255, 0.12)");
+  // Lo de atras no se desplaza y el foco no se escapa de la hoja.
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+  for (let i = 0; i < 4; i++) {
+    await page.keyboard.press("Tab");
+    expect(await hoja.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+  }
   await page.keyboard.press("Escape");
   await expect(hoja).toHaveCount(0);
-  await expect(ayuda(page)).toBeFocused();
+  await expect(campana(page)).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe("");
+});
+
+test("la X cierra la hoja; el velo y la hoja quedan por encima de la barra", async ({ page }) => {
+  await cuentaEnInicio(page);
+  await campana(page).click();
+  const hoja = page.getByRole("dialog", { name: "Notificaciones" });
+  await expect(hoja).toBeVisible();
+  // Lo que se ve en el centro de la barra es el velo, no la barra.
+  const barra = (await page.getByRole("navigation", { name: "Principal" }).boundingBox())!;
+  const encima = await page.evaluate(
+    ([x, y]) => document.elementFromPoint(x, y)?.closest("nav[aria-label='Principal']") === null,
+    [barra.x + barra.width / 2, barra.y + barra.height / 2],
+  );
+  expect(encima).toBe(true);
+  const cerrar = hoja.getByRole("button", { name: "Cerrar" });
+  const caja = (await cerrar.boundingBox())!;
+  expect(caja.width).toBeGreaterThanOrEqual(44);
+  expect(caja.height).toBeGreaterThanOrEqual(44);
+  await cerrar.click();
+  await expect(hoja).toHaveCount(0);
+});
+
+test("con prefers-reduced-motion la hoja de notificaciones entra sin animacion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await cuentaEnInicio(page);
+  await campana(page).click();
+  const hoja = page.getByRole("dialog", { name: "Notificaciones" });
+  await expect(hoja).toBeVisible();
+  expect(await hoja.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
 });
 
 test("la pildora de perfil lleva a Perfil", async ({ page }) => {
@@ -199,16 +268,18 @@ test("el chip +N esta semana solo aparece con movimientos positivos en 7 dias", 
   expect(Math.round((await tarjeta.boundingBox())!.height)).toBeGreaterThan(100);
 });
 
-test("la tarjeta de Beats es navy plana, sigue llevando a Beats y no hay texto de relleno", async ({ page }) => {
+test("la tarjeta de Beats es de vidrio, con texto navy, y sigue llevando a Beats", async ({ page }) => {
   await cuentaEnInicio(page);
   const tarjeta = page.getByRole("link", { name: /Ver mis Beats. Tienes 5 Beats/ });
-  await expect(tarjeta).toHaveCSS("background-color", "rgb(26, 35, 50)");
+  // La clase central del vidrio, sin backdrop-filter propio.
+  await expect(tarjeta).toHaveClass(/(^|\s)vidrio(\s|$)/);
+  expect(await tarjeta.evaluate((el) => getComputedStyle(el).backdropFilter)).toContain("blur(24px)");
   await expect(tarjeta).toHaveCSS("border-top-left-radius", "30px");
-  await expect(tarjeta).toContainText("Beats acumulados");
+  await expect(tarjeta.getByText("Beats acumulados")).toHaveCSS("color", "rgb(86, 94, 109)");
   const numero = page.locator("section[aria-label='Tu balance de Beats'] p.font-display");
   await expect(numero).toHaveText("5");
   await expect(numero).toHaveCSS("font-size", "68px");
-  await expect(numero).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(numero).toHaveCSS("color", "rgb(26, 35, 50)");
   await expect(page.locator(".halo-beats")).toHaveCount(0);
   await expect(page.getByText("Sigue participando para sumar más.")).toHaveCount(0);
   await tarjeta.click();
@@ -237,6 +308,10 @@ test("axe y auditoria sin violaciones con los acordeones cerrados y abiertos", a
 
   await acordeon(page, "Actividad reciente").click();
   await sinViolaciones(page, "inicio, los dos abiertos");
+
+  await campana(page).click();
+  await expect(page.getByRole("dialog", { name: "Notificaciones" })).toBeVisible();
+  await sinViolaciones(page, "inicio, hoja de notificaciones");
 });
 
 test.describe("funciones de actividad (sin pantalla)", () => {

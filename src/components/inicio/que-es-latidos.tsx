@@ -63,7 +63,7 @@ function ChipEstado({ estado }: { estado: Fase["estado"] }) {
   return (
     <span
       className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-        enCurso ? "bg-primario text-texto-principal" : "bg-gris-chip text-texto-secundario"
+        enCurso ? "bg-primario text-texto-principal" : "bg-fondo-alterno text-texto-secundario"
       }`}
     >
       {estado}
@@ -97,7 +97,7 @@ export function QueEsLatidos() {
           >
             {/* Por debajo del pliegue: carga diferida (la de next/image por
                 defecto). El alto fijo reserva el espacio antes de que llegue. */}
-            <div className="mb-2.5 flex h-[84px] items-center justify-center overflow-hidden rounded-2xl bg-celeste-claro">
+            <div className="mb-2.5 flex h-[84px] items-center justify-center overflow-hidden rounded-2xl bg-secundario/[0.08]">
               <Image
                 src={fase.ilustracion.src}
                 alt={fase.descripcion}

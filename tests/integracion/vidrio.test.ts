@@ -69,14 +69,12 @@ test("bienvenida y onboarding: el vidrio desenfoca el cielo", async ({ page }) =
   await comprobar(page, "onboarding", page.locator("main .vidrio").first());
 });
 
-test("Inicio: capsula sobre el banner y la barra; la tarjeta de Beats es plana", async ({ page }) => {
+test("Inicio: la tarjeta de Beats, la capsula sobre el banner y la barra", async ({ page }) => {
   await cuentaConId(page);
   await page.waitForTimeout(600);
-  // Excepcion documentada (v2.6.0): la tarjeta de Beats del Inicio es navy
-  // plana, sin vidrio.
-  const tarjeta = page.locator("section[aria-label='Tu balance de Beats'] > a");
-  expect(await filtroDe(tarjeta)).toBe("none");
-  await expect(tarjeta).toHaveCSS("background-color", "rgb(26, 35, 50)");
+  // v2.7.0: la tarjeta de Beats vuelve a ser vidrio, sobre el degradado de
+  // marca.
+  await comprobar(page, "tarjeta de Beats", page.locator("section[aria-label='Tu balance de Beats'] > a"));
 
   const capsula = page.locator("[data-capsula-puntos]");
   await capsula.scrollIntoViewIfNeeded();
@@ -128,7 +126,7 @@ test("barra y hojas pasan AA sobre negro puro con los valores finales", async ({
     // Y siguen siendo vidrio: ni opacos ni casi opacos.
     expect(receta.tinte.alfa, `${nombre}: opacidad`).toBeLessThanOrEqual(0.85);
   }
-  // Las etiquetas grises de la hoja usan el gris de vidrio.
+  // Las etiquetas grises de la hoja usan el gris de la paleta (v2.7.0).
   const etiqueta = page.getByRole("dialog").locator(".etiqueta").first();
-  await expect(etiqueta).toHaveCSS("color", "rgb(74, 81, 96)");
+  await expect(etiqueta).toHaveCSS("color", "rgb(86, 94, 109)");
 });

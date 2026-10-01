@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 /**
  * Hoja inferior (T028; constitution §2, "Bottom sheets"): radio de 24 px
@@ -22,14 +23,24 @@ export function HojaInferior({
   abierta,
   alCerrar,
   titulo,
+  variante = "vidrio",
   children,
 }: {
   abierta: boolean;
   alCerrar: () => void;
   /** Nombre accesible de la hoja. */
   titulo: string;
+  /**
+   * "vidrio": la hoja de siempre (.vidrio-hoja, titulo en DM Sans y "Cerrar").
+   * "aviso": blanca y opaca, titulo en Anton mayusculas y una X para cerrar
+   * (notificaciones del Inicio, constitution §2, v2.7.0). Es opaca porque en
+   * el Inicio ya hay dos vidrios grandes (la tarjeta de Beats y la barra) y
+   * una tercera capa pasaria del limite. El comportamiento es el mismo.
+   */
+  variante?: "vidrio" | "aviso";
   children: ReactNode;
 }) {
+  const aviso = variante === "aviso";
   const idTitulo = useId();
   const hoja = useRef<HTMLDivElement>(null);
   const disparador = useRef<Element | null>(null);
@@ -99,7 +110,10 @@ export function HojaInferior({
     else setDesplazamiento(0);
   };
 
-  return (
+  // En un portal sobre <body>: si la hoja quedara dentro de un contenedor con
+  // su propio contexto de apilamiento (el <main> del Inicio es `isolate`), la
+  // barra inferior se pintaria encima del velo y de la hoja.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       {/* Tocar fuera cierra. No es un boton: para teclado y lectores de
           pantalla estan Escape y "Cerrar". */}
@@ -117,7 +131,9 @@ export function HojaInferior({
         aria-labelledby={idTitulo}
         tabIndex={-1}
         style={{ transform: desplazamiento ? `translateY(${desplazamiento}px)` : undefined }}
-        className="relative flex max-h-[85dvh] w-full max-w-md flex-col vidrio-hoja outline-none motion-safe:animate-entrar-tarjeta"
+        className={`relative flex max-h-[85dvh] w-full max-w-md flex-col outline-none motion-safe:animate-entrar-tarjeta ${
+          aviso ? "rounded-t-[28px] bg-superficie shadow-[0_-10px_30px_rgba(26,35,50,0.16)]" : "vidrio-hoja"
+        }`}
       >
         {/* Zona de arrastre: el asa y la cabecera. El contenido de abajo
             conserva su propio desplazamiento. */}
@@ -136,13 +152,46 @@ export function HojaInferior({
           onPointerCancel={alSoltar}
         >
           <span aria-hidden="true" className="mx-auto block h-1.5 w-10 rounded-full bg-black/15" />
-          <div className="flex items-center justify-between gap-3">
-            <h2 id={idTitulo} className="text-[18px] font-medium text-texto-principal">
+          <div className={`flex items-center justify-between gap-3 ${aviso ? "mt-1.5" : ""}`}>
+            <h2
+              id={idTitulo}
+              className={
+                aviso
+                  ? "font-display text-[24px] uppercase leading-tight tracking-[0.02em] text-texto-principal"
+                  : "text-[18px] font-medium text-texto-principal"
+              }
+            >
               {titulo}
             </h2>
-            <button type="button" onClick={alCerrar} className="boton-ghost -mr-3">
-              Cerrar
-            </button>
+            {aviso ? (
+              // Circulo de 40px como la referencia, dentro de un area tactil
+              // de 48px.
+              <button
+                type="button"
+                onClick={alCerrar}
+                aria-label="Cerrar"
+                className="-mr-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-secundario"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-fondo-alterno text-texto-principal">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </span>
+              </button>
+            ) : (
+              <button type="button" onClick={alCerrar} className="boton-ghost -mr-3">
+                Cerrar
+              </button>
+            )}
           </div>
         </div>
 
@@ -154,6 +203,7 @@ export function HojaInferior({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

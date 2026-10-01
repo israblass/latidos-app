@@ -19,6 +19,8 @@ export const ILUSTRACIONES = {
   donacionesCajasBandera: { src: "/ilustraciones/donaciones-cajas-bandera.webp", ancho: 205, alto: 192 },
   corazonGorroNavidad: { src: "/ilustraciones/corazon-gorro-navidad.webp", ancho: 207, alto: 192 },
   estadioBeisbol: { src: "/ilustraciones/estadio-beisbol.webp", ancho: 251, alto: 192 },
+  /** Avatar de la pildora de perfil del Inicio (v2.7.0), a 46px de alto. */
+  corazonAudifonos: { src: "/ilustraciones/corazon-audifonos.webp", ancho: 80, alto: 92 },
   nubesTecho: { src: "/ilustraciones/nubes-techo.webp", ancho: 560, alto: 234 },
 } as const;
 

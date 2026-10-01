@@ -1,25 +1,27 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
 import { FilaMovimiento } from "@/components/beats/fila-movimiento";
-import { HojaComoGanar } from "@/components/beats/hoja-como-ganar";
 import { CarruselBanners } from "@/components/inicio/carrusel-banners";
+import { HojaNotificaciones, IconoCampana } from "@/components/inicio/hoja-notificaciones";
 import { QueEsLatidos } from "@/components/inicio/que-es-latidos";
 import { SaldoInicio } from "@/components/inicio/saldo-inicio";
 import { Acordeon } from "@/components/ui/acordeon";
 import { CirculoFlecha } from "@/components/ui/circulo-flecha";
 import { useActividadReciente } from "@/hooks/use-actividad-reciente";
 import { beatsDeLaSemana, movimientosRecientes } from "@/lib/beats/actividad";
+import { ILUSTRACIONES } from "@/lib/ilustraciones";
 import type { BannerInicio } from "@/types/banner";
 
 /**
- * Inicio (constitution §2, v2.6.0), de arriba a abajo: pildoras, saludo,
- * tarjeta de Beats, Escanear QR, banners y los acordeones de actividad y de
- * "Qué es Latidos".
+ * Inicio (constitution §2, v2.7.0), de arriba a abajo: pildoras (campana y
+ * avatar), saludo, tarjeta de Beats en vidrio, Escanear QR, banners y los
+ * acordeones de actividad y de "Qué es Latidos".
  *
- * Es de cliente porque la pildora de ayuda abre una hoja y porque los
+ * Es de cliente porque la campana abre una hoja y porque los
  * movimientos recientes (que alimentan el chip de la semana y la actividad) se
  * leen con la sesion de la persona, al montar y al volver a la app.
  */
@@ -31,15 +33,6 @@ const trazo = {
   strokeLinejoin: "round" as const,
   "aria-hidden": true,
 };
-
-function IconoAyuda() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" {...trazo}>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M9.6 9.4a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.8M12 17h.01" />
-    </svg>
-  );
-}
 
 function IconoReloj() {
   return (
@@ -58,9 +51,9 @@ function IconoCorazon() {
   );
 }
 
-/** Pildora navy de la cabecera: 108 x 58. */
+/** Pildoras de la cabecera: 108 x 58. */
 const PILDORA =
-  "flex h-[58px] w-[108px] items-center justify-center rounded-full bg-texto-principal text-texto-inverso outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secundario active:scale-[0.97] motion-reduce:active:scale-100";
+  "flex h-[58px] w-[108px] items-center justify-center overflow-hidden rounded-full outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secundario active:scale-[0.97] motion-reduce:active:scale-100";
 
 export function PanelInicio({
   nombre,
@@ -77,11 +70,10 @@ export function PanelInicio({
   const dias = useActividadReciente(usuarioId);
   const recientes = dias ? movimientosRecientes(dias, 3) : [];
   const semana = dias ? beatsDeLaSemana(dias) : null;
-  const inicial = nombre.trim().charAt(0).toLocaleUpperCase("es") || "?";
   const nombreLargo = nombre.trim().length > 10;
 
   // Estable: la hoja la usa como dependencia de su efecto. Al cerrarse, la
-  // propia hoja devuelve el foco a la pildora que la abrio.
+  // propia hoja devuelve el foco a la campana.
   const cerrarHoja = useCallback(() => setHojaAbierta(false), []);
 
   return (
@@ -89,20 +81,29 @@ export function PanelInicio({
       <header className="flex items-center justify-between">
         <button
           type="button"
-          aria-label="Cómo gano Beats"
+          aria-label="Notificaciones"
           aria-haspopup="dialog"
           onClick={() => setHojaAbierta(true)}
-          className={PILDORA}
+          className={`${PILDORA} bg-texto-principal text-texto-inverso`}
         >
-          <IconoAyuda />
+          <IconoCampana tamano={24} />
         </button>
-        <Link href="/perfil" aria-label="Mi perfil" className={PILDORA}>
-          <span
-            aria-hidden="true"
-            className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-primario text-[16px] font-bold text-texto-principal"
-          >
-            {inicial}
-          </span>
+        {/* Avatar de marca. Elegir otro llega con el Perfil completo; por
+            ahora es el mismo para todos y no se guarda. */}
+        <Link
+          href="/perfil"
+          aria-label="Mi perfil"
+          data-pildora-perfil=""
+          className={`${PILDORA} border border-white/90 bg-white/85 shadow-[0_6px_18px_rgba(26,35,50,0.08)]`}
+        >
+          <Image
+            src={ILUSTRACIONES.corazonAudifonos.src}
+            alt=""
+            width={40}
+            height={46}
+            priority
+            className="h-[46px] w-auto"
+          />
         </Link>
       </header>
 
@@ -167,7 +168,7 @@ export function PanelInicio({
         </Acordeon>
       </div>
 
-      <HojaComoGanar abierta={hojaAbierta} alCerrar={cerrarHoja} />
+      <HojaNotificaciones abierta={hojaAbierta} alCerrar={cerrarHoja} />
     </>
   );
 }

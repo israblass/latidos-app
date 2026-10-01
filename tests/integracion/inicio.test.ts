@@ -251,7 +251,7 @@ test.describe("Qué es Latidos", () => {
     await cuentaEnInicio(page);
     const y = async (selector: ReturnType<Page["locator"]>) => (await selector.boundingBox())!.y;
 
-    const pildoras = await y(page.getByRole("button", { name: "Cómo gano Beats" }));
+    const pildoras = await y(page.getByRole("button", { name: "Notificaciones" }));
     const saludo = await y(page.locator("[data-saludo]"));
     const contador = await y(page.getByRole("region", { name: "Tu balance de Beats" }));
     const escanear = await y(page.getByRole("main").getByRole("link", { name: "Escanear QR" }));
