@@ -22,6 +22,12 @@
   :root {
     color-scheme: light;
     --color-fondo: #fffff5;
+    /*
+     * Menu inferior flotante (constitution §2, v2.4.0): alto de la pildora y
+     * su separacion del borde de abajo. Lo usan la barra y .espacio-barra.
+     */
+    --alto-barra: 64px;
+    --margen-barra: 8px;
   }
 
   input,
@@ -299,7 +305,10 @@
    *
    * - .vidrio        piezas sueltas sobre el cielo (contador de Inicio, card de
    *                  la bienvenida, titulo del onboarding).
-   * - .vidrio-barra  la barra de tabs: el contenido pasa por debajo.
+   * - .vidrio-barra  el menu inferior: una pildora flotante por la que el
+   *                  contenido pasa por debajo. Mas esmerilada (85%): sus
+   *                  etiquetas son de 11px y tienen que pasar AA aunque debajo
+   *                  pase contenido oscuro (un banner, una foto).
    * - .vidrio-hoja   hojas inferiores. Casi opaca: una hoja lleva texto largo y
    *                  va sobre el velo oscuro del modal, y a 0.55 el texto
    *                  perderia contraste segun lo que hubiera detras.
@@ -328,10 +337,10 @@
     border-radius: theme("borderRadius.card");
   }
 
-  /* La barra va pegada abajo: solo el canto de arriba. */
+  /* Pildora flotante: separada de los bordes, con el canto completo. */
   .vidrio-barra {
-    border-width: 1px 0 0;
-    border-radius: 0;
+    --vidrio-fondo: rgba(255, 255, 255, 0.85);
+    border-radius: 9999px;
   }
 
   .vidrio-hoja {
@@ -393,12 +402,13 @@
   }
 
   /*
-   * Lo que va debajo de la barra de tabs: el contenido scrollea por detras
-   * del vidrio, y este espacio hace que el ultimo elemento no quede tapado
-   * (incluida la zona segura del iPhone).
+   * Lo que va debajo del menu inferior: el contenido scrollea por detras del
+   * vidrio, y este espacio (alto de la barra + zona segura del iPhone + 16px)
+   * hace que el ultimo elemento se vea completo al llegar al final. Es el
+   * unico lugar donde se calcula: las pantallas solo ponen la clase.
    */
   .espacio-barra {
-    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--alto-barra) + env(safe-area-inset-bottom) + 16px);
   }
 
   /*

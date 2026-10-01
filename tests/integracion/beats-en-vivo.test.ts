@@ -161,7 +161,7 @@ test("si el canal se cae no aparece ningun error, y al reentrar esta al dia", as
   await expect(page.getByRole("alert").filter({ hasText: /./ })).toHaveCount(0);
 
   await ponerTiempoRealCaido(false);
-  const barra = page.getByRole("navigation", { name: "Navegacion principal" });
+  const barra = page.getByRole("navigation", { name: "Principal" });
   await barra.getByRole("link", { name: "Inicio" }).click();
   await page.waitForURL("**/inicio");
   await barra.getByRole("link", { name: "Beats" }).click();

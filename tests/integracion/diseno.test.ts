@@ -154,7 +154,7 @@ test.describe("en pantalla", () => {
 
     // Lo ultimo de la pagina queda por encima de la barra al llegar al fondo.
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    const barra = await page.getByRole("navigation", { name: "Navegacion principal" }).boundingBox();
+    const barra = await page.getByRole("navigation", { name: "Principal" }).boundingBox();
     const ultimo = await page.getByRole("list", { name: "Fases del programa" }).boundingBox();
     expect(ultimo!.y + ultimo!.height).toBeLessThanOrEqual(barra!.y);
 

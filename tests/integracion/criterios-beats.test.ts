@@ -48,7 +48,7 @@ const haceDias = (n: number) => {
   const [a, m, d] = hoy().split("-").map(Number);
   return new Date(Date.UTC(a, m - 1, d - n)).toISOString().slice(0, 10);
 };
-const barra = (page: Page) => page.getByRole("navigation", { name: "Navegacion principal" });
+const barra = (page: Page) => page.getByRole("navigation", { name: "Principal" });
 const botonComoGano = (page: Page) => page.getByRole("button", { name: "¿Cómo gano Beats?" });
 const lineaGuia = (page: Page) => page.getByText("Escanea tu primer QR para sumar.");
 
