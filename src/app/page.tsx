@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { PromptsInstalacion } from "@/components/instalacion/prompts-instalacion";
 import { ImagenMarca } from "@/components/marca/imagen-marca";
+import { BarraAcento } from "@/components/marca/titulo-con-acento";
 import { ASSETS } from "@/lib/assets";
 
 /**
@@ -30,10 +31,7 @@ export default function Home() {
               prioritaria
             />
           </h1>
-          <div
-            aria-hidden="true"
-            className="mt-5 h-1.5 w-20 rounded-full bg-primario"
-          />
+          <BarraAcento className="mt-5" />
         </div>
 
         <p className="mt-8 max-w-[17rem] text-texto-secundario">

@@ -61,6 +61,10 @@ const config: Config = {
         // arriba se quedan entre 3.3:1 y 3.4:1 contra el blanco, por debajo del
         // AA que pide la constitution §9. Se usan solo para texto; los rellenos,
         // bordes e iconos siguen con el color de marca.
+        //
+        // Regla del azul (constitution §2, v2.3.0): el azul solo como texto
+        // grande (>= 18px bold o 24px). El texto chico va en navy o en el gris
+        // secundario; por eso hoy ningun componente usa este token.
         "secundario-texto": "#0070CC",
         "exito-texto": "#15803D",
         "alerta-texto": "#9A6700",

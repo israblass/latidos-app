@@ -13,12 +13,19 @@ import type { ReactNode } from "react";
  * poniendo el amarillo sobre una card oscura.
  */
 
-/** La barra sola, para cuando el titulo no es un texto (un numero, por ejemplo). */
+/**
+ * La barra sola, para cuando el titulo no es un texto (un numero, por ejemplo).
+ *
+ * Regla del amarillo (constitution §2, v2.3.0): sobre crema o blanco el
+ * `#FDFB05` queda en 1.1:1, asi que nunca va como linea fina. La barra es una
+ * pastilla de 10px con un canto navy suave: se lee como forma y no como un
+ * trazo que desaparece.
+ */
 export function BarraAcento({ className = "" }: { className?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`mx-auto h-1.5 w-16 rounded-full bg-primario ${className}`}
+      className={`mx-auto h-2.5 w-14 rounded-full bg-primario ring-1 ring-inset ring-texto-principal/25 ${className}`}
     />
   );
 }

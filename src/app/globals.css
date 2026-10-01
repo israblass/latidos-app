@@ -199,15 +199,22 @@
   /*
    * El secundario se eleva menos, no igual. Con la misma sombra que el primario
    * los dos pesarian lo mismo y se perderia cual es la accion y cual la salida.
+   *
+   * Regla del azul (constitution §2, v2.3.0): el azul es borde, icono o texto
+   * grande; el texto de 15px va en navy.
    */
   .boton-secundario {
-    @apply elevado-bajo flex min-h-touch w-full items-center justify-center rounded-control border border-secundario px-5 text-[15px] font-medium text-secundario-texto disabled:opacity-40 disabled:shadow-none;
+    @apply elevado-bajo flex min-h-touch w-full items-center justify-center rounded-control border border-secundario px-5 text-[15px] font-medium text-texto-principal disabled:opacity-40 disabled:shadow-none;
     background-image: linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
   }
 
-  /* El ghost es texto que se toca: no es una superficie y no se eleva. */
+  /*
+   * El ghost es texto que se toca: no es una superficie y no se eleva. Navy y
+   * no azul (texto chico, regla del azul); el subrayado azul es lo que lo
+   * distingue de un texto cualquiera.
+   */
   .boton-ghost {
-    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-secundario-texto active:scale-[0.97] active:opacity-80;
+    @apply flex min-h-touch items-center justify-center rounded-control px-4 text-[15px] font-medium text-texto-principal underline decoration-secundario decoration-2 underline-offset-4 active:scale-[0.97] active:opacity-80;
   }
 
   /*
