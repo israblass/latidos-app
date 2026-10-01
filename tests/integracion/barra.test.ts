@@ -7,6 +7,7 @@ import { auditar, informe } from "../ayudantes/accesibilidad";
 import { abrirBeats, cuentaConId } from "../ayudantes/beats";
 import { cuentaEnInicio } from "../ayudantes/cuenta";
 import { reiniciarMock } from "../ayudantes/mock";
+import { NAVY, NEGRO, aColor, contraste, filtrar, recetaDe, sobre } from "../ayudantes/vidrio";
 
 /**
  * Menu inferior flotante (constitution §2, v2.4.0): pildora de vidrio separada
@@ -63,7 +64,8 @@ test("las cinco pestañas de siempre, con etiqueta y area tactil", async ({ page
   await expect(pestana(page, "Inicio")).toHaveAttribute("aria-current", "page");
   await expect(pestana(page, "Inicio")).toHaveCSS("color", "rgb(26, 35, 50)");
   await expect(pestana(page, "Inicio").locator("span").last()).toHaveCSS("font-weight", "700");
-  await expect(pestana(page, "Beats")).toHaveCSS("color", "rgb(86, 94, 109)");
+  // Gris de texto sobre vidrio (--vidrio-texto-tenue, #4A5160).
+  await expect(pestana(page, "Beats")).toHaveCSS("color", "rgb(74, 81, 96)");
   await expect(pildora(page)).toHaveCSS("background-color", "rgb(253, 251, 5)");
   expect(await pildoraSobre(page, "Inicio")).toBeLessThanOrEqual(2);
 
@@ -154,32 +156,17 @@ test("al final de cada pantalla el ultimo elemento se ve completo, por encima de
 
 test("contraste AA de la barra sobre el crema y sobre contenido oscuro que pase por debajo", async ({ page }) => {
   await cuentaEnInicio(page);
-  const razones = await page.evaluate(() => {
-    const luminancia = ([r, g, b]: number[]) => {
-      const c = (v: number) => {
-        const n = v / 255;
-        return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
-      };
-      return 0.2126 * c(r) + 0.7152 * c(g) + 0.0722 * c(b);
-    };
-    const contraste = (a: number[], b: number[]) => {
-      const [x, y] = [luminancia(a), luminancia(b)].sort((m, n) => n - m);
-      return (x + 0.05) / (y + 0.05);
-    };
-    const canales = (color: string) => (color.match(/[\d.]+/g) ?? []).map(Number);
-    const nav = document.querySelector("nav[aria-label='Principal']")!;
-    const [r, g, b, a] = canales(getComputedStyle(nav).backgroundColor);
-    const sobre = (abajo: number[]) => [r, g, b].map((c, i) => c * a + abajo[i] * (1 - a));
-    const gris = [86, 94, 109];
-    const navy = [26, 35, 50];
-    const amarillo = canales(getComputedStyle(document.querySelector("[data-pildora-activa]")!).backgroundColor);
-    return {
-      "gris sobre crema": contraste(gris, sobre(canales(getComputedStyle(document.body).backgroundColor))),
-      // El peor caso posible: negro puro pasando por debajo.
-      "gris sobre negro": contraste(gris, sobre([0, 0, 0])),
-      "navy sobre amarillo": contraste(navy, amarillo),
-    };
-  });
+  const receta = await recetaDe(barra(page));
+  const crema = aColor(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).rgb;
+  const amarillo = aColor(await pildora(page).evaluate((p) => getComputedStyle(p).backgroundColor)).rgb;
+  const gris = aColor(await pestana(page, "Beats").evaluate((a) => getComputedStyle(a).color)).rgb;
+  expect(gris).toEqual(receta.textoTenue);
+  const razones = {
+    "gris sobre crema": contraste(gris, sobre(receta.tinte, filtrar(crema, receta.saturacion, receta.brillo))),
+    // El peor caso posible: negro puro pasando por debajo (el filtro no lo aclara).
+    "gris sobre negro": contraste(gris, sobre(receta.tinte, NEGRO)),
+    "navy sobre amarillo": contraste(NAVY, amarillo),
+  };
   for (const [caso, razon] of Object.entries(razones)) expect(razon, caso).toBeGreaterThanOrEqual(4.5);
 
   // Con el banner (azul) pasando por debajo de la barra: axe y la auditoria.

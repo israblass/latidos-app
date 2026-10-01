@@ -6,6 +6,7 @@ import { join, relative } from "node:path";
 import { abrirBeats, cuentaConId } from "../ayudantes/beats";
 import { completarRegistro, confirmarCorreo, cuentaEnInicio } from "../ayudantes/cuenta";
 import { reiniciarMock } from "../ayudantes/mock";
+import { NAVY, aColor, contraste, filtrar, recetaDe, sobre, type Rgb } from "../ayudantes/vidrio";
 
 /**
  * Design system v2.3.0: base crema, superficies blancas, regla del amarillo y
@@ -47,19 +48,26 @@ test.describe("reglas en el codigo", () => {
     expect(fuera, "backdrop-filter suelto fuera de las clases centrales").toEqual([]);
 
     const css = sinComentarios(readFileSync(GLOBALS, "utf8"));
-    // Una sola declaracion con desenfoque de verdad (y su par con prefijo);
-    // las demas son los apagados del modo sin transparencia.
-    // (Se descartan las condiciones de @supports, que van entre parentesis.)
-    expect(css.match(/(?<![-(])backdrop-filter:\s*blur\(/g)).toHaveLength(1);
-    expect(css.match(/(?<!\()-webkit-backdrop-filter:\s*blur\(/g)).toHaveLength(1);
-    const bloque = css.slice(0, css.search(/(?<![-(])backdrop-filter:\s*blur\(/));
+    // El filtro se define una sola vez (--vidrio-filtro) y se aplica en una
+    // sola regla, con y sin prefijo; los demas backdrop-filter son los
+    // apagados del modo sin transparencia y las condiciones de @supports.
+    expect(css.match(/--vidrio-filtro:\s*blur\(/g)).toHaveLength(1);
+    expect(css.match(/(?<![-(])backdrop-filter:\s*var\(--vidrio-filtro\)/g)).toHaveLength(1);
+    expect(css.match(/(?<!\()-webkit-backdrop-filter:\s*var\(--vidrio-filtro\)/g)).toHaveLength(1);
+    expect(css.match(/(?<![-(])backdrop-filter:\s*blur\(/g) ?? []).toHaveLength(0);
+    expect(css.match(/(?<!\()-webkit-backdrop-filter:\s*blur\(/g) ?? []).toHaveLength(0);
+    const bloque = css.slice(0, css.search(/--vidrio-filtro:\s*blur\(/));
     const selector = bloque.slice(bloque.lastIndexOf("}") + 1);
     expect(selector.replace(/\s+/g, " ")).toContain(".vidrio, .vidrio-barra, .vidrio-hoja {");
 
-    // La receta pedida, sin variaciones.
-    expect(css).toContain("--vidrio-fondo: rgba(255, 255, 255, 0.55)");
-    expect(css).toContain("backdrop-filter: blur(20px) saturate(180%)");
-    expect(css).toContain("border: 1px solid rgba(255, 255, 255, 0.65)");
+    // La receta pedida (v2.5.0), sin variaciones.
+    expect(css).toContain("--vidrio-tinte-arriba: rgba(255, 255, 255, 0.62)");
+    expect(css).toContain("--vidrio-tinte-abajo: rgba(255, 255, 255, 0.48)");
+    expect(css).toContain("--vidrio-filtro: blur(24px) saturate(200%) brightness(1.04)");
+    expect(css).toContain("--vidrio-borde: rgba(255, 255, 255, 0.75)");
+    expect(css).toContain("inset 0 1.5px 0 rgba(255, 255, 255, 0.95)");
+    expect(css).toContain("0 10px 30px rgba(26, 35, 50, 0.14), 0 2px 6px rgba(26, 35, 50, 0.08)");
+    expect(css).toContain("border: 1px solid var(--vidrio-borde)");
     expect(css).toMatch(/@supports not \(\(backdrop-filter: blur\(1px\)\)/);
     expect(css).toMatch(/@media \(prefers-reduced-transparency: reduce\)/);
 
@@ -126,18 +134,26 @@ async function incumplimientosDeColor(page: Page) {
   });
 }
 
-/** Elementos con desenfoque de fondo visibles ahora mismo. */
+/**
+ * Superficie a partir de la cual una capa de vidrio cuenta para el limite de
+ * dos. Los controles chicos (la capsula de puntos del banner, ~120x50) no
+ * cuentan: es la excepcion documentada en globals.css y en la constitucion.
+ */
+const AREA_CAPA_GRANDE = 8000;
+
+/** Capas grandes con desenfoque de fondo visibles ahora mismo. */
 const capasDeVidrio = (page: Page) =>
-  page.evaluate(() =>
+  page.evaluate((minimo) =>
     Array.from(document.querySelectorAll("body *"))
       .filter((el) => {
         const estilo = getComputedStyle(el);
         const filtro = estilo.backdropFilter || estilo.getPropertyValue("-webkit-backdrop-filter");
         const caja = el.getBoundingClientRect();
-        return filtro && filtro !== "none" && caja.width > 0 && caja.height > 0;
+        const visible = Math.max(0, Math.min(caja.bottom, innerHeight) - Math.max(caja.top, 0));
+        return filtro && filtro !== "none" && caja.width > 0 && visible > 0 && caja.width * caja.height >= minimo;
       })
       .map((el) => (el.getAttribute("class") ?? "").split(" ").find((c) => c.startsWith("vidrio")) ?? el.tagName),
-  );
+  AREA_CAPA_GRANDE);
 
 const fondoDelBody = (page: Page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
 
@@ -151,6 +167,9 @@ test.describe("en pantalla", () => {
     const capas = await capasDeVidrio(page);
     expect(capas.length).toBeLessThanOrEqual(2);
     expect([...capas].sort()).toEqual(["vidrio", "vidrio-barra"]);
+    // La capsula de puntos del banner es vidrio, pero chica: no cuenta.
+    const capsula = (await page.locator("[data-capsula-puntos]").boundingBox())!;
+    expect(capsula.width * capsula.height).toBeLessThan(AREA_CAPA_GRANDE);
 
     // Lo ultimo de la pagina queda por encima de la barra al llegar al fondo.
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
@@ -205,23 +224,9 @@ test.describe("en pantalla", () => {
 
   test("el texto sobre el vidrio pasa AA contra el crema y contra el cielo mas oscuro", async ({ page }) => {
     await cuentaEnInicio(page);
-    const resultado = await page.evaluate(async () => {
-      const luminancia = ([r, g, b]: number[]) => {
-        const c = (v: number) => {
-          const n = v / 255;
-          return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
-        };
-        return 0.2126 * c(r) + 0.7152 * c(g) + 0.0722 * c(b);
-      };
-      const contraste = (a: number[], b: number[]) => {
-        const [x, y] = [luminancia(a), luminancia(b)].sort((m, n) => n - m);
-        return (x + 0.05) / (y + 0.05);
-      };
-      const canales = (color: string) => (color.match(/[\d.]+/g) ?? []).map(Number);
-      const sobre = (arriba: number[], alfa: number, abajo: number[]) =>
-        arriba.slice(0, 3).map((c, i) => c * alfa + abajo[i] * (1 - alfa));
-
-      // El pixel mas oscuro del cielo.
+    // El pixel mas oscuro del cielo y el velo de la cabecera de Inicio.
+    const cielo = await page.evaluate(async () => {
+      const lum = ([r, g, b]: number[]) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
       const imagen = new Image();
       imagen.src = "/assets/fondos/fondo-splash-backdrop.webp";
       await imagen.decode();
@@ -234,25 +239,30 @@ test.describe("en pantalla", () => {
       let oscuro = [255, 255, 255];
       for (let i = 0; i < datos.length; i += 4) {
         const px = [datos[i], datos[i + 1], datos[i + 2]];
-        if (luminancia(px) < luminancia(oscuro)) oscuro = px;
+        if (lum(px) < lum(oscuro)) oscuro = px;
       }
-
-      const velo = canales(getComputedStyle(document.querySelector(".fondo-app__velo")!).backgroundColor);
-      const vidrio = canales(getComputedStyle(document.querySelector(".vidrio")!).backgroundColor);
-      const crema = canales(getComputedStyle(document.body).backgroundColor);
-
-      const cieloConVelo = sobre(velo, velo[3] ?? 1, oscuro);
-      const fondos = {
-        cielo: sobre(vidrio, vidrio[3], cieloConVelo),
-        crema: sobre(vidrio, vidrio[3], crema),
+      return {
+        oscuro,
+        velo: getComputedStyle(document.querySelector("[data-cielo='cabecera'] .fondo-app__velo")!).backgroundColor,
+        crema: getComputedStyle(document.body).backgroundColor,
       };
-      const textos = { principal: [26, 35, 50], secundario: [86, 94, 109] };
-      const salida: Record<string, number> = {};
-      for (const [f, fondo] of Object.entries(fondos)) {
-        for (const [t, texto] of Object.entries(textos)) salida[`${t} sobre ${f}`] = contraste(texto, fondo);
-      }
-      return salida;
     });
+    const receta = await recetaDe(page.locator("section[aria-label='Tu balance de Beats'] .vidrio"));
+    const cieloConVelo = sobre(aColor(cielo.velo), cielo.oscuro as Rgb);
+    // Lo que el vidrio deja ver: el cielo desenfocado, saturado y con brillo.
+    const detras = filtrar(cieloConVelo, receta.saturacion, receta.brillo);
+    const fondos = {
+      cielo: sobre(receta.tinte, detras),
+      crema: sobre(receta.tinte, filtrar(aColor(cielo.crema).rgb, receta.saturacion, receta.brillo)),
+    };
+    const resultado: Record<string, number> = {
+      // El saludo va directo sobre el cielo, sin vidrio.
+      "saludo navy sobre el cielo": contraste(NAVY, cieloConVelo),
+    };
+    for (const [f, fondo] of Object.entries(fondos)) {
+      resultado[`navy sobre vidrio y ${f}`] = contraste(NAVY, fondo);
+      resultado[`gris tenue sobre vidrio y ${f}`] = contraste(receta.textoTenue, fondo);
+    }
     for (const [caso, razon] of Object.entries(resultado)) {
       expect(razon, caso).toBeGreaterThanOrEqual(4.5);
     }
