@@ -118,6 +118,7 @@ test("acordeones: actividad abierta y Qué es Latidos cerrado; alternan y lo cer
     page.locator(`[id="${await boton.getAttribute("aria-controls")}"]`);
   const regionQueEs = await region(queEs);
   await expect(regionQueEs).toHaveAttribute("inert", "");
+  await expect(regionQueEs).toHaveAttribute("aria-hidden", "true");
   await expect(regionQueEs).toHaveAttribute("role", "region");
   // Cerrado no esta en el arbol accesible.
   await expect(page.getByRole("region", { name: "Qué es Latidos" })).toHaveCount(0);
@@ -125,6 +126,7 @@ test("acordeones: actividad abierta y Qué es Latidos cerrado; alternan y lo cer
   await queEs.click();
   await expect(queEs).toHaveAttribute("aria-expanded", "true");
   await expect(regionQueEs).not.toHaveAttribute("inert", "");
+  await expect(regionQueEs).not.toHaveAttribute("aria-hidden", "true");
   await expect(page.getByRole("region", { name: "Qué es Latidos" })).toBeVisible();
 
   await actividad.click();

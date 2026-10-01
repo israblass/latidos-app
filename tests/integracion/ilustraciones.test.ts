@@ -62,6 +62,8 @@ test("el onboarding usa las tres ilustraciones nuevas, sin repetir", async ({ pa
 
 test("las fases de Inicio llevan su ilustracion, con carga diferida", async ({ page }) => {
   await cuentaEnInicio(page);
+  // Las fases viven en el acordeon "Qué es Latidos", cerrado al entrar.
+  await page.getByRole("heading", { level: 2, name: /Qué es Latidos/ }).getByRole("button").click();
   const fases = page.getByRole("list", { name: "Fases del programa" }).getByRole("listitem");
   const esperadas = ["donaciones-cajas-bandera", "corazon-gorro-navidad", "estadio-beisbol"];
   for (let i = 0; i < 3; i++) {
@@ -69,7 +71,8 @@ test("las fases de Inicio llevan su ilustracion, con carga diferida", async ({ p
     await expect(imagen).toHaveAttribute("src", new RegExp(esperadas[i]));
     await expect(imagen).toHaveAttribute("loading", "lazy");
     await expect(imagen).toHaveAttribute("width", /\d+/);
-    await expect(imagen).toHaveAttribute("height", "96");
+    // 70px sobre un panel celeste de 84 (Inicio v2.6.0).
+    await expect(imagen).toHaveAttribute("height", "70");
     await imagen.scrollIntoViewIfNeeded();
     await expect
       .poll(() => imagen.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0))

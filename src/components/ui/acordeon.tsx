@@ -9,7 +9,7 @@ import { useId, useState, type ReactNode } from "react";
  *
  * Accesible como el patron de acordeon de WAI-ARIA: <h2><button> con
  * aria-expanded y aria-controls, y una region nombrada por el titulo. Cerrada,
- * la region queda `inert` (ni foco ni arbol accesible). El alto se anima con
+ * la region queda `inert` y `aria-hidden` (ni foco ni arbol accesible). El alto se anima con
  * grid-template-rows 0fr -> 1fr en 250ms; con prefers-reduced-motion no hay
  * transicion.
  *
@@ -38,7 +38,9 @@ export function Acordeon({
   // `inert` todavia no es una prop tipada en React 18, pero React pasa el
   // atributo tal cual. Va en el render (y no en un efecto) para que llegue
   // tambien en el HTML del servidor, antes de hidratar.
-  const inerte = (abierto ? {} : { inert: "" }) as object;
+  // aria-hidden ademas de inert: no todos los lectores ni herramientas
+  // respetan todavia inert para sacar el contenido del arbol accesible.
+  const inerte = (abierto ? {} : { inert: "", "aria-hidden": true }) as object;
 
   return (
     <section className="border-texto-principal/[0.08] [&+&]:border-t">
