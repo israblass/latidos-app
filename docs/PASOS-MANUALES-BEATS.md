@@ -330,7 +330,7 @@ No se editó ninguna migración de la Fase 1. Esto es lo que sugiero revisar:
 2. **Zona horaria en un solo lugar**: `dia_local_latidos` y `ZONA_HORARIA` de la app tienen que coincidir a mano. Se podría guardar la zona en `configuracion_app` y leerla en la función.
 3. **`dia_local_latidos` ejecutable por `anon`**: es inofensiva (solo convierte una fecha), pero si se quiere la superficie mínima se puede revocar en una migración nueva. La prueba de superficie RPC (`rls.test.ts`) tendría que actualizarse a la par.
 4. **Copy de Inicio**: corregido en la tarea de banners ("Sigue participando para sumar más.").
-5. **Constitution**: sigue diciendo `#6B7280` para el texto secundario, mientras la app usa `#565E6D` por contraste (anotado en el README desde antes).
+5. **Constitution**: desde la v2.3.0 dice `#565E6D` para el texto secundario, igual que la app.
 
 ---
 
