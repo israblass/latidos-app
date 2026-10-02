@@ -10,6 +10,7 @@ import { HojaNotificaciones, IconoCampana } from "@/components/inicio/hoja-notif
 import { QueEsLatidos } from "@/components/inicio/que-es-latidos";
 import { SaldoInicio } from "@/components/inicio/saldo-inicio";
 import { Acordeon } from "@/components/ui/acordeon";
+import { BotonDeslizar } from "@/components/ui/boton-deslizar";
 import { CirculoFlecha } from "@/components/ui/circulo-flecha";
 import { useActividadReciente } from "@/hooks/use-actividad-reciente";
 import { beatsDeLaSemana, movimientosRecientes } from "@/lib/beats/actividad";
@@ -125,14 +126,14 @@ export function PanelInicio({
         <SaldoInicio saldoInicial={saldoInicial} beatsSemana={semana} />
       </section>
 
-      <Link
+      {/* La accion principal del Inicio se desliza (v2.9.0); tambien se toca. */}
+      <BotonDeslizar
         href="/escanear"
-        className="boton-primario boton--flecha mt-[14px] h-16 text-[17px] font-bold"
-        style={{ paddingLeft: 28, paddingRight: 8 }}
-      >
-        Escanear QR
-        <CirculoFlecha tamano={48} />
-      </Link>
+        label="Escanear QR"
+        variante="amarillo"
+        ariaLabel="Escanear QR. Desliza o toca para abrir el escáner."
+        className="mt-[14px]"
+      />
 
       <div className="mt-4">
         <CarruselBanners banners={banners} />
