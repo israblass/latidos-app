@@ -42,8 +42,8 @@ const TABS: Tab[] = [
 ];
 
 /**
- * Los iconos de siempre (casa, corazon con latido, marco de escaneo, rayo,
- * persona), redibujados en SVG con trazo de 1.75 para poder pintarlos con el
+ * Los iconos de siempre (casa, rayo, marco de escaneo, corazon con latido,
+ * persona; en ese orden desde la v2.9.0), redibujados en SVG con trazo de 1.75 para poder pintarlos con el
  * color de cada estado: contorno en las inactivas y relleno en la activa.
  */
 function Icono({ nombre, relleno }: { nombre: NombreIcono; relleno: boolean }) {
@@ -61,7 +61,16 @@ function Icono({ nombre, relleno }: { nombre: NombreIcono; relleno: boolean }) {
   const lleno = relleno ? "currentColor" : "none";
   const trazos: Record<NombreIcono, ReactNode> = {
     inicio: <path d="M3.5 10.5 12 3.5l8.5 7V20a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5z" fill={lleno} />,
-    pulso: (
+    // Pulso es el rayo y Beats el corazon con latido (v2.9.0): antes estaban
+    // cruzados respecto a la referencia aprobada.
+    pulso: <path d="M13.5 2.5 5 13.5h6l-1.5 8 8.5-11h-6z" fill={lleno} />,
+    escanear: (
+      <>
+        <path d="M4 8.5V5.5a1.5 1.5 0 0 1 1.5-1.5h3M15.5 4h3A1.5 1.5 0 0 1 20 5.5v3M20 15.5v3a1.5 1.5 0 0 1-1.5 1.5h-3M8.5 20h-3A1.5 1.5 0 0 1 4 18.5v-3" />
+        {relleno ? <rect x="8" y="8" width="8" height="8" rx="1.5" fill="currentColor" stroke="none" /> : <path d="M8 12h8" />}
+      </>
+    ),
+    beats: (
       <>
         <path
           d="M12 20.5s-8.5-5.2-8.5-11.1A4.6 4.6 0 0 1 12 6.6a4.6 4.6 0 0 1 8.5 2.8c0 5.9-8.5 11.1-8.5 11.1z"
@@ -70,13 +79,6 @@ function Icono({ nombre, relleno }: { nombre: NombreIcono; relleno: boolean }) {
         <path d="M5.5 12.5h3l1.5-2.5 2 5 1.5-3h5" stroke={relleno ? "var(--color-fondo)" : "currentColor"} />
       </>
     ),
-    escanear: (
-      <>
-        <path d="M4 8.5V5.5a1.5 1.5 0 0 1 1.5-1.5h3M15.5 4h3A1.5 1.5 0 0 1 20 5.5v3M20 15.5v3a1.5 1.5 0 0 1-1.5 1.5h-3M8.5 20h-3A1.5 1.5 0 0 1 4 18.5v-3" />
-        {relleno ? <rect x="8" y="8" width="8" height="8" rx="1.5" fill="currentColor" stroke="none" /> : <path d="M8 12h8" />}
-      </>
-    ),
-    beats: <path d="M13.5 2.5 5 13.5h6l-1.5 8 8.5-11h-6z" fill={lleno} />,
     perfil: (
       <>
         <circle cx="12" cy="8" r="4" fill={lleno} />

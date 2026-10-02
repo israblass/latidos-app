@@ -151,6 +151,215 @@
       var(--color-fondo);
   }
 
+  /*
+   * Techo de nubes del Inicio (constitution §2, v2.9.0): franja decorativa que
+   * nace en el borde superior de la pantalla, con las formas colgando y
+   * desvaneciendose hacia abajo. Alto minimo de 120px; en un iPhone con
+   * muesca crece con la zona segura para que los hilos cuelguen desde arriba.
+   * La mascara solo usa el alfa (blanco, de la paleta).
+   */
+  .techo-nubes {
+    position: relative;
+    height: max(120px, calc(env(safe-area-inset-top, 0px) + 84px));
+    overflow: hidden;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to bottom, #fff 60%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #fff 60%, transparent 100%);
+  }
+
+  /* Medidas de la referencia (430px, corrida 18px a la izquierda y 6px hacia
+     arriba). En pantallas de mas de 394px crece para no dejar hueco a la
+     derecha. */
+  .techo-nubes img {
+    position: absolute;
+    top: -6px;
+    left: -18px;
+    width: max(430px, calc(100% + 36px));
+    max-width: none;
+    height: auto;
+  }
+
+  /*
+   * Circulos del pulso sobre la tarjeta de Beats del Inicio (v2.9.0). Van en
+   * su propia capa recortada (inset 0, radio heredado, overflow hidden) y no
+   * con overflow hidden en la tarjeta: asi no se recorta el canto especular
+   * del vidrio, que sobresale 1px. Ancho de la referencia (236px); en
+   * pantallas angostas se achica para que los anillos no crucen la etiqueta
+   * ni el numero.
+   */
+  .circulos-pulso {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .circulos-pulso img {
+    position: absolute;
+    right: -48px;
+    top: -56px;
+    width: min(236px, calc(100% - 104px));
+    max-width: none;
+    height: auto;
+    opacity: 0.92;
+  }
+
+  /*
+   * Boton de deslizar (constitution §2, v2.9.0; <BotonDeslizar>). El circulo
+   * se arrastra con Pointer Events: touch-action none solo en el circulo, para
+   * que el resto de la pantalla siga desplazandose con el dedo.
+   */
+  .deslizar {
+    --alto: 64px;
+    --pad: 8px;
+    --circulo: 48px;
+    position: relative;
+    display: flex;
+    height: var(--alto);
+    align-items: center;
+    overflow: hidden;
+    border-radius: 9999px;
+    font-size: 17px;
+    font-weight: 700;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+  }
+
+  .deslizar__relleno {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    border-radius: 9999px;
+    pointer-events: none;
+  }
+
+  .deslizar__etiqueta {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: calc(var(--circulo) + var(--pad) * 2);
+    padding-right: 22px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .deslizar__etiqueta span {
+    position: relative;
+  }
+
+  .deslizar__circulo {
+    position: absolute;
+    left: var(--pad);
+    top: 50%;
+    display: grid;
+    width: var(--circulo);
+    height: var(--circulo);
+    margin-top: calc(var(--circulo) / -2);
+    place-items: center;
+    border-radius: 9999px;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .deslizar__circulo:active {
+    cursor: grabbing;
+  }
+
+  .deslizar__circulo:focus-visible {
+    outline: 3px solid theme("colors.secundario");
+    outline-offset: 3px;
+  }
+
+  /* Regreso con rebote; con prefers-reduced-motion la regla global deja las
+     transiciones en 0.01ms, asi que regresa sin rebote. */
+  .deslizar.vuelve .deslizar__circulo,
+  .deslizar.vuelve .deslizar__relleno,
+  .deslizar.vuelve .deslizar__etiqueta {
+    transition:
+      transform 0.38s cubic-bezier(0.2, 0.9, 0.25, 1.15),
+      width 0.38s cubic-bezier(0.2, 0.9, 0.25, 1.15),
+      opacity 0.3s;
+  }
+
+  .deslizar.listo .deslizar__circulo {
+    transition: transform 0.18s ease-out;
+  }
+
+  /* En amarillo y blanco el circulo es navy con flecha amarilla: lleva la
+     clase .circulo-navy (el unico amarillo como trazo, siempre sobre navy). */
+  .deslizar--amarillo {
+    @apply bg-primario text-texto-principal;
+  }
+  .deslizar--amarillo .deslizar__relleno {
+    background: rgba(26, 35, 50, 0.1);
+  }
+
+  .deslizar--navy {
+    @apply bg-texto-principal text-texto-inverso;
+  }
+  .deslizar--navy .deslizar__circulo {
+    @apply bg-primario text-texto-principal;
+  }
+  .deslizar--navy .deslizar__relleno {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .deslizar--blanco {
+    @apply bg-superficie text-texto-principal;
+    box-shadow: inset 0 0 0 1.5px rgba(26, 35, 50, 0.16);
+  }
+  .deslizar--blanco .deslizar__relleno {
+    background: rgba(0, 144, 255, 0.1);
+  }
+
+  /* Destello que recorre la etiqueta: solo si la persona no pidio menos
+     movimiento, y se apaga mientras arrastra. */
+  @media (prefers-reduced-motion: no-preference) {
+    .deslizar__etiqueta span {
+      background: linear-gradient(100deg, currentColor 35%, transparent 50%, currentColor 65%) 0 0 / 250% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: destello-deslizar 2.8s ease-in-out infinite;
+    }
+    .deslizar--amarillo .deslizar__etiqueta span,
+    .deslizar--blanco .deslizar__etiqueta span {
+      background-image: linear-gradient(
+        100deg,
+        rgba(26, 35, 50, 1) 35%,
+        rgba(26, 35, 50, 0.35) 50%,
+        rgba(26, 35, 50, 1) 65%
+      );
+    }
+    .deslizar--navy .deslizar__etiqueta span {
+      background-image: linear-gradient(
+        100deg,
+        rgba(255, 255, 255, 1) 35%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgba(255, 255, 255, 1) 65%
+      );
+    }
+    .deslizar.arrastrando .deslizar__etiqueta span {
+      animation: none;
+      background: none;
+      -webkit-text-fill-color: currentColor;
+    }
+  }
+
+  @keyframes destello-deslizar {
+    0% {
+      background-position: 120% 0;
+    }
+    60%,
+    100% {
+      background-position: -60% 0;
+    }
+  }
+
   .titulo-pantalla {
     @apply font-display text-[28px] uppercase leading-tight text-texto-principal;
   }
@@ -419,6 +628,16 @@
     --vidrio-tinte-arriba: rgba(255, 255, 255, 0.85);
     --vidrio-tinte-abajo: rgba(255, 255, 255, 0.85);
     border-radius: theme("borderRadius.sheet") theme("borderRadius.sheet") 0 0;
+  }
+
+  /*
+   * Limite de dos capas (v2.9.0): con una hoja abierta, las piezas de vidrio
+   * de la pantalla quedan bajo el velo y apagan su desenfoque (lo marca
+   * HojaInferior en el body). Asi Beats (tarjeta + barra + hoja) no pasa de
+   * dos capas grandes con desenfoque.
+   */
+  body[data-hoja-abierta] main .vidrio {
+    --vidrio-filtro: none;
   }
 
   /*

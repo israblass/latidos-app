@@ -57,6 +57,10 @@ export function HojaInferior({
     // Lo de atras no se desplaza mientras la hoja esta encima.
     const overflowPrevio = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    // Mientras la hoja esta abierta, el vidrio de la pantalla de atras (bajo
+    // el velo) apaga su desenfoque: asi nunca hay mas de dos capas grandes
+    // (la hoja y la barra). Ver globals.css.
+    document.body.setAttribute("data-hoja-abierta", "");
 
     const alTeclear = (evento: KeyboardEvent) => {
       if (evento.key === "Escape") {
@@ -88,6 +92,7 @@ export function HojaInferior({
     return () => {
       document.removeEventListener("keydown", alTeclear);
       document.body.style.overflow = overflowPrevio;
+      document.body.removeAttribute("data-hoja-abierta");
       setDesplazamiento(0);
       // El foco vuelve a quien abrio la hoja.
       if (disparador.current instanceof HTMLElement) disparador.current.focus();

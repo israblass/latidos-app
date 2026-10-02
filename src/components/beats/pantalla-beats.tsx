@@ -6,7 +6,7 @@ import { DiaHistorial } from "@/components/beats/dia-historial";
 import { EstadoInicial } from "@/components/beats/estado-inicial";
 import { HojaComoGanar } from "@/components/beats/hoja-como-ganar";
 import { AnuncioVivo } from "@/components/beats/anuncio-vivo";
-import { CarruselMarcas, HeroBeats, TuPulso } from "@/components/beats/dashboard-beats";
+import { CarruselMarcas, TarjetaBeats } from "@/components/beats/dashboard-beats";
 import { CirculoFlecha } from "@/components/ui/circulo-flecha";
 import { TabBar } from "@/components/navegacion/tab-bar";
 import { AvisoEstado } from "@/components/beats/aviso-estado";
@@ -20,8 +20,8 @@ import { marcasDelHistorial, metricasDeLaSemana } from "@/lib/beats/dashboard";
 
 /**
  * Pantalla de Beats (T020), como dashboard desde la v2.8.0 (constitution §2):
- * cabecera "Tus Beats" con la pildora de ayuda, hero navy con el saldo, "Tu
- * pulso" de la semana, carrusel de marcas, historial por dias en acordeon,
+ * cabecera "Tus Beats" con la pildora de ayuda, tarjeta de vidrio con el
+ * saldo y "Tu pulso" de la semana (v2.9.0), carrusel de marcas, historial por dias en acordeon,
  * "Cómo ganar" y el recordatorio del canje.
  *
  * Es una pantalla de cliente a proposito (plan §4, decision 10): el service
@@ -190,11 +190,9 @@ export function PantallaBeats() {
           </button>
         </header>
 
-        <HeroBeats saldo={resumen?.saldo ?? null} beatsSemana={metricas.beats} cargando={!fallo} />
+        <TarjetaBeats saldo={resumen?.saldo ?? null} metricas={metricas} cargando={!fallo} />
 
         <div className="mt-4 flex flex-col gap-4">
-          <TuPulso metricas={metricas} />
-
           <CarruselMarcas marcas={marcas} />
 
           <section aria-label="Historial de Beats" aria-busy={cargando}>
