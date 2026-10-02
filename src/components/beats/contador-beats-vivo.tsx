@@ -20,13 +20,11 @@ export function ContadorBeatsVivo({
   /**
    * "halo": el contador de la pantalla de Beats (navy, barra y halo
    * amarillos).
-   * "plano": digitos navy sin barra ni halo, para la tarjeta de vidrio del
-   * Inicio (constitution §2, v2.7.0).
-   * "navy": digitos blancos sin halo, sobre el hero navy de la pantalla de
-   * Beats (v2.8.0).
+   * "plano": digitos navy sin barra ni halo, para las tarjetas de vidrio del
+   * Inicio y de Beats (constitution §2, v2.7.0 y v2.9.0).
    * El conteo animado es el mismo en todas.
    */
-  variante?: "halo" | "plano" | "navy";
+  variante?: "halo" | "plano";
 }) {
   const anterior = useRef(valor);
   const [animacion, setAnimacion] = useState<{ desde: number; hasta: number; vez: number } | null>(
@@ -46,13 +44,9 @@ export function ContadorBeatsVivo({
     <ContadorAnimado key={animacion.vez} desde={animacion.desde} hasta={animacion.hasta} />
   ) : undefined;
 
-  if (variante === "plano" || variante === "navy") {
+  if (variante === "plano") {
     return (
-      <p
-        className={`font-display text-[68px] leading-none tracking-[0.01em] ${
-          variante === "navy" ? "text-texto-inverso" : "text-texto-principal"
-        }`}
-      >
+      <p className="font-display text-[68px] leading-none tracking-[0.01em] text-texto-principal">
         {animado ?? valor}
       </p>
     );

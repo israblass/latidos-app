@@ -8,8 +8,8 @@ import type { MetricasSemana, ResumenMarca } from "@/lib/beats/dashboard";
 import { beatsConSigno, conteoEscaneos } from "@/lib/beats/formato";
 
 /**
- * Piezas del dashboard de Beats (constitution §2, v2.8.0): el hero navy, la
- * tarjeta "Tu pulso" y el carrusel de marcas. Todo sale del historial que ya
+ * Piezas del dashboard de Beats (constitution §2, v2.8.0; v2.9.0): la tarjeta
+ * de vidrio con el saldo y "Tu pulso", y el carrusel de marcas. Todo sale del historial que ya
  * trae la pantalla; aqui no se pide nada a la red.
  */
 
@@ -31,53 +31,20 @@ export function IconoReloj() {
 }
 
 /**
- * Hero navy: se queda navy y opaco a proposito (no es vidrio). Lleva el saldo
- * con su conteo animado y el chip de la semana, que solo aparece si la suma de
- * los ultimos 7 dias es positiva.
+ * Tarjeta de Beats (constitution §2, v2.9.0): una sola pieza de vidrio con el
+ * saldo y "Tu pulso". Arriba "Beats acumulados" y el chip de la semana (la
+ * cifra semanal vive solo ahi); el saldo en Anton con su conteo animado; la
+ * linea de latido; "Tu pulso · Últimos 7 días" y las tres metricas.
  */
-export function HeroBeats({
+export function TarjetaBeats({
   saldo,
-  beatsSemana,
+  metricas,
   cargando,
 }: {
   saldo: number | null;
-  beatsSemana: number;
+  metricas: MetricasSemana;
   cargando: boolean;
 }) {
-  return (
-    <section
-      aria-label="Tu balance de Beats"
-      data-hero-beats=""
-      className="mt-[22px] flex flex-col gap-[14px] rounded-[30px] bg-texto-principal px-6 py-[22px]"
-    >
-      {/* Alto fijo para la fila: el chip llega con el historial y no puede
-          empujar el numero. */}
-      <div className="flex min-h-[26px] items-center justify-between gap-3">
-        <span className="text-[14px] text-texto-sobre-navy">Beats acumulados</span>
-        {beatsSemana > 0 ? (
-          <span
-            data-chip-semana=""
-            className="shrink-0 rounded-full bg-primario px-3 py-[5px] text-[12px] font-bold text-texto-principal"
-          >
-            +{beatsSemana} esta semana
-          </span>
-        ) : null}
-      </div>
-      {saldo !== null ? (
-        // Sin animacion de entrada (spec §10.11): el numero aparece directo.
-        // Solo se anima si cambia con la pantalla abierta.
-        <ContadorBeatsVivo valor={saldo} variante="navy" />
-      ) : (
-        <div className="flex h-[68px] items-center text-texto-sobre-navy">
-          {cargando ? <span className="girador" aria-hidden="true" /> : null}
-        </div>
-      )}
-    </section>
-  );
-}
-
-/** "Tu pulso": la semana en un vistazo, con la linea de latido del cliente. */
-export function TuPulso({ metricas }: { metricas: MetricasSemana }) {
   const datos = [
     { valor: metricas.escaneos, etiqueta: "Escaneos" },
     { valor: metricas.marcas, etiqueta: "Marcas" },
@@ -85,26 +52,35 @@ export function TuPulso({ metricas }: { metricas: MetricasSemana }) {
   ];
   return (
     <section
-      aria-labelledby="titulo-tu-pulso"
-      data-tu-pulso=""
-      className="rounded-[28px] border border-texto-principal/[0.08] bg-superficie px-5 pb-4 pt-5"
+      aria-label="Tu balance de Beats"
+      data-tarjeta-beats=""
+      className="vidrio mt-[22px] flex flex-col gap-[14px] rounded-[30px] px-6 py-[22px]"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 id="titulo-tu-pulso" className="text-[16px] font-bold text-texto-principal">
-            Tu pulso
-          </h2>
-          <p className="text-[13px] text-texto-secundario">Últimos 7 días</p>
-        </div>
-        <p className="text-right">
-          <span data-pulso-beats="" className="block font-display text-[34px] leading-none text-texto-principal">
-            {metricas.beats === 0 ? "0" : beatsConSigno(metricas.beats)}
+      {/* Alto fijo para la fila: el chip llega con el historial y no puede
+          empujar el numero. */}
+      <div className="flex min-h-[26px] items-center justify-between gap-3">
+        <span className="text-[14px] text-texto-secundario">Beats acumulados</span>
+        {metricas.beats > 0 ? (
+          <span
+            data-chip-semana=""
+            className="shrink-0 rounded-full bg-primario px-3 py-[5px] text-[12px] font-bold text-texto-principal"
+          >
+            +{metricas.beats} esta semana
           </span>
-          <span className="mt-1 block text-[12px] text-texto-secundario">Beats</span>
-        </p>
+        ) : null}
       </div>
-      {/* Decorativa y quieta. Ancho y alto fijos (la proporcion del archivo,
-          640 x 218) para que no mueva nada al cargar. */}
+      {saldo !== null ? (
+        // Sin animacion de entrada (spec §10.11): el numero aparece directo.
+        // Solo se anima si cambia con la pantalla abierta.
+        <ContadorBeatsVivo valor={saldo} variante="plano" />
+      ) : (
+        <div className="flex h-[68px] items-center text-texto-secundario">
+          {cargando ? <span className="girador" aria-hidden="true" /> : null}
+        </div>
+      )}
+      {/* Decorativa y quieta: es arte de marca, no una grafica de los datos.
+          Ancho y alto fijos (la proporcion del archivo, 640 x 218) para que no
+          mueva nada al cargar. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/ilustraciones/ecg-pulso.webp"
@@ -113,16 +89,21 @@ export function TuPulso({ metricas }: { metricas: MetricasSemana }) {
         height={218}
         decoding="async"
         data-ecg-pulso=""
-        className="mb-1.5 mt-3.5 block h-auto w-full"
+        className="mt-0.5 block h-auto w-full"
       />
-      <dl className="grid grid-cols-3 gap-2 border-t border-texto-principal/[0.08] pt-3.5">
-        {datos.map((d) => (
-          <div key={d.etiqueta} className="flex flex-col-reverse">
-            <dt className="text-[12px] text-texto-secundario">{d.etiqueta}</dt>
-            <dd className="font-display text-[24px] leading-[1.1] text-texto-principal">{d.valor}</dd>
-          </div>
-        ))}
-      </dl>
+      <div data-tu-pulso="">
+        <h2 className="text-[12px] font-semibold tracking-[0.02em] text-texto-secundario">
+          Tu pulso · Últimos 7 días
+        </h2>
+        <dl className="mt-[14px] grid grid-cols-3 gap-2 border-t border-texto-principal/10 pt-[14px]">
+          {datos.map((d) => (
+            <div key={d.etiqueta} className="flex flex-col-reverse">
+              <dt className="text-[12px] text-texto-secundario">{d.etiqueta}</dt>
+              <dd className="font-display text-[24px] leading-[1.1] text-texto-principal">{d.valor}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
     </section>
   );
 }

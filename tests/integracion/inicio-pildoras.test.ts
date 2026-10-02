@@ -164,15 +164,16 @@ test("un nombre largo baja a 32 px y envuelve sin romper el layout", async ({ pa
 
 test("Escanear QR navega a /escanear y es el CTA de 64 px con su flecha", async ({ page }) => {
   await cuentaEnInicio(page);
-  const escanear = page.getByRole("main").getByRole("link", { name: "Escanear QR" });
-  const caja = (await escanear.boundingBox())!;
+  // v2.9.0: es el boton de deslizar; un toque en el circulo tambien abre.
+  const control = page.getByRole("main").locator("[data-boton-deslizar]");
+  const caja = (await control.boundingBox())!;
   expect(Math.round(caja.height)).toBe(64);
-  await expect(escanear).toHaveClass(/boton-primario/);
-  await expect(escanear).toHaveClass(/boton--flecha/);
-  const circulo = escanear.locator(".circulo-flecha");
+  await expect(control).toHaveCSS("background-color", "rgb(253, 251, 5)");
+  await expect(control).toContainText("Escanear QR");
+  const circulo = page.getByRole("button", { name: /^Escanear QR/ });
   expect(Math.round((await circulo.boundingBox())!.width)).toBe(48);
   await expect(circulo).toHaveCSS("background-color", "rgb(26, 35, 50)");
-  await escanear.click();
+  await circulo.click();
   await page.waitForURL("**/escanear");
 });
 

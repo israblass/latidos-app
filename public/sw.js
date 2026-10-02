@@ -10,7 +10,7 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v9";
+const VERSION = "v10";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
@@ -25,6 +25,10 @@ const VERSION = "v9";
 // hojas, principio de paleta): misma razon que la v7.
 // v9: la pantalla de Beats pasa a dashboard (CSS nuevo) y su copia sin red
 // guarda tambien la linea de latido de "Tu pulso".
+// v10: CSS nuevo (techo de nubes, circulos del pulso, boton de deslizar,
+// tarjeta de Beats unificada). Las dos ilustraciones nuevas del Inicio no se
+// precachean (~200 KB): como todo .webp, se guardan la primera vez que se ven
+// con red y desde ahi se sirven sin ella.
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 

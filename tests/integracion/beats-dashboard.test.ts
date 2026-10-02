@@ -132,34 +132,42 @@ test.describe("en pantalla", () => {
     return id;
   }
 
-  test("con datos: cabecera, hero navy con chip, Tu pulso y marcas", async ({ page }) => {
+  test("con datos: cabecera, tarjeta de vidrio con saldo, chip y Tu pulso, y marcas", async ({ page }) => {
     await conDatos(page);
     const h1 = page.getByRole("heading", { level: 1 });
     await expect(h1).toHaveText(/^Tus\s*Beats$/);
     await expect(page.getByRole("heading", { level: 1, name: "Tus Beats" })).toHaveCount(1);
-    for (const nombre of ["Tu pulso", "Marcas", "Historial"]) {
+    for (const nombre of ["Tu pulso · Últimos 7 días", "Marcas", "Historial"]) {
       await expect(page.getByRole("heading", { level: 2, name: nombre })).toBeVisible();
     }
 
-    const hero = page.locator("section[aria-label='Tu balance de Beats']");
-    await expect(hero).toHaveCSS("background-color", "rgb(26, 35, 50)");
-    await expect(hero).toHaveCSS("border-top-left-radius", "30px");
-    await expect(hero.getByText("Beats acumulados")).toHaveCSS("color", "rgba(255, 255, 255, 0.72)");
-    await expect(hero.locator("[data-chip-semana]")).toHaveText("+40 esta semana");
-    const numero = hero.locator("p.font-display");
+    // v2.9.0: una sola tarjeta de vidrio, region con nombre, con el saldo y
+    // "Tu pulso" adentro.
+    const tarjeta = page.getByRole("region", { name: "Tu balance de Beats" });
+    await expect(tarjeta).toHaveCount(1);
+    await expect(tarjeta).toHaveClass(/(^|\s)vidrio(\s|$)/);
+    expect(await tarjeta.evaluate((el) => getComputedStyle(el).backdropFilter)).toContain("blur(24px)");
+    await expect(tarjeta).toHaveCSS("border-top-left-radius", "30px");
+    await expect(tarjeta.getByText("Beats acumulados")).toHaveCSS("color", "rgb(86, 94, 109)");
+    await expect(tarjeta.locator("[data-chip-semana]")).toHaveText("+40 esta semana");
+    const numero = tarjeta.locator("p.font-display");
     await expect(numero).toHaveText("40");
-    await expect(numero).toHaveCSS("color", "rgb(255, 255, 255)");
+    await expect(numero).toHaveCSS("color", "rgb(26, 35, 50)");
     await expect(numero).toHaveCSS("font-size", "68px");
 
-    const pulso = page.locator("[data-tu-pulso]");
-    await expect(pulso.locator("[data-pulso-beats]")).toHaveText("+40");
-    await expect(pulso.getByText("Últimos 7 días")).toHaveCSS("color", "rgb(86, 94, 109)");
+    const pulso = tarjeta.locator("[data-tu-pulso]");
+    await expect(pulso.getByRole("heading", { name: "Tu pulso · Últimos 7 días" })).toHaveCSS("font-size", "12px");
+    await expect(pulso.getByRole("heading", { name: "Tu pulso · Últimos 7 días" })).toHaveCSS("font-weight", "600");
+    // La cifra semanal vive solo en el chip: no hay un "+40 Beats" aparte.
+    await expect(page.locator("[data-pulso-beats]")).toHaveCount(0);
+    await expect(page.getByText("+40", { exact: true })).toHaveCount(0);
+    await expect(page.locator("[data-hero-beats]")).toHaveCount(0);
     const valores = await pulso.locator("dd").allTextContents();
     const etiquetas = await pulso.locator("dt").allTextContents();
     expect(etiquetas).toEqual(["Escaneos", "Marcas", "Días activos"]);
     expect(valores).toEqual(["2", "2", "2"]);
-    // El ECG: decorativo, con tamaño fijo y cargado.
-    const ecg = pulso.locator("img[data-ecg-pulso]");
+    // El ECG: dentro de la tarjeta, decorativo, con tamaño fijo y cargado.
+    const ecg = tarjeta.locator("img[data-ecg-pulso]");
     await expect(ecg).toHaveAttribute("alt", "");
     await expect(ecg).toHaveAttribute("width", "640");
     await expect(ecg).toHaveAttribute("height", "218");
@@ -215,9 +223,11 @@ test.describe("en pantalla", () => {
     // La bienvenida pasa a hace 10 dias: la semana queda vacia.
     await moverMovimientos(id, 10);
     await abrirBeats(page);
-    const pulso = page.locator("[data-tu-pulso]");
-    await expect(pulso.locator("[data-pulso-beats]")).toHaveText("0");
-    expect(await pulso.locator("dd").allTextContents()).toEqual(["0", "0", "0"]);
+    const tarjeta = page.getByRole("region", { name: "Tu balance de Beats" });
+    await expect(tarjeta.locator("p.font-display")).toHaveText("5");
+    await expect(tarjeta.locator("img[data-ecg-pulso]")).toBeVisible();
+    expect(await tarjeta.locator("[data-tu-pulso] dd").allTextContents()).toEqual(["0", "0", "0"]);
+    await expect(page.locator("[data-pulso-beats]")).toHaveCount(0);
     await expect(page.locator("[data-chip-semana]")).toHaveCount(0);
     await expect(carrusel(page).getByRole("listitem")).toHaveCount(1);
     await expect(carrusel(page).getByRole("link", { name: /Descubre más/ })).toBeVisible();
