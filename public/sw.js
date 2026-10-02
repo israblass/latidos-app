@@ -10,7 +10,7 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v10";
+const VERSION = "v11";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
@@ -29,6 +29,9 @@ const VERSION = "v10";
 // tarjeta de Beats unificada). Las dos ilustraciones nuevas del Inicio no se
 // precachean (~200 KB): como todo .webp, se guardan la primera vez que se ven
 // con red y desde ahi se sirven sin ella.
+// v11: bienvenida inmersiva (carrusel con ilustraciones y logo con aro). Se
+// precachea lo de su primera pintura: el arte de la pantalla 1, el logo y las
+// fuentes. Las pantallas 2 a 4 se guardan en uso.
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 
@@ -69,7 +72,29 @@ const SHELL = [
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   ILUSTRACION_SIN_SENAL,
+  // Primera pintura de la bienvenida (v11): ~250 KB entre las tres
+  // ilustraciones de la pantalla 1 y el logo.
+  "/marca/logo-latidos-aro.webp",
+  "/ilustraciones/circulos-pulso-bienvenida.webp",
+  "/ilustraciones/corazon-latido-bienvenida.webp",
+  "/ilustraciones/ecg-pulso-ancho.webp",
 ];
+
+/**
+ * Las fuentes llevan un hash en el nombre (/_next/static/media/...): este
+ * archivo no puede conocerlas de antemano. Al instalar se leen del HTML de la
+ * bienvenida, que las precarga, y se guardan. Si algo falla no pasa nada: se
+ * guardan igual la primera vez que se usan.
+ */
+async function precachearFuentes(cache) {
+  try {
+    const html = await (await fetch("/", { credentials: "omit" })).text();
+    const fuentes = [...new Set(html.match(/\/_next\/static\/media\/[^"']+\.woff2/g) || [])];
+    await Promise.all(fuentes.map((ruta) => cache.add(ruta).catch(() => null)));
+  } catch {
+    // Sin red al instalar: las fuentes llegaran en uso.
+  }
+}
 
 self.addEventListener("install", (evento) => {
   evento.waitUntil(
@@ -77,7 +102,10 @@ self.addEventListener("install", (evento) => {
       .open(CACHE_SHELL)
       // addAll falla entero si un recurso falla; de a uno es mas tolerante.
       .then((cache) =>
-        Promise.all(SHELL.map((ruta) => cache.add(ruta).catch(() => null))),
+        Promise.all([
+          ...SHELL.map((ruta) => cache.add(ruta).catch(() => null)),
+          precachearFuentes(cache),
+        ]),
       )
       .then(() => self.skipWaiting()),
   );
