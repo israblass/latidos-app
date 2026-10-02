@@ -10,7 +10,8 @@ import { leerResumen } from "@/lib/beats/consultas";
 /**
  * Tarjeta de Beats del Inicio (constitution §2, v2.7.0): vidrio claro (la
  * clase central .vidrio) sobre el degradado de marca, texto navy y etiqueta
- * gris, sin barra ni halo.
+ * gris, sin barra ni halo. Desde la v2.9.0 lleva los circulos del pulso a la
+ * derecha, recortados por el borde.
  *
  * Al volver a la app relee el saldo en silencio: si cambio mientras el
  * telefono estaba bloqueado, el numero sube con el conteo animado de siempre.
@@ -46,9 +47,15 @@ export function SaldoInicio({
       aria-label={`Ver mis Beats. Tienes ${saldo} Beats`}
       className="vidrio flex flex-col gap-[14px] rounded-[30px] px-6 py-[22px] outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secundario active:scale-[0.99] motion-reduce:active:scale-100"
     >
+      {/* Circulos del pulso (v2.9.0): decorativos, recortados por el borde de
+          la tarjeta y por debajo del texto. */}
+      <span aria-hidden="true" data-circulos-pulso="" className="circulos-pulso">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/ilustraciones/circulos-pulso.webp" alt="" width={480} height={480} decoding="async" />
+      </span>
       {/* Alto fijo para la fila: el chip aparece cuando cargan los movimientos
           y no puede empujar el numero. */}
-      <span className="flex min-h-[26px] items-center justify-between gap-3">
+      <span className="relative z-[1] flex min-h-[26px] items-center justify-between gap-3">
         <span className="text-[14px] text-texto-secundario">Beats acumulados</span>
         {beatsSemana !== null && beatsSemana > 0 ? (
           <span
@@ -59,7 +66,9 @@ export function SaldoInicio({
           </span>
         ) : null}
       </span>
-      <ContadorBeatsVivo valor={saldo} variante="plano" />
+      <span className="relative z-[1]">
+        <ContadorBeatsVivo valor={saldo} variante="plano" />
+      </span>
     </Link>
   );
 }
