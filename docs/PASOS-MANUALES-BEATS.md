@@ -141,7 +141,7 @@ Usa una cuenta de prueba nueva. Marca cada punto a medida que lo ves.
 **Entrar a Beats**
 
 - [ ] En Inicio, tocas la card del número y abre **BEATS**.
-- [ ] Vuelves y tocas el tab **Beats** (el rayo) en la barra: abre la misma pantalla y el tab queda en azul.
+- [ ] Vuelves y tocas el tab **Beats** (el corazón con latido; antes de la v2.9.0 de la constitución era el rayo) en la barra: abre la misma pantalla y el tab queda en azul.
 - [ ] Arriba ves el título BEATS y, a la derecha, "¿Cómo gano Beats?" en azul.
 - [ ] El número aparece directo en 5, sin animarse al entrar. La card, la barra amarilla y el halo que late son iguales a los de Inicio.
 - [ ] Debajo dice "Pronto podrás cambiarlos por entradas al concierto, merch y cursos."

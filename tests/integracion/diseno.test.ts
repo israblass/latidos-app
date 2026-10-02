@@ -181,11 +181,11 @@ test.describe("principio de paleta", () => {
     for (const viejo of ["#DDF3FB", "#EAF6FB", "#F0F2F5", "#C9D1DE", "celeste", "gris-chip"]) {
       expect(tailwind, viejo).not.toContain(viejo);
     }
-    // El texto sobre navy volvio en la v2.8.0 (hero de Beats), pero como
-    // blanco al 72% y no como el #C9D1DE de antes.
-    expect(tailwind).toContain('"sobre-navy": "rgb(255 255 255 / 0.72)"');
+    // El texto sobre navy volvio en la v2.8.0 (hero navy de Beats) y se fue
+    // en la v2.9.0 con la tarjeta de vidrio: ya no queda nada sobre navy.
+    expect(tailwind).not.toContain("sobre-navy");
     const usos = archivos(SRC).filter((ruta) =>
-      /\b(bg|text|border)-(celeste|celeste-claro|gris-chip)\b|--inicio-cielo/.test(
+      /\b(bg|text|border)-(celeste|celeste-claro|gris-chip|texto-sobre-navy)\b|--inicio-cielo/.test(
         sinComentarios(readFileSync(ruta, "utf8")),
       ),
     );
@@ -290,9 +290,15 @@ test.describe("en pantalla", () => {
     );
   });
 
-  test("Inicio: el texto de la tarjeta de vidrio pasa AA sobre el degradado real", async ({ page }) => {
+  // v2.9.0: Beats tambien tiene su tarjeta de vidrio sobre el degradado.
+  for (const caso of [
+    { pantalla: "Inicio", ruta: "/inicio", selector: "section[aria-label='Tu balance de Beats'] > a" },
+    { pantalla: "Beats", ruta: "/beats", selector: "section[aria-label='Tu balance de Beats']" },
+  ])
+  test(`${caso.pantalla}: el texto de la tarjeta de vidrio pasa AA sobre el degradado real`, async ({ page }) => {
     await cuentaEnInicio(page);
-    const tarjeta = page.locator("section[aria-label='Tu balance de Beats'] > a");
+    if (caso.ruta === "/beats") await abrirBeats(page);
+    const tarjeta = page.locator(caso.selector);
     await expect(tarjeta).toBeVisible();
     const receta = await recetaDe(tarjeta);
     // Lo que hay detras: se esconde la tarjeta y se mira el pixel mas oscuro
@@ -338,15 +344,11 @@ test.describe("en pantalla", () => {
     expect(await fondoDelBody(page)).toBe("rgb(255, 255, 245)");
     await expect(page.locator("[data-cielo]")).toHaveCount(0);
     // v2.8.0: Beats lleva el mismo degradado de marca del Inicio (una sola
-    // definicion) y ninguna capa de vidrio aparte de la barra.
+    // definicion). v2.9.0: dos capas grandes, la tarjeta unificada y la barra.
     await expect(page.locator(".fondo-inicio")).toHaveCount(1);
-    expect(await capasDeVidrio(page)).toEqual(["vidrio-barra"]);
-    // El hero es navy opaco; Tu pulso y el historial son blancos opacos.
-    await expect(page.locator("section[aria-label='Tu balance de Beats']")).toHaveCSS(
-      "background-color",
-      "rgb(26, 35, 50)",
-    );
-    await expect(page.locator("[data-tu-pulso]")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    expect(await capasDeVidrio(page)).toEqual(["vidrio", "vidrio-barra"]);
+    // Las demas tarjetas (marcas, historial) siguen blancas opacas.
+    await expect(page.locator("section[aria-label='Historial de Beats'] > div")).toHaveCSS("background-color", "rgb(255, 255, 255)");
     expect(await incumplimientosDeColor(page)).toEqual([]);
 
     await page.getByRole("button", { name: "¿Cómo gano Beats?" }).click();
