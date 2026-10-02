@@ -41,7 +41,11 @@ const FLECHA = (
 
 type Props = {
   label: string;
-  variante?: "amarillo" | "navy" | "blanco";
+  /**
+   * "vidrio-amarillo" y "vidrio-blanco" (v2.10.0): la pista es vidrio (la
+   * receta central .vidrio, solo cambia el tinte). Se usan en la bienvenida.
+   */
+  variante?: "amarillo" | "navy" | "blanco" | "vidrio-amarillo" | "vidrio-blanco";
   /** Nombre accesible del circulo; por defecto, "<label>. Desliza o toca para activar." */
   ariaLabel?: string;
   className?: string;
@@ -53,7 +57,12 @@ const CLASE_VARIANTE = {
   amarillo: "deslizar--amarillo",
   navy: "deslizar--navy",
   blanco: "deslizar--blanco",
+  "vidrio-amarillo": "vidrio deslizar--vidrio deslizar--vidrio-amarillo",
+  "vidrio-blanco": "vidrio deslizar--vidrio deslizar--vidrio-blanco",
 } as const;
+
+/** El circulo navy con flecha amarilla (la unica excepcion del amarillo como trazo). */
+const CIRCULO_NAVY = new Set(["amarillo", "blanco", "vidrio-amarillo"]);
 
 const reduceMovimiento = () =>
   typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -215,7 +224,7 @@ export function BotonDeslizar({ label, variante = "amarillo", ariaLabel, classNa
         onPointerUp={alSoltar}
         onPointerCancel={alCancelar}
         onClick={alClicCirculo}
-        className={`deslizar__circulo ${variante === "navy" ? "" : "circulo-navy"}`}
+        className={`deslizar__circulo ${CIRCULO_NAVY.has(variante) ? "circulo-navy" : ""}`}
       >
         {FLECHA}
       </button>
