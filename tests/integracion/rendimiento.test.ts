@@ -179,7 +179,8 @@ test.describe("rendimiento en 4G", () => {
 
     const arranque = Date.now();
     await pagina.goto("/", { waitUntil: "commit" });
-    await pagina.getByRole("link", { name: /Registrarme/ }).waitFor({ timeout: 20_000 });
+    // v2.10.0: Registrarme es un boton de deslizar.
+    await pagina.getByRole("button", { name: /^Registrarme\./ }).waitFor({ timeout: 20_000 });
     const transcurrido = Date.now() - arranque;
 
     console.log(`[rendimiento] bienvenida lista (cache fria, 4G) en ${transcurrido} ms`);

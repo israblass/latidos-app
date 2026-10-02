@@ -232,7 +232,7 @@ test.describe("pantalla de Beats (T049)", () => {
     await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
     await page.reload();
     await expect
-      .poll(() => page.evaluate(() => caches.open("latidos-shell-v10").then((c) => c.match("/beats")).then(Boolean)))
+      .poll(() => page.evaluate(() => caches.open("latidos-shell-v11").then((c) => c.match("/beats")).then(Boolean)))
       .toBe(true);
 
     await cortarRed(context);

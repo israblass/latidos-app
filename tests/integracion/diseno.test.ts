@@ -365,10 +365,13 @@ test.describe("en pantalla", () => {
     expect(await incumplimientosDeColor(page)).toEqual([]);
   });
 
-  test("bienvenida y onboarding llevan el cielo y una sola pieza de vidrio", async ({ page }) => {
+  test("bienvenida: degradado sin cielo y dos capas (los botones); onboarding: cielo y una pieza de vidrio", async ({ page }) => {
+    // v2.10.0: la bienvenida deja el cielo y la card de vidrio. Fondo de
+    // marca (.fondo-inicio) y dos capas grandes: los dos botones de deslizar.
     await page.goto("/");
-    await expect(page.locator("[data-cielo='pantalla']")).toHaveCount(1);
-    expect(await capasDeVidrio(page)).toEqual(["vidrio"]);
+    await expect(page.locator("[data-cielo]")).toHaveCount(0);
+    await expect(page.locator(".fondo-inicio")).toHaveCount(1);
+    expect(await capasDeVidrio(page)).toEqual(["vidrio", "vidrio"]);
     expect(await incumplimientosDeColor(page)).toEqual([]);
     expect((await new AxeBuilder({ page }).analyze()).violations.map((v) => v.id)).toEqual([]);
 
@@ -383,9 +386,11 @@ test.describe("en pantalla", () => {
   });
 
   test("el texto sobre el vidrio pasa AA contra el crema y contra el cielo mas oscuro", async ({ page }) => {
-    // Desde la v2.6.0 el vidrio sobre el cielo vive en la bienvenida y el
-    // onboarding (el Inicio ya no lleva cielo de foto).
-    await page.goto("/");
+    // Desde la v2.10.0 el vidrio sobre el cielo vive solo en el onboarding
+    // (la bienvenida y el Inicio usan el degradado de marca).
+    await completarRegistro(page);
+    await confirmarCorreo(page);
+    await expect(page.locator("[data-cielo='pantalla']")).toHaveCount(1);
     const cielo = await page.evaluate(async () => {
       const lum = ([r, g, b]: number[]) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
       const imagen = new Image();

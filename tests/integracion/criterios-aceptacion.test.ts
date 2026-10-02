@@ -55,15 +55,26 @@ test("01 — llegar desde cualquier canal muestra la misma bienvenida", async ({
     // por razones de red, no por el canal de origen.
     vistas.push(
       [
+        // v2.10.0: el titular de la pantalla 1 del carrusel, su texto de
+        // beneficio y el boton de deslizar que lleva al registro.
         await pagina.getByRole("heading", { level: 1 }).innerText(),
-        await pagina.getByText(/Participa, suma Beats/).innerText(),
-        await pagina.getByRole("link", { name: /Registrarme/ }).innerText(),
+        await pagina.getByText("Asiste a los eventos, suma Beats y canjéalos por recompensas.").innerText(),
+        (await pagina.getByRole("button", { name: /^Registrarme\./ }).getAttribute("aria-label")) ?? "",
       ].join("|"),
     );
     await contexto.close();
   }
 
   expect(new Set(vistas).size, `la bienvenida cambia segun el canal: ${JSON.stringify(vistas)}`).toBe(1);
+  expect(vistas[0]).toContain("Tu pulso");
+
+  // Y el CTA llega al registro.
+  const contexto = await browser.newContext();
+  const pagina = await contexto.newPage();
+  await pagina.goto("/");
+  await pagina.getByRole("button", { name: /^Registrarme\./ }).click();
+  await pagina.waitForURL("**/registro/paso-1");
+  await contexto.close();
 });
 
 test("02 — en iOS aparece el modal con los pasos de instalacion, descartable", async ({
@@ -124,7 +135,7 @@ test("04 — descartar el prompt no impide registrarse", async ({ browser }) => 
   await pagina.getByRole("button", { name: /Entendido|Cerrar/ }).first().click();
 
   // El boton de registro sigue accesible y funciona.
-  await pagina.getByRole("link", { name: /Registrarme/ }).click();
+  await pagina.getByRole("button", { name: /^Registrarme\./ }).click();
   await pagina.waitForURL("**/registro/paso-1");
   await expect(pagina.getByLabel("Cedula")).toBeVisible();
   await contexto.close();
