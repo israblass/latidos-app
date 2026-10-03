@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 
 import { PANTALLAS, type PiezaArte } from "@/components/bienvenida/pantallas";
-import { ImagenMarca } from "@/components/marca/imagen-marca";
 import { BotonDeslizar } from "@/components/ui/boton-deslizar";
 import { ALTO_LOGO, ANCHO_LOGO, LOGOS, LOGOS_PIE, logoSobreAmarillo } from "@/lib/assets";
 
@@ -201,18 +200,30 @@ export function CarruselBienvenida() {
         />
         <footer className="bienvenida-pie">
           <p className="bienvenida-pie__rotulo">Un programa de</p>
-          {/* Altura optica pareja: el sello de la UCV, redondo, va mas alto
-              que los wordmarks (ver .bienvenida-logo-pie en globals.css). */}
+          {/* Orden fijo: Flame, UCV, MUN UCV. Alturas en globals.css
+              (.bienvenida-logo-pie--*). */}
           <div className="bienvenida-pie__logos">
-            <span data-logo-pie="flame" className="bienvenida-logo-pie">
-              <ImagenMarca src={LOGOS_PIE.flame} alt="The Flame Creative Lab" alto={24} />
-            </span>
-            <span data-logo-pie="ucv" className="bienvenida-logo-pie bienvenida-logo-pie--sello">
-              <ImagenMarca src={LOGOS_PIE.ucv} alt="Universidad Central de Venezuela" alto={28} />
-            </span>
-            <span data-logo-pie="mun-ucv" className="bienvenida-logo-pie">
-              <ImagenMarca src={LOGOS_PIE.munUcv} alt="MUN UCV" alto={24} />
-            </span>
+            {(
+              [
+                ["flame", LOGOS_PIE.flame, "bienvenida-logo-pie bienvenida-logo-pie--flame"],
+                ["ucv", LOGOS_PIE.ucv, "bienvenida-logo-pie bienvenida-logo-pie--ucv"],
+                ["mun-ucv", LOGOS_PIE.munUcv, "bienvenida-logo-pie bienvenida-logo-pie--mun"],
+              ] as const
+            ).map(([nombre, logo, clase]) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={nombre}
+                src={logo.src}
+                alt={logo.alt}
+                width={logo.ancho}
+                height={logo.alto}
+                decoding="async"
+                // Sin precarga: no compiten con el arte de la pantalla 1.
+                loading="lazy"
+                data-logo-pie={nombre}
+                className={clase}
+              />
+            ))}
           </div>
         </footer>
       </div>

@@ -56,18 +56,20 @@ export const LOGO_AMARILLO: "blanco" | "navy" = "blanco";
 export const logoSobreAmarillo = () => (LOGO_AMARILLO === "blanco" ? LOGOS.blancoAro : LOGOS.navyAro);
 
 /**
- * Logos institucionales del pie de la bienvenida (v2.10.1).
+ * Logos de los aliados en el pie de la bienvenida (v2.10.1), servidos desde
+ * public/marca/pie (logos-pie-v2/final). Se escalan proporcionalmente y nada
+ * mas: no se deforman ni se recolorean. Ancho y alto son los del archivo, para
+ * reservar su proporcion antes de que carguen.
  *
- * PENDIENTE: la version navy de una sola tinta (public/marca/pie/*.webp, que
- * genera scripts/logos-pie.py) todavia no existe: hace falta tener los
- * archivos originales para revisarlos antes de recolorear (el Storage no fue
- * accesible al construir esto). Mientras tanto se sirven los del Storage.
- * Cuando esten las versiones navy, se cambian aqui las tres rutas y nada mas.
+ * - El sello de la UCV es un redibujo hecho con IA a partir del oficial, NO el
+ *   archivo oficial: falta la aprobacion de la UCV (o de Kevin) o el vector.
+ * - Flame y MUN UCV son ampliaciones 8x de fuentes pequeñas: se reemplazan con
+ *   el mismo nombre de archivo cuando lleguen los vectores.
  */
 export const LOGOS_PIE = {
-  flame: ASSETS.flame,
-  ucv: ASSETS.ucv,
-  munUcv: ASSETS.munUcv,
+  flame: { src: "/marca/pie/logo-flame.webp", ancho: 1488, alto: 432, alt: "The Flame Creative Lab" },
+  ucv: { src: "/marca/pie/logo-ucv.webp", ancho: 1024, alto: 1024, alt: "Universidad Central de Venezuela" },
+  munUcv: { src: "/marca/pie/logo-mun-ucv.webp", ancho: 1049, alto: 615, alt: "MUN UCV" },
 } as const;
 
 /*

@@ -668,60 +668,48 @@
   }
 
   /*
-   * Logos del pie (v2.10.1): una fila centrada, con altura optica pareja (el
-   * sello de la UCV es redondo y va mas alto que los wordmarks), 24px entre
-   * ellos y como mucho el 85% del ancho. Cada logo vive en una caja de alto
-   * fijo: si uno del Storage no carga, su texto de respaldo no empuja los
-   * botones hacia arriba.
+   * Logos del pie (v2.10.1): The Flame Creative Lab, sello de la UCV y MUN UCV
+   * (public/marca/pie), en ese orden, centrados como grupo y alineados al
+   * centro vertical. Alturas de partida: Flame 24, UCV 36, MUN 32 (el ancho
+   * sale de la proporcion de cada archivo; nunca se deforman). 24px entre
+   * logos. Si el grupo no cabe en el 85% del ancho, se escala entero: cada
+   * alto se limita a su parte de ese ancho (173.3 = suma de los anchos a
+   * escala 1). --escala-pie lo reduce en pantallas bajas.
    */
   .bienvenida-pie__logos {
-    --alto-sello: 28px;
-    --alto-wordmark: 24px;
+    --escala-pie: 1;
+    --sep-logos: 24px;
+    --ancho-grupo: calc(85vw - 2 * var(--sep-logos));
     display: flex;
-    height: var(--alto-sello);
     max-width: 85vw;
     align-items: center;
     justify-content: center;
-    gap: 24px;
-    overflow: hidden;
-    white-space: nowrap;
+    gap: var(--sep-logos);
   }
 
   .bienvenida-logo-pie {
-    display: flex;
-    height: var(--alto-wordmark);
-    min-width: 0;
-    flex-shrink: 1;
-    align-items: center;
+    display: block;
+    width: auto;
+    max-width: none;
+    flex: none;
+    object-fit: contain;
   }
 
-  .bienvenida-logo-pie--sello {
-    height: var(--alto-sello);
+  .bienvenida-logo-pie--flame {
+    height: min(calc(24px * var(--escala-pie)), calc(var(--ancho-grupo) * 24 / 173.3));
   }
 
-  /* El alto lo manda la caja (ImagenMarca pone el suyo en linea). */
-  .bienvenida-logo-pie img {
-    height: 100% !important;
-    max-width: 100%;
+  .bienvenida-logo-pie--ucv {
+    height: min(calc(36px * var(--escala-pie)), calc(var(--ancho-grupo) * 36 / 173.3));
   }
 
-  /* Si un logo no carga, ImagenMarca deja su nombre en texto: que se corte con
-     elipsis en su lugar y no se encime con los otros dos. */
-  .bienvenida-logo-pie {
-    overflow: hidden;
-  }
-
-  .bienvenida-logo-pie > span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .bienvenida-logo-pie--mun {
+    height: min(calc(32px * var(--escala-pie)), calc(var(--ancho-grupo) * 32 / 173.3));
   }
 
   @media (max-width: 359px) {
     .bienvenida-pie__logos {
-      --alto-sello: 22px;
-      --alto-wordmark: 22px;
-      gap: 16px;
+      --sep-logos: 16px;
     }
   }
 
@@ -736,10 +724,10 @@
     .bienvenida-pie__rotulo {
       display: none;
     }
-    /* Solo los logos, con el alto minimo. */
+    /* Solo los logos, un poco mas chicos para que puntos y botones no suban
+       mas de 12px. */
     .bienvenida-pie__logos {
-      --alto-sello: 22px;
-      --alto-wordmark: 22px;
+      --escala-pie: 0.9;
     }
   }
 
