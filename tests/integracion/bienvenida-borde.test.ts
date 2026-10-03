@@ -178,14 +178,49 @@ for (const [ancho, alto] of [
     await expect.poll(async () => (await logosPie(page)).every((l) => l.cargado)).toBe(true);
     const logos = await logosPie(page);
     expect(logos.map((l) => l.nombre)).toEqual(["flame", "ucv", "mun-ucv"]);
-    // Sin solaparse entre si, centrados como grupo y alineados al centro vertical.
+    // Sin solaparse entre si y alineados al centro vertical.
     expect(logos[0].der).toBeLessThanOrEqual(logos[1].izq);
     expect(logos[1].der).toBeLessThanOrEqual(logos[2].izq);
-    expect(Math.abs(logos[0].izq - (ancho - logos[2].der))).toBeLessThanOrEqual(1);
     for (const l of logos) expect(Math.abs(l.centro - logos[1].centro)).toBeLessThanOrEqual(0.5);
-    expect(logos[2].der - logos[0].izq).toBeLessThanOrEqual(ancho * 0.85 + 0.5);
-    // Separacion: 24px (16px por debajo de 360 de ancho).
-    expect(Math.round(logos[1].izq - logos[0].der)).toBe(ancho < 360 ? 16 : 24);
+    // El sello, en el centro exacto de la pantalla (grid 1fr / auto / 1fr), y
+    // a la misma distancia de Flame y de MUN aunque midan distinto.
+    expect(Math.abs((logos[1].izq + logos[1].der) / 2 - ancho / 2)).toBeLessThanOrEqual(1);
+    const huecoIzq = logos[1].izq - logos[0].der;
+    const huecoDer = logos[2].izq - logos[1].der;
+    expect(Math.abs(huecoIzq - huecoDer)).toBeLessThanOrEqual(1);
+    // Separacion: 24px (16px a 320 de ancho o menos).
+    expect(Math.round(huecoIzq)).toBe(ancho <= 320 ? 16 : 24);
+    // Los tres dentro del 85% del ancho, centrado en el eje: el lado mas
+    // ancho (Flame) es el que manda.
+    const mitad = Math.max(ancho / 2 - logos[0].izq, logos[2].der - ancho / 2);
+    expect(2 * mitad).toBeLessThanOrEqual(ancho * 0.85 + 0.5);
+    // Puntos, botones y rotulo, en el mismo eje que el sello.
+    const ejes = await page.evaluate(() => {
+      const centro = (el: Element) => {
+        const r = el.getBoundingClientRect();
+        return r.left + r.width / 2 - innerWidth / 2;
+      };
+      const rotulo = document.querySelector(".bienvenida-pie__rotulo")!;
+      let letras: number | null = null;
+      if (getComputedStyle(rotulo).display !== "none") {
+        // El centro de las letras, sin el letter-spacing que queda tras la ultima.
+        const rango = document.createRange();
+        rango.selectNodeContents(rotulo);
+        const cajas = Array.from(rango.getClientRects());
+        const espacio = parseFloat(getComputedStyle(rotulo).letterSpacing);
+        const izq = Math.min(...cajas.map((c) => c.left));
+        const der = Math.max(...cajas.map((c) => c.right)) - espacio;
+        letras = (izq + der) / 2 - innerWidth / 2;
+      }
+      const botones = document.querySelectorAll("[data-boton-deslizar]");
+      return {
+        puntos: centro(document.querySelector(".bienvenida-puntos")!),
+        b1: centro(botones[0]),
+        b2: centro(botones[1]),
+        letras,
+      };
+    });
+    for (const [k, v] of Object.entries(ejes)) if (v !== null) expect(Math.abs(v), k).toBeLessThanOrEqual(1);
     // Legibles: el wordmark de Flame, el mas bajo, nunca por debajo de 20px.
     expect(logos[0].alto).toBeGreaterThanOrEqual(20);
     if (alto >= 700) {

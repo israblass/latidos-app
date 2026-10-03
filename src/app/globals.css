@@ -664,27 +664,34 @@
     line-height: normal;
     font-weight: 600;
     letter-spacing: 0.18em;
+    /* El letter-spacing tambien queda despues de la ultima letra y corre el
+       texto a la izquierda: se compensa para que quede en el eje. */
+    margin-right: -0.18em;
     text-transform: uppercase;
   }
 
   /*
    * Logos del pie (v2.10.1): The Flame Creative Lab, sello de la UCV y MUN UCV
-   * (public/marca/pie), en ese orden, centrados como grupo y alineados al
-   * centro vertical. Alturas de partida: Flame 24, UCV 36, MUN 32 (el ancho
-   * sale de la proporcion de cada archivo; nunca se deforman). 24px entre
-   * logos. Si el grupo no cabe en el 85% del ancho, se escala entero: cada
-   * alto se limita a su parte de ese ancho (173.3 = suma de los anchos a
-   * escala 1). --escala-pie lo reduce en pantallas bajas.
+   * (public/marca/pie), en ese orden y alineados al centro vertical. Grid de
+   * tres columnas 1fr / auto / 1fr: las dos laterales miden lo mismo, asi que
+   * el sello queda en el centro exacto de la pantalla (en el eje de los
+   * botones y los puntos) y a la misma distancia de sus dos vecinos, aunque
+   * Flame sea mas ancho que MUN. Alturas de partida: Flame 24, UCV 36, MUN 32
+   * (el ancho sale de la proporcion de cada archivo; nunca se deforman). Si
+   * el grupo no cabe en el 85% del ancho, se escala entero: cada alto se
+   * limita a su parte de ese ancho (201.3 = 2 x Flame + UCV a escala 1, porque
+   * las columnas laterales miden lo que Flame). --escala-pie lo reduce en
+   * pantallas bajas.
    */
   .bienvenida-pie__logos {
     --escala-pie: 1;
     --sep-logos: 24px;
     --ancho-grupo: calc(85vw - 2 * var(--sep-logos));
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     max-width: 85vw;
     align-items: center;
-    justify-content: center;
-    gap: var(--sep-logos);
+    column-gap: var(--sep-logos);
   }
 
   .bienvenida-logo-pie {
@@ -696,18 +703,21 @@
   }
 
   .bienvenida-logo-pie--flame {
-    height: min(calc(24px * var(--escala-pie)), calc(var(--ancho-grupo) * 24 / 173.3));
+    justify-self: end;
+    height: min(calc(24px * var(--escala-pie)), calc(var(--ancho-grupo) * 24 / 201.3));
   }
 
   .bienvenida-logo-pie--ucv {
-    height: min(calc(36px * var(--escala-pie)), calc(var(--ancho-grupo) * 36 / 173.3));
+    justify-self: center;
+    height: min(calc(36px * var(--escala-pie)), calc(var(--ancho-grupo) * 36 / 201.3));
   }
 
   .bienvenida-logo-pie--mun {
-    height: min(calc(32px * var(--escala-pie)), calc(var(--ancho-grupo) * 32 / 173.3));
+    justify-self: start;
+    height: min(calc(32px * var(--escala-pie)), calc(var(--ancho-grupo) * 32 / 201.3));
   }
 
-  @media (max-width: 359px) {
+  @media (max-width: 320px) {
     .bienvenida-pie__logos {
       --sep-logos: 16px;
     }
