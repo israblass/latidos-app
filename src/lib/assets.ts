@@ -55,6 +55,21 @@ export const LOGO_AMARILLO: "blanco" | "navy" = "blanco";
 
 export const logoSobreAmarillo = () => (LOGO_AMARILLO === "blanco" ? LOGOS.blancoAro : LOGOS.navyAro);
 
+/**
+ * Logos institucionales del pie de la bienvenida (v2.10.1).
+ *
+ * PENDIENTE: la version navy de una sola tinta (public/marca/pie/*.webp, que
+ * genera scripts/logos-pie.py) todavia no existe: hace falta tener los
+ * archivos originales para revisarlos antes de recolorear (el Storage no fue
+ * accesible al construir esto). Mientras tanto se sirven los del Storage.
+ * Cuando esten las versiones navy, se cambian aqui las tres rutas y nada mas.
+ */
+export const LOGOS_PIE = {
+  flame: ASSETS.flame,
+  ucv: ASSETS.ucv,
+  munUcv: ASSETS.munUcv,
+} as const;
+
 /*
  * Assets de marca que ya estan en public/assets pero todavia no tienen pantalla
  * donde vivir. Se anotan aqui para que no se pierdan de vista al construir las
