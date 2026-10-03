@@ -286,6 +286,34 @@ recolorear (debe dar 0). Si cambia el logo oficial, reemplaza
 variante va sobre el amarillo pleno lo decide `LOGO_AMARILLO` en
 `src/lib/assets.ts` (`"blanco"` hoy; `"navy"` para mas contraste).
 
+### Logos del pie de la bienvenida (v2.10.1)
+
+El pie de la bienvenida lleva los logos de The Flame Creative Lab, la UCV y MUN
+UCV en navy (`#1A2332`) de una sola tinta, para que se lean sobre el crema. Se
+generan con un script versionado; no se redibujan ni se estiran:
+
+```bash
+pip install pillow
+# 1. Copiar los originales del bucket a recursos/marca/pie/:
+#    flame-logo.png -> flame.png, Logo-UCV.png -> ucv.png,
+#    Logo-MUN-UCV.png -> mun-ucv.png
+# 2. Generar
+python3 scripts/logos-pie.py
+```
+
+Si el archivo tiene transparencia, conserva el alfa y pinta todo de navy; si
+trae fondo opaco, usa la distancia al color de las esquinas como mascara (y se
+niega si las esquinas no coinciden). Escribe `public/marca/pie/<nombre>-navy.webp`
+y `.png` (3x de 24px, o 28px el sello de la UCV) y una vista a zoom en
+`recursos/marca/pie/revision/` para revisar bordes. Revisar sobre todo el sello
+de la UCV: si en navy se vuelve una mancha, no usarlo y dejar el original con
+aro blanco. Despues, cambiar las tres rutas de `LOGOS_PIE` en
+`src/lib/assets.ts` y subir la version del service worker.
+
+**Pendiente:** los originales no se pudieron descargar en el entorno donde se
+construyo esto (el Storage estaba bloqueado por la red), asi que hoy `LOGOS_PIE`
+sigue apuntando a los del Storage, ya en el tamaño y el espaciado nuevos.
+
 ## Escaneo de QR
 
 Al enfocar un codigo valido, la app lleva a la pantalla de confirmacion, que
@@ -556,6 +584,13 @@ en Chromium. En un iPhone real, con Safari y con la app instalada, revisar:
       botones; el boton de instalar de la esquina no tapa el logo.
 - [ ] **Alturas bajas** (iPhone SE): los dos botones y el pie se ven sin
       desplazar la pantalla.
+
+### Bienvenida en iPhone: borde superior y pie (v2.10.1)
+
+- [ ] Abrir la PWA instalada y comprobar que no hay linea dura bajo la
+      hora/bateria en las 4 slides.
+- [ ] La hora y la bateria se leen sobre el arte de las 4 slides.
+- [ ] Los tres logos del pie se leen con claridad sobre el crema.
 
 ## Cambios de design system no reflejados en la constitution
 
