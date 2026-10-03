@@ -266,6 +266,26 @@ el componente cae al texto del `alt`: se pierde el arte, nunca el contenido.
 Los iconos de PWA (`public/icon-*.png`) NO salen de este bucket; se generan
 aparte.
 
+### Logos de la bienvenida
+
+La bienvenida (`/`) usa variantes del logo con un aro blanco alrededor del sello
+UCV, servidas desde `public/marca/` (no del bucket). Se generan con un script
+versionado a partir del logo oficial guardado en `recursos/marca/`:
+
+```bash
+pip install pillow
+python3 scripts/logo-variantes.py
+```
+
+Genera `logo-latidos-aro`, `logo-latidos-blanco-aro` y `logo-latidos-navy-aro`
+(webp y png de respaldo, 416 x 156). El script separa el wordmark del sello por
+la forma real del sello (el amarillo con sus huecos rellenos), no por un
+circulo, e imprime cuantos pixeles azules quedan fuera del sello tras
+recolorear (debe dar 0). Si cambia el logo oficial, reemplaza
+`recursos/marca/logo-latidos-ucv-oficial.png` y vuelve a correrlo. Que
+variante va sobre el amarillo pleno lo decide `LOGO_AMARILLO` en
+`src/lib/assets.ts` (`"blanco"` hoy; `"navy"` para mas contraste).
+
 ## Escaneo de QR
 
 Al enfocar un codigo valido, la app lleva a la pantalla de confirmacion, que
@@ -516,6 +536,26 @@ telefono de verdad. Estan marcadas como PARCIAL en `criterios-aceptacion.test.ts
 - **Criterio 13 — permiso de camara.** Se comprueba que la app llama a
   `getUserMedia`, que es lo que dispara el dialogo; el dialogo lo pinta el
   sistema operativo y no se ve desde una prueba.
+
+### Bienvenida en iPhone Safari (v2.10.0)
+
+WebKit no esta disponible en el entorno de pruebas: todo lo automatizado corre
+en Chromium. En un iPhone real, con Safari y con la app instalada, revisar:
+
+- [ ] **Vidrio de los dos botones.** "Registrarme" (amarillo) y "Ya tengo
+      cuenta" (blanco) con borde brillante, reflejo arriba y sombra. Sobre crema
+      liso el desenfoque no se nota: es lo esperado. La etiqueta se lee bien.
+- [ ] **Swipe vs. arrastre.** Deslizar el carrusel con el dedo cambia de
+      pantalla y no activa ningun boton. Arrastrar el circulo de un boton no
+      mueve el carrusel ni el otro boton; pasado el ~82% abre la pantalla y
+      antes regresa. Un toque tambien abre.
+- [ ] **Safe area.** El logo no queda bajo la barra de estado ni la muesca, y
+      el pie no queda bajo la barra de inicio del iPhone.
+- [ ] **Fuentes.** Titular en DM Sans fina y negrita, sin saltos al cargar.
+- [ ] **Prompt de instalacion.** El modal de iOS se cierra y deja usar los
+      botones; el boton de instalar de la esquina no tapa el logo.
+- [ ] **Alturas bajas** (iPhone SE): los dos botones y el pie se ven sin
+      desplazar la pantalla.
 
 ## Cambios de design system no reflejados en la constitution
 

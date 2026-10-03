@@ -18,7 +18,16 @@ import { usePlataforma } from "@/hooks/use-plataforma";
  * queda un boton discreto, siempre disponible, para quien quiera instalar
  * despues.
  */
-export function PromptsInstalacion() {
+export function PromptsInstalacion({
+  ubicacion = "en-linea",
+}: {
+  /**
+   * "en-linea": donde se ponga, en el flujo. "arriba" (bienvenida, v2.10.0):
+   * el aviso de Android flota arriba y el boton para reabrirlo es un icono en
+   * la esquina, para no chocar con el logo ni con los botones fijos de abajo.
+   */
+  ubicacion?: "en-linea" | "arriba";
+} = {}) {
   const { plataforma, esStandalone, listo } = usePlataforma();
   const [visible, setVisible] = useState(false);
 
@@ -37,10 +46,39 @@ export function PromptsInstalacion() {
 
   if (visible) {
     if (plataforma === "ios") return <PromptIOS onCerrar={cerrar} />;
-    if (plataforma === "android") return <PromptAndroid onCerrar={cerrar} />;
     // En escritorio Chrome tambien dispara beforeinstallprompt, y el banner
     // sirve igual.
-    return <PromptAndroid onCerrar={cerrar} />;
+    const android = <PromptAndroid onCerrar={cerrar} />;
+    return ubicacion === "arriba" ? (
+      <div className="fixed inset-x-4 top-[max(12px,env(safe-area-inset-top))] z-40 mx-auto max-w-md">{android}</div>
+    ) : (
+      android
+    );
+  }
+
+  if (ubicacion === "arriba") {
+    return (
+      <button
+        type="button"
+        onClick={() => setVisible(true)}
+        aria-label="Instalar la app"
+        className="fixed right-1 top-[max(6px,env(safe-area-inset-top))] z-30 flex h-12 w-12 items-center justify-center rounded-full text-texto-secundario outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-secundario"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
+        </svg>
+      </button>
+    );
   }
 
   return (

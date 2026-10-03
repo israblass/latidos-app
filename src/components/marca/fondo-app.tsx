@@ -1,9 +1,9 @@
 /**
  * El cielo de la marca, como lienzo detras del contenido.
  *
- * Solo va donde la marca tiene que lucirse (constitution §2, v2.6.0): la
- * bienvenida y el onboarding. El Inicio usa un degradado de marca en CSS
- * (`.fondo-inicio`) y el resto de la app es crema solido (`--color-fondo`).
+ * Solo va en el onboarding (constitution §2, v2.10.0). La bienvenida y el
+ * Inicio usan el degradado de marca en CSS (`.fondo-inicio`) y el resto de la
+ * app es crema solido (`--color-fondo`).
  *
  * Son tres capas apiladas:
  *

@@ -53,7 +53,8 @@ const clavesDeBeats = (page: Page) =>
 test.describe("entrar", () => {
   test("la bienvenida lleva a Entrar con 'Ya tengo cuenta'", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Ya tengo cuenta" }).click();
+    // v2.10.0: boton de deslizar; un toque tambien lleva.
+    await page.getByRole("button", { name: /^Ya tengo cuenta\./ }).click();
     await page.waitForURL("**/entrar");
     await expect(page.getByRole("heading", { name: "Entrar", level: 1 })).toBeVisible();
     // Y desde Entrar se puede ir a crear una cuenta.
@@ -180,7 +181,7 @@ test.describe("perfil", () => {
   test("sin sesion, Perfil vuelve a la bienvenida", async ({ page }) => {
     await page.goto("/perfil");
     await page.waitForURL((url) => url.pathname === "/");
-    await expect(page.getByRole("link", { name: "Ya tengo cuenta" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Ya tengo cuenta\./ })).toBeVisible();
   });
 
   test("el tab Perfil lleva al correo de la persona y al boton de cerrar sesion", async ({ page }) => {
@@ -351,7 +352,7 @@ test.describe("cerrar sesion", () => {
     await expect(numeroDeBeats(page)).toBeVisible();
 
     const copia = await page.evaluate(async () => {
-      const cache = await caches.open("latidos-shell-v10");
+      const cache = await caches.open("latidos-shell-v11");
       const respuesta = await cache.match("/beats");
       return respuesta ? respuesta.text() : null;
     });
@@ -360,7 +361,7 @@ test.describe("cerrar sesion", () => {
     expect(copia).not.toContain(datos.nombre);
     // Y ninguna otra respuesta guardada es una pantalla con sesion.
     const guardadas = await page.evaluate(async () =>
-      (await (await caches.open("latidos-shell-v10")).keys()).map((r) => new URL(r.url).pathname),
+      (await (await caches.open("latidos-shell-v11")).keys()).map((r) => new URL(r.url).pathname),
     );
     expect(guardadas.filter((ruta) => /^\/(inicio|perfil|onboarding|escanear|api|auth)/.test(ruta))).toEqual([]);
   });

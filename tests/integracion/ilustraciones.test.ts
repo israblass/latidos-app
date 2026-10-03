@@ -13,7 +13,7 @@ import { cortarRed, volverRed } from "../ayudantes/red";
  */
 test.beforeEach(reiniciarMock);
 
-const CACHE_SW = "latidos-shell-v10";
+const CACHE_SW = "latidos-shell-v11";
 const SIN_SENAL = "/ilustraciones/latido-ecg-ruido.webp";
 
 /** Imagenes de la pagina que no cargaron. */
@@ -31,7 +31,7 @@ const fuentes = (page: Page) =>
 async function esperarServiceWorker(page: Page) {
   await page.evaluate(() => navigator.serviceWorker.ready);
   await expect
-    .poll(() => page.evaluate(async () => Boolean(await (await caches.open("latidos-shell-v10")).match("/ilustraciones/latido-ecg-ruido.webp"))))
+    .poll(() => page.evaluate(async () => Boolean(await (await caches.open("latidos-shell-v11")).match("/ilustraciones/latido-ecg-ruido.webp"))))
     .toBe(true);
 }
 
@@ -117,7 +117,7 @@ test("la ilustracion de la pantalla de error se sirve sin red", async ({ page, c
   await volverRed(context);
 });
 
-test("lo precacheado de ilustraciones no pasa de 400 KB y es solo la de sin señal", async ({ page }) => {
+test("lo precacheado de ilustraciones no pasa de 400 KB: la de sin señal y las de la pantalla 1 de la bienvenida", async ({ page }) => {
   await page.goto("/");
   await esperarServiceWorker(page);
   const precacheadas = await page.evaluate(async (nombre) => {
@@ -131,8 +131,21 @@ test("lo precacheado de ilustraciones no pasa de 400 KB y es solo la de sin señ
     }
     return salida;
   }, CACHE_SW);
-  expect(precacheadas.map((p) => p.ruta)).toEqual([SIN_SENAL]);
-  expect(precacheadas.reduce((t, p) => t + p.bytes, 0)).toBeLessThanOrEqual(400 * 1024);
+  // v2.10.0 (service worker v11): ademas de la de sin señal, el arte de la
+  // primera pintura de la bienvenida. Las pantallas 2 a 4 se guardan en uso.
+  // La precarga en reposo de la pantalla 2 puede guardar su arte en uso si el
+  // service worker ya controla la pagina: eso no es precache y no cuenta.
+  const enUso = ["/ilustraciones/estadio-ucv.webp", "/ilustraciones/parlante-corazones.webp"];
+  const soloPrecache = precacheadas.filter((p) => !enUso.includes(p.ruta));
+  expect(soloPrecache.map((p) => p.ruta).sort()).toEqual(
+    [
+      SIN_SENAL,
+      "/ilustraciones/circulos-pulso-bienvenida.webp",
+      "/ilustraciones/corazon-latido-bienvenida.webp",
+      "/ilustraciones/ecg-pulso-ancho.webp",
+    ].sort(),
+  );
+  expect(soloPrecache.reduce((t, p) => t + p.bytes, 0)).toBeLessThanOrEqual(400 * 1024);
   // Y la cache vieja del service worker anterior no queda.
   const nombres = await page.evaluate(() => caches.keys());
   expect(nombres.filter((n) => n.startsWith("latidos-") && n !== CACHE_SW)).toEqual([]);

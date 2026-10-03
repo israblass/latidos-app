@@ -316,6 +316,22 @@
     background: rgba(0, 144, 255, 0.1);
   }
 
+  /* Vidrio (v2.10.0): la pista la pinta .vidrio; aqui el texto, el circulo
+     y el tinte que se llena al arrastrar. */
+  .deslizar--vidrio-amarillo,
+  .deslizar--vidrio-blanco {
+    @apply text-texto-principal;
+  }
+  .deslizar--vidrio-amarillo .deslizar__relleno {
+    background: rgba(26, 35, 50, 0.1);
+  }
+  .deslizar--vidrio-blanco .deslizar__circulo {
+    @apply bg-texto-principal text-texto-inverso;
+  }
+  .deslizar--vidrio-blanco .deslizar__relleno {
+    background: rgba(0, 144, 255, 0.1);
+  }
+
   /* Destello que recorre la etiqueta: solo si la persona no pidio menos
      movimiento, y se apaga mientras arrastra. */
   @media (prefers-reduced-motion: no-preference) {
@@ -327,7 +343,9 @@
       animation: destello-deslizar 2.8s ease-in-out infinite;
     }
     .deslizar--amarillo .deslizar__etiqueta span,
-    .deslizar--blanco .deslizar__etiqueta span {
+    .deslizar--blanco .deslizar__etiqueta span,
+    .deslizar--vidrio-amarillo .deslizar__etiqueta span,
+    .deslizar--vidrio-blanco .deslizar__etiqueta span {
       background-image: linear-gradient(
         100deg,
         rgba(26, 35, 50, 1) 35%,
@@ -357,6 +375,290 @@
     60%,
     100% {
       background-position: -60% 0;
+    }
+  }
+
+  /*
+   * Bienvenida inmersiva (constitution §2, v2.10.0). Medidas de la referencia
+   * a 390 x 844. El texto y el dock (puntos, botones y pie) guardan su tamaño
+   * y se anclan abajo; el arte absorbe la diferencia de alto.
+   *
+   * --reserva: distancia del borde de abajo al texto (844 - 408 = 436).
+   * --lienzo: ancho del lienzo del arte, 390 * k, con
+   *   k = clamp(.5, min(ancho / 390, (alto - 432) / 430), 1.15).
+   * Va en CSS (unidades de contenedor) y no en JavaScript: sin saltos en la
+   * primera pintura.
+   */
+  .bienvenida {
+    --reserva: 436px;
+    --top-logo: max(54px, calc(env(safe-area-inset-top, 0px) + 16px));
+    --tam-titulo: 48px;
+    --lienzo: clamp(195px, min(100vw, calc((100vh - 432px) * 390 / 430)), 448.5px);
+    position: relative;
+    isolation: isolate;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  @supports (height: 100dvh) {
+    .bienvenida {
+      --lienzo: clamp(195px, min(100vw, calc((100dvh - 432px) * 390 / 430)), 448.5px);
+    }
+  }
+
+  .bienvenida-carrusel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    outline: none;
+  }
+
+  .bienvenida-carrusel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bienvenida-carrusel:focus-visible {
+    box-shadow: inset 0 0 0 3px theme("colors.secundario");
+  }
+
+  .bienvenida-pantalla {
+    position: relative;
+    flex: 0 0 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* Campo de color arriba, desvanecido hacia el crema. Las mascaras solo usan
+     el alfa (blanco, de la paleta). */
+  .bienvenida-campo {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: calc(var(--lienzo) * 430 / 390);
+    -webkit-mask-image: linear-gradient(180deg, #fff 0, #fff 62%, transparent 100%);
+    mask-image: linear-gradient(180deg, #fff 0, #fff 62%, transparent 100%);
+  }
+
+  .campo-azul {
+    background: rgba(0, 144, 255, 0.22);
+  }
+  .campo-amarillo {
+    @apply bg-primario;
+  }
+  .campo-amarillo-suave {
+    background: rgba(253, 251, 5, 0.34);
+  }
+
+  .bienvenida-arte {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: calc(var(--lienzo) * 430 / 390);
+    overflow: hidden;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(180deg, #fff 0, #fff 60%, transparent 100%);
+    mask-image: linear-gradient(180deg, #fff 0, #fff 60%, transparent 100%);
+  }
+
+  /* El lienzo de 390 x 430, escalado: --u es 1px de la referencia. */
+  .bienvenida-lienzo {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: var(--lienzo);
+    aspect-ratio: 390 / 430;
+    transform: translateX(-50%);
+    container-type: inline-size;
+  }
+
+  .bienvenida-lienzo > img {
+    --u: calc(100cqw / 390);
+  }
+
+  .bienvenida-logo {
+    position: absolute;
+    top: var(--top-logo);
+    left: 50%;
+    z-index: 1;
+    width: auto;
+    height: 52px;
+    transform: translateX(-50%);
+  }
+
+  .bienvenida-texto {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: calc(100% - var(--reserva) - env(safe-area-inset-bottom, 0px));
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .bienvenida-eyebrow {
+    @apply text-texto-secundario;
+    font-size: 12px;
+    line-height: normal;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .bienvenida-titulo {
+    @apply text-texto-principal;
+    margin-top: 10px;
+    font-size: var(--tam-titulo);
+    font-weight: 300;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+
+  .bienvenida-titulo b {
+    display: block;
+    font-weight: 700;
+  }
+
+  .bienvenida-sub {
+    @apply text-texto-secundario;
+    margin-top: 14px;
+    max-width: 290px;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  /*
+   * Dock fijo. Medidas de la referencia (desde arriba a 844): puntos en 608,
+   * Registrarme en 634, Ya tengo cuenta en 710 y el pie a 22 del borde. Solo
+   * lo tocable recibe toques: el resto deja pasar el swipe al carrusel.
+   */
+  .bienvenida-dock {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px calc(22px + env(safe-area-inset-bottom, 0px));
+    pointer-events: none;
+  }
+
+  .bienvenida-dock > * {
+    pointer-events: auto;
+  }
+
+  .bienvenida-puntos {
+    display: flex;
+    /* La fila mide 48px de alto (area tactil, el minimo de la constitucion);
+       el margen negativo deja los puntos de 8px donde van en la referencia. */
+    margin: -20px 0 -2px;
+  }
+
+  /* Cada boton mide 48px de alto y, de ancho, lo que su punto + 8px de
+     separacion, como en la referencia: los botones quedan contiguos y sin
+     solaparse, y toda la fila responde al toque. */
+  .bienvenida-punto {
+    display: flex;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border-radius: 9999px;
+    outline: none;
+  }
+
+  .bienvenida-punto:focus-visible > span {
+    box-shadow: 0 0 0 2px theme("colors.secundario");
+  }
+
+  .bienvenida-punto > span {
+    display: block;
+    height: 8px;
+    width: 8px;
+    border-radius: 9999px;
+    background: rgba(26, 35, 50, 0.22);
+    transition: width 0.25s ease-out, background-color 0.25s ease-out;
+  }
+
+  .bienvenida-punto > span.activo {
+    width: 24px;
+    @apply bg-texto-principal;
+  }
+
+  .bienvenida-boton {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .bienvenida-puntos + .bienvenida-boton {
+    margin-top: 0;
+  }
+
+  .bienvenida-boton--secundario {
+    width: 228px;
+    margin-top: 12px;
+    font-size: 16px;
+  }
+
+  .bienvenida-pie {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .bienvenida-pie__rotulo {
+    @apply text-texto-secundario;
+    font-size: 10.5px;
+    line-height: normal;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Alto fijo: si un logo del Storage no carga, su texto de respaldo no
+     puede empujar los botones hacia arriba. */
+  .bienvenida-pie__logos {
+    display: flex;
+    height: 16px;
+    max-width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* Alturas bajas: el logo sube, el titular baja a 42px y el pie se queda
+     solo con los logos. */
+  @media (max-height: 699px) {
+    .bienvenida {
+      --reserva: 410px;
+      --top-logo: max(36px, calc(env(safe-area-inset-top, 0px) + 12px));
+      --tam-titulo: 42px;
+    }
+    .bienvenida-pie__rotulo {
+      display: none;
+    }
+  }
+
+  /* 320 x 568 y parecidos: titular de 38px y los dos botones de 56px. */
+  @media (max-height: 599px) {
+    .bienvenida {
+      --reserva: 400px;
+      --tam-titulo: 38px;
+    }
+    .bienvenida-dock .deslizar {
+      --alto: 56px;
+      --circulo: 44px;
+      --pad: 6px;
     }
   }
 
@@ -566,9 +868,9 @@
    * tests/integracion/diseno.test.ts). Es CSS puro: sin WebGL ni filtros SVG
    * de refraccion, que no funcionan en Safari iOS y pesan.
    *
-   * - .vidrio        piezas sueltas sobre el cielo o el degradado (tarjeta de
-   *                  Beats del Inicio, card de la bienvenida, titulo del
-   *                  onboarding).
+   * - .vidrio        piezas sueltas sobre el cielo o el degradado (tarjetas de
+   *                  Beats del Inicio y de Beats, titulo del onboarding y los
+   *                  botones de deslizar de la bienvenida).
    * - .vidrio-barra  el menu inferior: una pildora flotante por la que el
    *                  contenido pasa por debajo (tinte 0.85).
    * - .vidrio-hoja   hojas inferiores (tinte 0.85): llevan texto
@@ -587,9 +889,9 @@
    * solo cambia la opacidad del tinte (arriba -> abajo).
    *
    * Opacidades minimas por contraste (AA 4.5:1 en el PEOR caso):
-   * - .vidrio va sobre el cielo (bienvenida, onboarding) o el degradado del
-   *   Inicio (tarjeta de Beats): su peor caso es el pixel mas oscuro del cielo
-   *   con su velo, y ahi el tinte 0.62 -> 0.48 alcanza.
+   * - .vidrio va sobre el cielo del onboarding o el degradado de marca
+   *   (tarjetas de Beats, botones de la bienvenida): su peor caso es el pixel
+   *   mas oscuro del cielo con su velo, y ahi el tinte 0.62 -> 0.48 alcanza.
    * - .vidrio-barra y .vidrio-hoja pueden tener cualquier cosa debajo; se
    *   calcula sobre negro puro. Desde la v2.7.0 (principio de paleta) su gris
    *   es el secundario #565E6D y no el #4A5160 que se usaba solo aqui: pide
@@ -628,6 +930,23 @@
     --vidrio-tinte-arriba: rgba(255, 255, 255, 0.85);
     --vidrio-tinte-abajo: rgba(255, 255, 255, 0.85);
     border-radius: theme("borderRadius.sheet") theme("borderRadius.sheet") 0 0;
+  }
+
+  /*
+   * Botones de deslizar de vidrio (v2.10.0; bienvenida). El control lleva
+   * .vidrio (la receta: filtro, borde, sombra, reflejo y canto) y el
+   * modificador solo cambia el tinte, igual que .vidrio-barra y .vidrio-hoja.
+   * Sin overflow hidden: recortaria el canto especular, que sobresale 1px.
+   */
+  .deslizar.deslizar--vidrio {
+    border-radius: 9999px;
+    overflow: visible;
+  }
+
+  /* Tinte amarillo de la paleta: el minimo da AA de sobra con el navy. */
+  .deslizar--vidrio-amarillo {
+    --vidrio-tinte-arriba: rgba(253, 251, 5, 0.92);
+    --vidrio-tinte-abajo: rgba(253, 251, 5, 0.82);
   }
 
   /*
@@ -710,6 +1029,11 @@
       --vidrio-tinte-arriba: rgba(255, 255, 255, 0.92);
       --vidrio-tinte-abajo: rgba(255, 255, 255, 0.92);
     }
+    /* El boton amarillo de vidrio sigue amarillo, casi solido. */
+    .deslizar--vidrio-amarillo {
+      --vidrio-tinte-arriba: rgba(253, 251, 5, 0.96);
+      --vidrio-tinte-abajo: rgba(253, 251, 5, 0.96);
+    }
   }
 
   /* Quien pidio menos transparencia recibe blanco solido, sin desenfoque. */
@@ -721,6 +1045,11 @@
       --vidrio-tinte-abajo: #ffffff;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
+    }
+    /* El boton amarillo de vidrio pasa a amarillo solido. */
+    .deslizar--vidrio-amarillo {
+      --vidrio-tinte-arriba: #fdfb05;
+      --vidrio-tinte-abajo: #fdfb05;
     }
   }
 

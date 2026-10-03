@@ -1,82 +1,24 @@
-import Link from "next/link";
-
+import { CarruselBienvenida } from "@/components/bienvenida/carrusel-bienvenida";
 import { PromptsInstalacion } from "@/components/instalacion/prompts-instalacion";
-import { FondoApp } from "@/components/marca/fondo-app";
-import { ImagenMarca } from "@/components/marca/imagen-marca";
-import { BarraAcento } from "@/components/marca/titulo-con-acento";
-import { ASSETS } from "@/lib/assets";
 
 /**
- * Pantalla de bienvenida (T018).
+ * Pantalla de bienvenida (T018; constitution §2, v2.10.0).
  *
  * Es la misma sin importar de donde venga la persona: QR fisico, link de
- * WhatsApp, campaña o la web informativa (spec §10 suposicion 1). Sobre ella
- * aparece el prompt de instalacion, que nunca bloquea nada.
+ * WhatsApp, campaña o la web informativa (spec §10 suposicion 1). Un carrusel
+ * de cuatro pantallas con ilustraciones grandes sobre el degradado de marca
+ * (sin el cielo de foto ni la card de vidrio de antes) y, fijos abajo, los dos
+ * botones de deslizar: Registrarme y Ya tengo cuenta.
  *
- * El logotipo es el arte oficial servido desde el Storage compartido con la
- * web. El amarillo entra como acento bajo el logo: el unico bloque amarillo
- * grande de la pantalla es el CTA, para que la jerarquia quede clara.
+ * El prompt de instalacion nunca bloquea nada: va arriba, como aviso flotante,
+ * para no chocar con los botones.
  */
 export default function Home() {
   return (
-    <>
-      {/* Bienvenida: una de las pantallas con el cielo de la marca. Va fuera del
-        <main>: la animacion de entrada le da un transform, y un hijo fijo se
-        mediria contra el y no contra la pantalla. */}
-      <FondoApp />
-      <main className="flex min-h-dvh flex-col px-5 pb-8 pt-16">
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <div className="vidrio flex w-full flex-col items-center px-6 py-12">
-            {/* El logo es el titulo de la pantalla: dentro de un h1, su texto
-              alternativo es lo que anuncia un lector de pantalla al entrar. */}
-            <h1>
-              <ImagenMarca
-                src={ASSETS.latidosHero}
-                alt="Latidos"
-                alto={96}
-                prioritaria
-              />
-            </h1>
-            <BarraAcento className="mt-5" />
-          </div>
-
-          <p className="mt-8 max-w-[17rem] text-texto-secundario">
-            Participa, suma Beats y canjea recompensas del programa Latidos UCV.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Link href="/registro/paso-1" className="boton-primario">
-            Registrarme
-          </Link>
-
-          <Link href="/entrar" className="boton-ghost">
-            Ya tengo cuenta
-          </Link>
-
-          <PromptsInstalacion />
-        </div>
-
-        {/* Credito institucional: los tres organizadores del programa. */}
-        <footer className="mt-8 flex flex-col items-center gap-3">
-          <p className="etiqueta">Un programa de</p>
-          {/* Se envuelve para que en pantallas angostas los tres logos bajen de
-            linea en vez de encogerse hasta volverse ilegibles. */}
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-            <ImagenMarca
-              src={ASSETS.flame}
-              alt="The Flame Creative Lab"
-              alto={28}
-            />
-            <ImagenMarca
-              src={ASSETS.ucv}
-              alt="Universidad Central de Venezuela"
-              alto={32}
-            />
-            <ImagenMarca src={ASSETS.munUcv} alt="MUN UCV" alto={32} />
-          </div>
-        </footer>
-      </main>
-    </>
+    <main className="bienvenida">
+      <div aria-hidden="true" className="fondo-inicio" />
+      <CarruselBienvenida />
+      <PromptsInstalacion ubicacion="arriba" />
+    </main>
   );
 }

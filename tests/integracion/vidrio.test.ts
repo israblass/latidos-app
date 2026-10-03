@@ -58,10 +58,17 @@ async function comprobar(page: Page, nombre: string, l: Locator, conEfecto = tru
   if (conEfecto) expect(await desenfocaDeVerdad(page, l), `${nombre}: el filtro no cambia nada`).toBe(true);
 }
 
-test("bienvenida y onboarding: el vidrio desenfoca el cielo", async ({ page }) => {
+test("bienvenida: los dos botones de deslizar llevan la receta; onboarding: el vidrio desenfoca el cielo", async ({ page }) => {
+  // v2.10.0: la bienvenida ya no tiene cielo ni card de vidrio. El vidrio
+  // son los dos botones de deslizar, sobre crema liso: llevan la receta
+  // entera, pero ahi el desenfoque no tiene nada que mostrar (aceptado por
+  // Isra), asi que no se exige diferencia visible.
   await page.goto("/");
   await page.waitForTimeout(600);
-  await comprobar(page, "bienvenida", page.locator("main .vidrio").first());
+  const botones = page.locator("main .deslizar.vidrio");
+  await expect(botones).toHaveCount(2);
+  await comprobar(page, "Registrarme", botones.nth(0), false);
+  await comprobar(page, "Ya tengo cuenta", botones.nth(1), false);
 
   await completarRegistro(page);
   await confirmarCorreo(page);

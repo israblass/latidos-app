@@ -28,6 +28,33 @@ export const ASSETS = {
 
 export type ClaveAsset = keyof typeof ASSETS;
 
+/**
+ * Variantes del logo para la bienvenida (constitution §2, v2.10.0), servidas
+ * desde public/marca y generadas con scripts/logo-variantes.py a partir del
+ * logo oficial (recursos/marca). Todas llevan un aro blanco detras del sello
+ * UCV. 416 x 156 (3x de los 52px con que se muestran).
+ */
+export const LOGOS = {
+  /** Oficial (wordmark azul) con aro: pantallas 1, 3 y 4. */
+  aro: { src: "/marca/logo-latidos-aro.webp", respaldo: "/marca/logo-latidos-aro.png" },
+  /** Wordmark blanco con aro: sobre el amarillo pleno de la pantalla 2. */
+  blancoAro: { src: "/marca/logo-latidos-blanco-aro.webp", respaldo: "/marca/logo-latidos-blanco-aro.png" },
+  /** Wordmark navy con aro: alternativa para el amarillo pleno. */
+  navyAro: { src: "/marca/logo-latidos-navy-aro.webp", respaldo: "/marca/logo-latidos-navy-aro.png" },
+} as const;
+
+export const ANCHO_LOGO = 416;
+export const ALTO_LOGO = 156;
+
+/**
+ * Wordmark sobre el amarillo pleno (pantalla 2 de la bienvenida). Pedido de
+ * Isra: blanco. Ojo: blanco sobre #FDFB05 da ~1.06:1; se lee por tamaño, no
+ * por contraste. Para pasar a navy (~15:1) basta con cambiar esta constante.
+ */
+export const LOGO_AMARILLO: "blanco" | "navy" = "blanco";
+
+export const logoSobreAmarillo = () => (LOGO_AMARILLO === "blanco" ? LOGOS.blancoAro : LOGOS.navyAro);
+
 /*
  * Assets de marca que ya estan en public/assets pero todavia no tienen pantalla
  * donde vivir. Se anotan aqui para que no se pierdan de vista al construir las
