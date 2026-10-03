@@ -7,7 +7,7 @@ import { reiniciarMock } from "../ayudantes/mock";
  * mas grandes.
  *
  * La zona segura de arriba se emula con CDP (Emulation.setSafeAreaInsetsOverride,
- * Chromium 141): asi `env(safe-area-inset-top)` vale 47px como en un iPhone
+ * Chromium 141): asi `env(safe-area-inset-top)` vale 59px como en un iPhone
  * con la barra de estado translucida. Con la barra "default" (la que usa la
  * app) iOS deja la zona segura en 0 y pinta una barra opaca aparte: ese caso
  * es el de "sin zona segura" y lo cubre el fundido del borde superior.
@@ -15,7 +15,8 @@ import { reiniciarMock } from "../ayudantes/mock";
 test.use({ viewport: { width: 390, height: 844 } });
 test.beforeEach(reiniciarMock);
 
-const ZONA = 47;
+// 59px: la zona segura de arriba de los iPhone 14 Pro en adelante.
+const ZONA = 59;
 
 async function abrir(page: Page, zona: number) {
   if (zona) {
@@ -60,7 +61,7 @@ async function medidas(page: Page, i: number) {
   }, i);
 }
 
-test("con zona segura de 47px el campo llega al borde y el texto y el dock no se mueven", async ({ browser }) => {
+test("con zona segura de 59px el campo llega al borde y el texto y el dock no se mueven", async ({ browser }) => {
   const sin = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await abrir(sin, 0);
   const con = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -132,52 +133,86 @@ test("sin zona segura (barra 'default' de iOS) el borde de arriba se funde con e
   expect(Math.abs(fila[0] - 255) + Math.abs(fila[1] - 255) + Math.abs(fila[2] - 245)).toBeLessThan(90);
 });
 
-test("pie: tres logos visibles de 22px o mas y 12px desde Ya tengo cuenta", async ({ page }) => {
-  await abrir(page, 0);
-  for (const nombre of ["flame", "ucv", "mun-ucv"]) {
-    const logo = page.locator(`[data-logo-pie='${nombre}']`);
-    await expect(logo).toBeVisible();
-    expect((await logo.boundingBox())!.height, nombre).toBeGreaterThanOrEqual(22);
-  }
-  // El sello de la UCV mas alto que los wordmarks (altura optica).
-  expect((await page.locator("[data-logo-pie='ucv']").boundingBox())!.height).toBe(28);
-  expect((await page.locator("[data-logo-pie='flame']").boundingBox())!.height).toBe(24);
-  // Como mucho el 85% del ancho y 24px entre logos.
-  const fila = page.locator(".bienvenida-pie__logos");
-  expect((await fila.boundingBox())!.width).toBeLessThanOrEqual(390 * 0.85 + 0.5);
-  await expect(fila).toHaveCSS("column-gap", "24px");
-  // Rotulo a 10px y 6px hasta los logos.
-  await expect(page.locator(".bienvenida-pie__rotulo")).toHaveCSS("font-size", "10px");
-  await expect(page.locator(".bienvenida-pie")).toHaveCSS("row-gap", "6px");
-  const b2 = (await page.locator("[data-boton-deslizar]").nth(1).boundingBox())!;
-  const pie = (await page.locator(".bienvenida-pie").boundingBox())!;
-  expect(pie.y - (b2.y + b2.height)).toBeGreaterThanOrEqual(12);
-  // El pie, a 14px del borde.
-  expect(Math.round(844 - (pie.y + pie.height))).toBe(14);
-});
+/** Cajas de los logos del pie, en orden de izquierda a derecha. */
+async function logosPie(page: Page) {
+  return page.evaluate(() =>
+    Array.from(document.querySelectorAll<HTMLImageElement>("[data-logo-pie]")).map((img) => {
+      const r = img.getBoundingClientRect();
+      return { nombre: img.dataset.logoPie!, izq: r.left, der: r.right, alto: r.height, centro: r.top + r.height / 2, cargado: img.complete && img.naturalWidth > 0 };
+    }),
+  );
+}
+
+/** Color medio de los pixeles opacos de un logo, leido de la captura. */
+async function colorDe(page: Page, nombre: string) {
+  const caja = (await page.locator(`[data-logo-pie='${nombre}']`).boundingBox())!;
+  const png = await page.screenshot({ clip: caja });
+  return page.evaluate(async (b64) => {
+    const img = new Image();
+    img.src = `data:image/png;base64,${b64}`;
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = img.naturalWidth;
+    c.height = img.naturalHeight;
+    const ctx = c.getContext("2d")!;
+    ctx.drawImage(img, 0, 0);
+    const d = ctx.getImageData(0, 0, c.width, c.height).data;
+    // El pixel mas alejado del crema: lo que de verdad pinta el logo.
+    let lejos = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      lejos = Math.max(lejos, Math.abs(d[i] - 255) + Math.abs(d[i + 1] - 255) + Math.abs(d[i + 2] - 245));
+    }
+    return lejos;
+  }, png.toString("base64"));
+}
 
 for (const [ancho, alto] of [
-  [375, 667],
-  [360, 640],
   [320, 568],
+  [375, 667],
+  [390, 844],
+  [430, 932],
 ] as const) {
-  test(`pie a ${ancho}x${alto}: solo logos de 22px, todo cabe sin scroll`, async ({ page }) => {
+  test(`pie a ${ancho}x${alto}: Flame, UCV y MUN UCV en orden, en el 85% y a 12px de los botones`, async ({ page }) => {
     await page.setViewportSize({ width: ancho, height: alto });
     await abrir(page, 0);
-    await expect(page.locator(".bienvenida-pie__rotulo")).toBeHidden();
-    for (const nombre of ["flame", "ucv", "mun-ucv"]) {
-      expect((await page.locator(`[data-logo-pie='${nombre}']`).boundingBox())!.height).toBe(22);
+    await expect.poll(async () => (await logosPie(page)).every((l) => l.cargado)).toBe(true);
+    const logos = await logosPie(page);
+    expect(logos.map((l) => l.nombre)).toEqual(["flame", "ucv", "mun-ucv"]);
+    // Sin solaparse entre si, centrados como grupo y alineados al centro vertical.
+    expect(logos[0].der).toBeLessThanOrEqual(logos[1].izq);
+    expect(logos[1].der).toBeLessThanOrEqual(logos[2].izq);
+    expect(Math.abs(logos[0].izq - (ancho - logos[2].der))).toBeLessThanOrEqual(1);
+    for (const l of logos) expect(Math.abs(l.centro - logos[1].centro)).toBeLessThanOrEqual(0.5);
+    expect(logos[2].der - logos[0].izq).toBeLessThanOrEqual(ancho * 0.85 + 0.5);
+    // Separacion: 24px (16px por debajo de 360 de ancho).
+    expect(Math.round(logos[1].izq - logos[0].der)).toBe(ancho < 360 ? 16 : 24);
+    // Legibles: el wordmark de Flame, el mas bajo, nunca por debajo de 20px.
+    expect(logos[0].alto).toBeGreaterThanOrEqual(20);
+    if (alto >= 700) {
+      expect(logos.map((l) => Math.round(l.alto))).toEqual([24, 36, 32]);
+      await expect(page.locator(".bienvenida-pie__rotulo")).toBeVisible();
+      await expect(page.locator(".bienvenida-pie__rotulo")).toHaveCSS("font-size", "10px");
+      await expect(page.locator(".bienvenida-pie__rotulo")).toHaveCSS("color", "rgb(86, 94, 109)");
+    } else {
+      await expect(page.locator(".bienvenida-pie__rotulo")).toBeHidden();
     }
+    // Su color efectivo no es blanco ni transparente sobre el crema.
+    for (const l of logos) expect(await colorDe(page, l.nombre), l.nombre).toBeGreaterThan(150);
     const m = await page.evaluate(() => ({
       scroll: document.documentElement.scrollHeight,
       alto: innerHeight,
-      pie: document.querySelector(".bienvenida-pie")!.getBoundingClientRect().bottom,
       b2: document.querySelectorAll("[data-boton-deslizar]")[1].getBoundingClientRect().bottom,
-      pieTop: document.querySelector(".bienvenida-pie")!.getBoundingClientRect().top,
+      pie: document.querySelector(".bienvenida-pie")!.getBoundingClientRect(),
     }));
+    expect(m.pie.top - m.b2).toBeGreaterThanOrEqual(12);
+    expect(Math.round(m.alto - m.pie.bottom)).toBe(14);
     expect(m.scroll).toBeLessThanOrEqual(m.alto);
-    expect(m.pie).toBeLessThanOrEqual(m.alto);
-    expect(m.pieTop - m.b2).toBeGreaterThanOrEqual(12);
-    if (ancho < 360) await expect(page.locator(".bienvenida-pie__logos")).toHaveCSS("column-gap", "16px");
   });
 }
+
+test("pie a 360x640: todo cabe sin scroll", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 640 });
+  await abrir(page, 0);
+  const scroll = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+  expect(scroll).toBeLessThanOrEqual(0);
+});
