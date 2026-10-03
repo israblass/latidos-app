@@ -391,7 +391,10 @@
    */
   .bienvenida {
     --reserva: 436px;
-    --top-logo: max(54px, calc(env(safe-area-inset-top, 0px) + 16px));
+    /* Zona segura de arriba (v2.10.1): el arte llega al borde fisico y se
+       corre hacia abajo lo mismo que mide la zona segura. */
+    --zona-arriba: env(safe-area-inset-top, 0px);
+    --top-logo: max(54px, calc(var(--zona-arriba) + 16px));
     --tam-titulo: 48px;
     --lienzo: clamp(195px, min(100vw, calc((100vh - 432px) * 390 / 430)), 448.5px);
     position: relative;
@@ -435,14 +438,24 @@
     scroll-snap-stop: always;
   }
 
-  /* Campo de color arriba, desvanecido hacia el crema. Las mascaras solo usan
-     el alfa (blanco, de la paleta). */
+  /*
+   * Campo de color arriba, desvanecido hacia el crema. Las mascaras solo usan
+   * el alfa (blanco, de la paleta).
+   *
+   * Borde superior (v2.10.1): el campo nace en y=0 del viewport y mide 430
+   * (escalado) mas la zona segura, para llegar al borde fisico cuando el
+   * contenido puede pasar bajo la barra de estado. Ademas, sus primeros 56px
+   * se funden con el crema: en la PWA instalada en iPhone, con la barra
+   * "default", el contenido empieza DEBAJO de una barra opaca y no puede
+   * pasar por detras; sin este fundido el campo arrancaba con un borde duro
+   * justo bajo la hora y la bateria.
+   */
   .bienvenida-campo {
     position: absolute;
     inset: 0 0 auto 0;
-    height: calc(var(--lienzo) * 430 / 390);
-    -webkit-mask-image: linear-gradient(180deg, #fff 0, #fff 62%, transparent 100%);
-    mask-image: linear-gradient(180deg, #fff 0, #fff 62%, transparent 100%);
+    height: calc(var(--lienzo) * 430 / 390 + var(--zona-arriba));
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #fff 56px, #fff 62%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #fff 56px, #fff 62%, transparent 100%);
   }
 
   .campo-azul {
@@ -455,14 +468,40 @@
     background: rgba(253, 251, 5, 0.34);
   }
 
+  /* Las ilustraciones: corridas hacia abajo exactamente la zona segura, para
+     conservar sus coordenadas respecto al logo y al texto (el lienzo de 390 x
+     430 no cambia). El fundido de arriba se mide desde el borde de la
+     pantalla (y=0), igual que el del campo. */
   .bienvenida-arte {
     position: absolute;
-    inset: 0 0 auto 0;
+    inset: var(--zona-arriba) 0 auto 0;
     height: calc(var(--lienzo) * 430 / 390);
     overflow: hidden;
     pointer-events: none;
-    -webkit-mask-image: linear-gradient(180deg, #fff 0, #fff 60%, transparent 100%);
-    mask-image: linear-gradient(180deg, #fff 0, #fff 60%, transparent 100%);
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent calc(-1 * var(--zona-arriba)),
+      #fff calc(56px - var(--zona-arriba)),
+      #fff 60%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      180deg,
+      transparent calc(-1 * var(--zona-arriba)),
+      #fff calc(56px - var(--zona-arriba)),
+      #fff 60%,
+      transparent 100%
+    );
+  }
+
+  /* Velo crema muy suave bajo la hora y la bateria: por encima del arte y
+     por debajo del logo, sin linea visible (se funde a transparente). */
+  .bienvenida-velo {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: calc(var(--zona-arriba) + 16px);
+    background: linear-gradient(to bottom, rgba(255, 255, 245, 0.55), rgba(255, 255, 245, 0));
+    pointer-events: none;
   }
 
   /* El lienzo de 390 x 430, escalado: --u es 1px de la referencia. */
@@ -545,7 +584,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 16px calc(22px + env(safe-area-inset-bottom, 0px));
+    /* v2.10.1: el pie baja a 14px del borde (o la zona segura + 6px) para
+       dejar sitio a los logos mas grandes. */
+    padding: 0 16px max(14px, calc(env(safe-area-inset-bottom, 0px) + 6px));
     pointer-events: none;
   }
 
@@ -606,34 +647,82 @@
     font-size: 16px;
   }
 
+  /* Al menos 12px entre "Ya tengo cuenta" y el pie (v2.10.1): con los logos
+     mas grandes, el grupo de puntos y botones sube lo que haga falta (3px a
+     390 x 844), sin tocar el texto ni el arte. */
   .bienvenida-pie {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 6px;
+    margin-top: 12px;
   }
 
   .bienvenida-pie__rotulo {
     @apply text-texto-secundario;
-    font-size: 10.5px;
+    font-size: 10px;
     line-height: normal;
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
 
-  /* Alto fijo: si un logo del Storage no carga, su texto de respaldo no
-     puede empujar los botones hacia arriba. */
+  /*
+   * Logos del pie (v2.10.1): una fila centrada, con altura optica pareja (el
+   * sello de la UCV es redondo y va mas alto que los wordmarks), 24px entre
+   * ellos y como mucho el 85% del ancho. Cada logo vive en una caja de alto
+   * fijo: si uno del Storage no carga, su texto de respaldo no empuja los
+   * botones hacia arriba.
+   */
   .bienvenida-pie__logos {
+    --alto-sello: 28px;
+    --alto-wordmark: 24px;
     display: flex;
-    height: 16px;
-    max-width: 100%;
+    height: var(--alto-sello);
+    max-width: 85vw;
     align-items: center;
     justify-content: center;
-    gap: 18px;
+    gap: 24px;
     overflow: hidden;
     white-space: nowrap;
+  }
+
+  .bienvenida-logo-pie {
+    display: flex;
+    height: var(--alto-wordmark);
+    min-width: 0;
+    flex-shrink: 1;
+    align-items: center;
+  }
+
+  .bienvenida-logo-pie--sello {
+    height: var(--alto-sello);
+  }
+
+  /* El alto lo manda la caja (ImagenMarca pone el suyo en linea). */
+  .bienvenida-logo-pie img {
+    height: 100% !important;
+    max-width: 100%;
+  }
+
+  /* Si un logo no carga, ImagenMarca deja su nombre en texto: que se corte con
+     elipsis en su lugar y no se encime con los otros dos. */
+  .bienvenida-logo-pie {
+    overflow: hidden;
+  }
+
+  .bienvenida-logo-pie > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 359px) {
+    .bienvenida-pie__logos {
+      --alto-sello: 22px;
+      --alto-wordmark: 22px;
+      gap: 16px;
+    }
   }
 
   /* Alturas bajas: el logo sube, el titular baja a 42px y el pie se queda
@@ -641,11 +730,16 @@
   @media (max-height: 699px) {
     .bienvenida {
       --reserva: 410px;
-      --top-logo: max(36px, calc(env(safe-area-inset-top, 0px) + 12px));
+      --top-logo: max(36px, calc(var(--zona-arriba) + 16px));
       --tam-titulo: 42px;
     }
     .bienvenida-pie__rotulo {
       display: none;
+    }
+    /* Solo los logos, con el alto minimo. */
+    .bienvenida-pie__logos {
+      --alto-sello: 22px;
+      --alto-wordmark: 22px;
     }
   }
 
