@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties, type Keyb
 import { PANTALLAS, type PiezaArte } from "@/components/bienvenida/pantallas";
 import { ImagenMarca } from "@/components/marca/imagen-marca";
 import { BotonDeslizar } from "@/components/ui/boton-deslizar";
-import { ALTO_LOGO, ANCHO_LOGO, ASSETS, LOGOS, logoSobreAmarillo } from "@/lib/assets";
+import { ALTO_LOGO, ANCHO_LOGO, LOGOS, LOGOS_PIE, logoSobreAmarillo } from "@/lib/assets";
 
 /**
  * Bienvenida inmersiva (constitution §2, v2.10.0): un carrusel de cuatro
@@ -149,6 +149,8 @@ export function CarruselBienvenida() {
                   ))}
                 </div>
               </div>
+              {/* Velo crema bajo la hora y la bateria (v2.10.1). */}
+              <div aria-hidden="true" data-velo-superior="" className="bienvenida-velo" />
               <Logo sobreAmarillo={p.logoSobreAmarillo} />
               <div className="bienvenida-texto">
                 <p className="bienvenida-eyebrow">{p.eyebrow}</p>
@@ -199,10 +201,18 @@ export function CarruselBienvenida() {
         />
         <footer className="bienvenida-pie">
           <p className="bienvenida-pie__rotulo">Un programa de</p>
+          {/* Altura optica pareja: el sello de la UCV, redondo, va mas alto
+              que los wordmarks (ver .bienvenida-logo-pie en globals.css). */}
           <div className="bienvenida-pie__logos">
-            <ImagenMarca src={ASSETS.flame} alt="The Flame Creative Lab" alto={16} />
-            <ImagenMarca src={ASSETS.ucv} alt="Universidad Central de Venezuela" alto={16} />
-            <ImagenMarca src={ASSETS.munUcv} alt="MUN UCV" alto={16} />
+            <span data-logo-pie="flame" className="bienvenida-logo-pie">
+              <ImagenMarca src={LOGOS_PIE.flame} alt="The Flame Creative Lab" alto={24} />
+            </span>
+            <span data-logo-pie="ucv" className="bienvenida-logo-pie bienvenida-logo-pie--sello">
+              <ImagenMarca src={LOGOS_PIE.ucv} alt="Universidad Central de Venezuela" alto={28} />
+            </span>
+            <span data-logo-pie="mun-ucv" className="bienvenida-logo-pie">
+              <ImagenMarca src={LOGOS_PIE.munUcv} alt="MUN UCV" alto={24} />
+            </span>
           </div>
         </footer>
       </div>
