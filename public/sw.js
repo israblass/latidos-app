@@ -10,7 +10,7 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v11";
+const VERSION = "v12";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
@@ -32,6 +32,8 @@ const VERSION = "v11";
 // v11: bienvenida inmersiva (carrusel con ilustraciones y logo con aro). Se
 // precachea lo de su primera pintura: el arte de la pantalla 1, el logo y las
 // fuentes. Las pantallas 2 a 4 se guardan en uso.
+// v12: CSS nuevo de la bienvenida (borde superior fundido con el crema y pie
+// con logos mas grandes): misma razon que la v7.
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 
