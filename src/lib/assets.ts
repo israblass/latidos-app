@@ -55,6 +55,23 @@ export const LOGO_AMARILLO: "blanco" | "navy" = "blanco";
 
 export const logoSobreAmarillo = () => (LOGO_AMARILLO === "blanco" ? LOGOS.blancoAro : LOGOS.navyAro);
 
+/**
+ * Logos de los aliados en el pie de la bienvenida (v2.10.1), servidos desde
+ * public/marca/pie (logos-pie-v2/final). Se escalan proporcionalmente y nada
+ * mas: no se deforman ni se recolorean. Ancho y alto son los del archivo, para
+ * reservar su proporcion antes de que carguen.
+ *
+ * - El sello de la UCV es un redibujo hecho con IA a partir del oficial, NO el
+ *   archivo oficial: falta la aprobacion de la UCV (o de Kevin) o el vector.
+ * - Flame y MUN UCV son ampliaciones 8x de fuentes pequeñas: se reemplazan con
+ *   el mismo nombre de archivo cuando lleguen los vectores.
+ */
+export const LOGOS_PIE = {
+  flame: { src: "/marca/pie/logo-flame.webp", ancho: 1488, alto: 432, alt: "The Flame Creative Lab" },
+  ucv: { src: "/marca/pie/logo-ucv.webp", ancho: 1024, alto: 1024, alt: "Universidad Central de Venezuela" },
+  munUcv: { src: "/marca/pie/logo-mun-ucv.webp", ancho: 1049, alto: 615, alt: "MUN UCV" },
+} as const;
+
 /*
  * Assets de marca que ya estan en public/assets pero todavia no tienen pantalla
  * donde vivir. Se anotan aqui para que no se pierdan de vista al construir las

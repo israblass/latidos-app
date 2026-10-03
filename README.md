@@ -286,6 +286,47 @@ recolorear (debe dar 0). Si cambia el logo oficial, reemplaza
 variante va sobre el amarillo pleno lo decide `LOGO_AMARILLO` en
 `src/lib/assets.ts` (`"blanco"` hoy; `"navy"` para mas contraste).
 
+### Logos del pie de la bienvenida (v2.10.1)
+
+El pie de la bienvenida lleva los logos de los aliados, en este orden: The Flame
+Creative Lab (navy), el sello de la UCV (a color) y MUN UCV (azul). Viven en
+`public/marca/pie/` (`logo-flame.webp`, `logo-ucv.webp`, `logo-mun-ucv.webp`,
+tomados de `logos-pie-v2/final/`) y se registran en `LOGOS_PIE`
+(`src/lib/assets.ts`). Solo se escalan proporcionalmente: no se deforman ni se
+recolorean.
+
+**Pendiente antes de publicar:**
+
+- **El sello de la UCV es un redibujo hecho con IA** a partir del sello
+  oficial, NO es el archivo oficial. Hay que pedirle a la UCV (o a Kevin) el
+  vector oficial o su aprobacion de este.
+- **Flame y MUN UCV son ampliaciones 8x** de fuentes pequeñas (131 y 185 px
+  de ancho), no vectores. A tamaño de pie se leen bien, pero con los vectores
+  originales quedan mejor.
+
+Para reemplazar cualquiera, basta con dejar el archivo nuevo con el mismo
+nombre en `public/marca/pie/` y actualizar su ancho y alto en `LOGOS_PIE`.
+
+### Pantalla de carga de la app instalada (v2.10.1)
+
+Al abrir la app instalada se ve el icono sobre el fondo de marca en vez de una
+pantalla en blanco. Son dos piezas (ver la constitution §2):
+
+- **Imagenes de arranque de iOS** (`public/splash/`, 14 tamaños de iPhone).
+  Las genera un script a partir de `scripts/splash-fuentes/` (maqueta aprobada
+  e icono):
+
+  ```bash
+  npm run splash
+  ```
+
+  La lista de tamaños vive en `src/lib/splash.ts`, que tambien usa
+  `layout.tsx` para los `<link rel="apple-touch-startup-image">`. Los PNG se
+  commitean. iOS los guarda al instalar: para ver unos nuevos hay que borrar la
+  app y volver a añadirla.
+- **Overlay `#splash-inicial`** (`src/components/pwa/splash-inicial.tsx`, CSS
+  en linea en `layout.tsx`): solo en la app instalada, se va solo al cargar.
+
 ## Escaneo de QR
 
 Al enfocar un codigo valido, la app lleva a la pantalla de confirmacion, que
@@ -556,6 +597,26 @@ en Chromium. En un iPhone real, con Safari y con la app instalada, revisar:
       botones; el boton de instalar de la esquina no tapa el logo.
 - [ ] **Alturas bajas** (iPhone SE): los dos botones y el pie se ven sin
       desplazar la pantalla.
+
+### Bienvenida y pantalla de carga en iPhone (v2.10.1)
+
+WebKit no esta en el entorno de pruebas: esto se valida en un iPhone real.
+
+1. [ ] **Reinstalar.** Borrar la app de la pantalla de inicio y volver a
+       añadirla desde Safari (Compartir > Añadir a pantalla de inicio). iOS
+       guarda las imagenes de arranque al instalar: sin reinstalar NO se ven
+       las nuevas.
+2. [ ] **Pantalla de carga.** Cerrar la app del todo (deslizarla fuera del
+       selector de apps) y abrirla: en lugar de blanco aparece el icono
+       centrado sobre el fondo crema, amarillo y azul.
+3. [ ] **Sin salto.** De la imagen de arranque al overlay no se ve ningun
+       salto (el icono no se mueve ni cambia de tamaño) y el overlay se
+       desvanece al cargar la bienvenida.
+4. [ ] **Borde superior.** En las 4 laminas no hay linea dura bajo la
+       hora/bateria, y la hora y la bateria se leen sobre el arte.
+5. [ ] **Logos del pie.** Flame, UCV y MUN UCV se leen con claridad sobre el
+       crema en tu modelo, sin tocar los botones.
+6. [ ] **En Safari (sin instalar)** no aparece la pantalla de carga.
 
 ## Cambios de design system no reflejados en la constitution
 

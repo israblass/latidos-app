@@ -178,7 +178,7 @@ for (const [ancho, alto] of [
       }
       expect(medidas.texto.bottom, "el texto no toca los puntos").toBeLessThanOrEqual(medidas.puntos.top);
       expect(medidas.b1.bottom).toBeLessThanOrEqual(medidas.b2.top);
-      expect(medidas.pie.top - medidas.b2.bottom, "10px entre el boton 2 y el pie").toBeGreaterThanOrEqual(10);
+      expect(medidas.pie.top - medidas.b2.bottom, "12px entre el boton 2 y el pie (v2.10.1)").toBeGreaterThanOrEqual(12);
     }
     // En alturas bajas: titular mas chico y pie solo con logos; a 320x568,
     // botones de 56px.
