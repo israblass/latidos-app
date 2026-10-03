@@ -32,8 +32,11 @@ const VERSION = "v12";
 // v11: bienvenida inmersiva (carrusel con ilustraciones y logo con aro). Se
 // precachea lo de su primera pintura: el arte de la pantalla 1, el logo y las
 // fuentes. Las pantallas 2 a 4 se guardan en uso.
-// v12: CSS nuevo de la bienvenida (borde superior fundido con el crema y pie
-// con logos mas grandes): misma razon que la v7.
+// v12: CSS nuevo de la bienvenida (borde superior fundido con el crema, pie
+// con los logos de los aliados) y pantalla de carga de la app instalada. El
+// icono del overlay (/icons/icon-512.png) ya estaba en el shell. Las imagenes
+// de arranque de iOS (/splash, ~3 MB) no se precachean: iOS las guarda al
+// instalar. Los logos del pie tampoco: se guardan la primera vez que se ven.
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 
