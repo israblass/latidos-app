@@ -61,8 +61,9 @@ export default function PasoTipoUsuario() {
                 // vidrio por pantalla: la elegida y el boton).
                 className={`registro-opcion ${activo ? "vidrio vidrio-amarillo" : "superficie"}`}
               >
-                <span aria-hidden="true" className="registro-opcion-icono">
-                  <svg aria-hidden="true"
+                <span aria-hidden="true" className={`registro-opcion-icono ${activo ? "circulo-navy" : ""}`}>
+                  <svg
+                    aria-hidden="true"
                     width="22"
                     height="22"
                     viewBox="0 0 24 24"
@@ -89,7 +90,8 @@ export default function PasoTipoUsuario() {
                     data-check=""
                     className="circulo-navy flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
                   >
-                    <svg aria-hidden="true"
+                    <svg
+                      aria-hidden="true"
                       width="14"
                       height="14"
                       viewBox="0 0 24 24"

@@ -802,43 +802,88 @@
     opacity: 0.2;
   }
 
-  /* Trazo ECG de progreso: 6 tramos; hechos en navy, el activo en azul y mas
-     grueso, los que faltan en navy al 18%. */
+  /*
+   * Trazo ECG de progreso (v2.10.4): 6 tramos de 57 unidades en un viewBox de
+   * 354x30, a lo ancho con 18px de margen lateral. Fantasma en navy al 16%,
+   * lo recorrido en azul y el punto amarillo con borde navy. Solo se animan
+   * transform (seguro en WebKit): el recorte es una caja con overflow hidden
+   * corrida a la izquierda y el trazo de adentro corrido lo mismo a la derecha.
+   */
+  /* El registro tiene 20px de padding: -6px de margen y 4px de padding dejan
+     el dibujo a 18px del borde, con holgura para el borde del punto. */
   .registro-ecg {
-    display: block;
-    width: 100%;
-    height: 28px;
-    overflow: visible;
+    margin: 8px -6px 0;
+    padding: 0 4px;
+    overflow: hidden;
   }
 
-  .registro-ecg path {
+  .registro-ecg-lienzo {
+    position: relative;
+    aspect-ratio: 354 / 30;
+  }
+
+  .registro-ecg-capa {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
     fill: none;
-    stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke: rgba(26, 35, 50, 0.18);
-    transition: stroke 0.3s ease-out;
   }
 
-  .registro-ecg path[data-estado="hecho"] {
-    stroke: theme("colors.texto.principal");
+  .registro-ecg-fantasma {
+    stroke: rgba(26, 35, 50, 0.16);
+    stroke-width: 2.4;
   }
 
-  .registro-ecg path[data-estado="activo"] {
+  .registro-ecg-lleno {
     stroke: theme("colors.secundario");
     stroke-width: 3;
   }
 
+  .registro-ecg-recorte,
+  .registro-ecg-punto {
+    position: absolute;
+    inset: 0;
+  }
+
+  .registro-ecg-recorte {
+    overflow: hidden;
+  }
+
+  .registro-ecg-recorte,
+  .registro-ecg-lleno,
+  .registro-ecg-punto {
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  .registro-ecg-punto circle {
+    fill: theme("colors.primario");
+    stroke: theme("colors.texto.principal");
+    stroke-width: 2;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .registro-ecg-recorte,
+    .registro-ecg-lleno,
+    .registro-ecg-punto {
+      transition: none;
+    }
+  }
+
   .registro-titulo {
     @apply font-display uppercase text-texto-principal;
-    font-size: 34px;
-    line-height: 1.02;
+    font-size: 38px;
+    line-height: 1.05;
   }
 
   .registro-subtitulo {
     @apply text-texto-secundario;
     margin-top: 8px;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.4;
   }
 
@@ -846,6 +891,26 @@
   .registro-tarjeta {
     @apply flex flex-col gap-4;
     padding: 18px 16px;
+  }
+
+  /* Mas especifico que .vidrio (definido abajo), que trae el radio de tarjeta. */
+  .vidrio.registro-tarjeta {
+    border-radius: 28px;
+  }
+
+  /* Campo enfocado: aro azul de 2px (sin mover el layout). */
+  .registro .campo:focus:not(.campo-error) {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px theme("colors.secundario");
+  }
+
+  .registro .campo:-webkit-autofill:focus {
+    -webkit-box-shadow:
+      0 0 0 1000px theme("colors.superficie") inset,
+      0 0 0 2px theme("colors.secundario");
+    box-shadow:
+      0 0 0 1000px theme("colors.superficie") inset,
+      0 0 0 2px theme("colors.secundario");
   }
 
   /*
@@ -889,8 +954,9 @@
     @apply outline outline-2 outline-offset-2 outline-secundario;
   }
 
-  /* Opciones del tipo de usuario: blancas; la elegida, vidrio amarillo con
-     aro navy de 2px y check navy. */
+  /* Opciones del tipo de usuario: blancas con el icono en un circulo azul
+     suave; la elegida, vidrio amarillo con aro navy de 2px, el icono en el
+     circulo navy (simbolo amarillo, .circulo-navy) y check navy. */
   .registro-opcion {
     @apply flex w-full items-center gap-3 text-left;
     min-height: 72px;
@@ -906,10 +972,6 @@
     @apply flex shrink-0 items-center justify-center rounded-full bg-secundario/[0.12] text-texto-principal;
     width: 44px;
     height: 44px;
-  }
-
-  .registro-opcion[aria-checked="true"] .registro-opcion-icono {
-    @apply bg-superficie/70;
   }
 
   /* Medidor de fuerza de la contrasena: 4 tramos. */

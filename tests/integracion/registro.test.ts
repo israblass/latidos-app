@@ -266,6 +266,36 @@ test.describe("rediseño del registro", () => {
       expect(caja.height).toBeGreaterThanOrEqual(64);
     }
   });
+
+  test("el punto del ECG queda en x = paso * 57; en el paso 6, al final del trazo", async ({ page }) => {
+    // Centro del punto, en unidades del viewBox (-6 0 354 30).
+    const xDelPunto = () =>
+      page.evaluate(() => {
+        const lienzo = document.querySelector(".registro-ecg-lienzo")!.getBoundingClientRect();
+        const punto = document.querySelector("[data-ecg-punto] circle")!.getBoundingClientRect();
+        return ((punto.left + punto.width / 2 - lienzo.left) / lienzo.width) * 354 - 6;
+      });
+    const progreso = page.getByRole("progressbar", { name: "Progreso del registro" });
+    for (const paso of [1, 3, 6] as Paso[]) {
+      await llegarAlPaso(page, paso);
+      await expect(progreso).toHaveAttribute("aria-valuenow", String(paso));
+      await expect(progreso).toHaveAttribute("data-paso", String(paso));
+      await expect(progreso).toHaveAttribute("data-progreso-x", String(paso * 57));
+      await expect.poll(xDelPunto).toBeCloseTo(paso * 57, 0);
+    }
+    // En el paso 6 el punto cae sobre el final del trazo (x = 342).
+    expect(await xDelPunto()).toBeCloseTo(342, 0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+    // A 390 de ancho el dibujo va a 18px de cada borde: 354px, escala 1.
+    const lienzo = (await page.locator(".registro-ecg-lienzo").boundingBox())!;
+    expect(lienzo.x).toBeCloseTo(18, 0);
+    expect(lienzo.width).toBeCloseTo(354, 0);
+    expect(lienzo.height).toBeCloseTo(30, 0);
+    // Al volver, el punto regresa al paso anterior.
+    await page.goBack();
+    await expect(progreso).toHaveAttribute("data-paso", "5");
+    await expect.poll(xDelPunto).toBeCloseTo(5 * 57, 0);
+  });
 });
 
 for (const [ancho, alto] of [
