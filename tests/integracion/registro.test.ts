@@ -278,6 +278,8 @@ test.describe("rediseño del registro", () => {
     const progreso = page.getByRole("progressbar", { name: "Progreso del registro" });
     for (const paso of [1, 3, 6] as Paso[]) {
       await llegarAlPaso(page, paso);
+      // Sin corazon junto al titulo (v2.10.5): el banner del paso 1 ya trae uno.
+      await expect(page.locator(".registro header img")).toHaveCount(0);
       await expect(progreso).toHaveAttribute("aria-valuenow", String(paso));
       await expect(progreso).toHaveAttribute("data-paso", String(paso));
       await expect(progreso).toHaveAttribute("data-progreso-x", String(paso * 57));

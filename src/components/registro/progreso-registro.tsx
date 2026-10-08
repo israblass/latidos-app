@@ -12,8 +12,6 @@ interface Props {
   titulo: string;
   /** Una linea breve debajo del titulo. */
   subtitulo?: string;
-  /** El corazon decorativo junto al titulo: solo en el paso 1. */
-  corazon?: boolean;
   children: ReactNode;
 }
 
@@ -114,10 +112,9 @@ function TrazoProgreso({ paso }: { paso: number }) {
  * volver, "Paso N de 6", el trazo ECG de progreso (azul con punto amarillo),
  * titulo en Anton y subtitulo breve.
  */
-export function ProgresoRegistro({ paso, titulo, subtitulo, corazon = false, children }: Props) {
+export function ProgresoRegistro({ paso, titulo, subtitulo, children }: Props) {
   const router = useRouter();
   const arte = ILUSTRACIONES.circulosPulsoBienvenida;
-  const latido = ILUSTRACIONES.corazonLatidoBienvenida;
 
   return (
     <div className="registro">
@@ -166,24 +163,9 @@ export function ProgresoRegistro({ paso, titulo, subtitulo, corazon = false, chi
           <TrazoProgreso paso={paso} />
         </div>
 
-        <div className="mt-6 flex items-start justify-between gap-3">
-          <div>
-            <h1 className="registro-titulo">{titulo}</h1>
-            {subtitulo ? <p className="registro-subtitulo">{subtitulo}</p> : null}
-          </div>
-          {corazon ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={latido.src}
-              alt=""
-              aria-hidden="true"
-              width={latido.ancho}
-              height={latido.alto}
-              decoding="async"
-              data-corazon-registro=""
-              className="-mt-2 h-auto w-[72px] shrink-0"
-            />
-          ) : null}
+        <div className="mt-6">
+          <h1 className="registro-titulo">{titulo}</h1>
+          {subtitulo ? <p className="registro-subtitulo">{subtitulo}</p> : null}
         </div>
       </header>
 

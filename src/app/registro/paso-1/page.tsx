@@ -32,7 +32,6 @@ export default function PasoCedula() {
       paso={1}
       titulo="¿Cuál es tu cédula?"
       subtitulo="La usamos para identificarte en el programa."
-      corazon
     >
       {/* noValidate: la validacion nativa del navegador mostraria sus propios
           mensajes por encima de los nuestros. Todos los pasos hacen lo mismo. */}
