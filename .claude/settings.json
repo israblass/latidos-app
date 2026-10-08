@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run test:rapido)",
+      "Bash(npm run -s test:rapido)",
+      "Bash(npm run test:e2e:area *)",
+      "Bash(npm run -s test:e2e:area *)"
+    ],
+    "ask": [
+      "Bash(npm run test:completo)",
+      "Bash(npm run test:completo *)",
+      "Bash(npm run -s test:completo)",
+      "Bash(node scripts/pruebas/completo.mjs)",
+      "Bash(node scripts/pruebas/completo.mjs *)",
+      "Bash(npm run capturas)",
+      "Bash(npm run capturas *)",
+      "Bash(npm run -s capturas)",
+      "Bash(npm run -s capturas *)",
+      "Bash(node scripts/pruebas/capturas.mjs)",
+      "Bash(node scripts/pruebas/capturas.mjs *)",
+      "Bash(npx playwright test)",
+      "Bash(npx playwright test --*)",
+      "Bash(npm test)",
+      "Bash(npm run test)",
+      "Bash(npm run -s test)"
+    ]
+  }
+}

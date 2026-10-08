@@ -35,7 +35,7 @@ const sinComentarios = (texto: string) =>
     .replace(/{\s*\/\*[\s\S]*?\*\/\s*}/g, "")
     .replace(/(^|[^:"'])\/\/.*$/gm, "$1");
 
-test.describe("reglas en el codigo", () => {
+test.describe("reglas en el codigo", { tag: "@rapido" }, () => {
   test("la receta del vidrio esta definida una sola vez, en globals.css", () => {
     const fuera = archivos(SRC)
       .filter((ruta) => ruta !== GLOBALS)
@@ -158,7 +158,7 @@ function coloresFueraDePaleta(texto: string) {
   return fuera;
 }
 
-test.describe("principio de paleta", () => {
+test.describe("principio de paleta", { tag: "@rapido" }, () => {
   test("en src no hay colores escritos fuera de la paleta", () => {
     const fuera = archivos(SRC).flatMap((ruta) =>
       coloresFueraDePaleta(readFileSync(ruta, "utf8")).map((c) => `${relative(RAIZ, ruta)}: ${c}`),

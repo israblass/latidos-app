@@ -188,7 +188,7 @@ test("los movimientos de otra cuenta no llegan", async ({ page, browser }) => {
   await expect(page.getByText("Regalo Latidos")).toHaveCount(0);
 });
 
-test.describe("insertarMovimiento (sin pantalla)", () => {
+test.describe("insertarMovimiento (sin pantalla)", { tag: "@rapido" }, () => {
   const mov = (id: string, beats: number, hora: string, tipo: "escaneo" | "regalo" = "escaneo") => ({
     id,
     tipo,

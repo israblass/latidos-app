@@ -315,7 +315,7 @@ test("axe y auditoria sin violaciones con los acordeones cerrados y abiertos", a
   await sinViolaciones(page, "inicio, hoja de notificaciones");
 });
 
-test.describe("funciones de actividad (sin pantalla)", () => {
+test.describe("funciones de actividad (sin pantalla)", { tag: "@rapido" }, () => {
   const dia = (dia_local: string, beats: number[]): DiaHistorial => ({
     dia_local,
     total_neto: beats.reduce((a, b) => a + b, 0),
