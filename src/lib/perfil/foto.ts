@@ -1,5 +1,6 @@
 "use client";
 
+import { olvidarUrlFirmada } from "@/hooks/use-url-firmada";
 import { BUCKET_AVATARES, FallaFoto, rutaAvatar } from "@/lib/avatar";
 import { crearClienteNavegador } from "@/lib/supabase/client";
 
@@ -44,7 +45,11 @@ export async function guardarFoto(opciones: {
     throw fallaDeRed();
   }
 
-  if (opciones.rutaAnterior && opciones.rutaAnterior !== ruta) await bucket.remove([opciones.rutaAnterior]);
+  if (opciones.rutaAnterior && opciones.rutaAnterior !== ruta) {
+    // La URL firmada de la foto anterior apunta a un archivo que se borra.
+    olvidarUrlFirmada(opciones.rutaAnterior);
+    await bucket.remove([opciones.rutaAnterior]);
+  }
   return ruta;
 }
 
@@ -57,5 +62,6 @@ export async function quitarFoto(opciones: { usuarioId: string; ruta: string }):
     .update({ avatar_path: null })
     .eq("id", opciones.usuarioId);
   if (error) throw fallaDeRed();
+  olvidarUrlFirmada(opciones.ruta);
   await supabase.storage.from(BUCKET_AVATARES).remove([opciones.ruta]);
 }

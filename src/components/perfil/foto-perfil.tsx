@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
@@ -41,6 +42,7 @@ export function FotoPerfil({
   iniciales: string;
   rutaInicial: string | null;
 }) {
+  const router = useRouter();
   const [ruta, setRuta] = useState(rutaInicial);
   // La foto recien guardada se ve al instante, sin esperar la URL firmada.
   const [local, setLocal] = useState<string | null>(null);
@@ -94,6 +96,9 @@ export function FotoPerfil({
       const nueva = await guardarFoto({ usuarioId, foto: elegida.foto, rutaAnterior: ruta });
       setLocal(URL.createObjectURL(elegida.foto));
       setRuta(nueva);
+      // Vacia la cache de pantallas del router: Inicio no puede volver con el
+      // avatar_path anterior (cuyo archivo ya se borro).
+      router.refresh();
       enCurso.current = false;
       setOcupada(false);
       cerrar();
@@ -112,6 +117,7 @@ export function FotoPerfil({
     try {
       await quitarFoto({ usuarioId, ruta });
       setRuta(null);
+      router.refresh();
       setLocal(null);
       enCurso.current = false;
       setOcupada(false);
