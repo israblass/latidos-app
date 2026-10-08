@@ -7,9 +7,15 @@
  * pantallas no se tocan.
  *
  * Van en los pasos 1, 3 y 4 y en "Revisa tu correo". No en los pasos 2, 5 y 6,
- * que tienen mas campos o la decision final.
+ * que tienen mas campos o la decision final. En el Perfil v1 hay uno solo, al
+ * pie (`perfil-pie`, v2.11.0).
  */
-export type SlotBanner = "registro-paso-1" | "registro-paso-3" | "registro-paso-4" | "registro-revisa-correo";
+export type SlotBanner =
+  | "registro-paso-1"
+  | "registro-paso-3"
+  | "registro-paso-4"
+  | "registro-revisa-correo"
+  | "perfil-pie";
 
 export interface BannerAliado {
   /** Imagen 1200 x 600 (2:1), WebP. */
@@ -40,6 +46,12 @@ export const BANNERS: Record<SlotBanner, BannerAliado> = {
     alt: "Tu marca aquí: espacio para un aliado de Latidos",
   },
   "registro-revisa-correo": {
+    src: "/banners/tu-marca-aqui-corazon.webp",
+    ancho: 1200,
+    alto: 600,
+    alt: "Tu marca aquí: espacio para un aliado de Latidos",
+  },
+  "perfil-pie": {
     src: "/banners/tu-marca-aqui-corazon.webp",
     ancho: 1200,
     alto: 600,

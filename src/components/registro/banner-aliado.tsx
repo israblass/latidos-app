@@ -13,9 +13,17 @@ const UMBRAL_TECLADO = 0.75;
  *
  * Se oculta con el teclado abierto (visualViewport mas bajo que el 75% de la
  * ventana) y, por CSS, en pantallas de menos de 700px de alto: nunca empuja
- * el boton fuera de la zona tocable.
+ * el boton fuera de la zona tocable. En pantallas que se desplazan (el
+ * Perfil) no empuja nada: con `siempreVisible` se queda tambien en pantallas
+ * bajas.
  */
-export function BannerAliado({ slot }: { slot: SlotBanner }) {
+export function BannerAliado({
+  slot,
+  siempreVisible = false,
+}: {
+  slot: SlotBanner;
+  siempreVisible?: boolean;
+}) {
   const banner = BANNERS[slot];
   const [teclado, setTeclado] = useState(false);
 
@@ -29,7 +37,12 @@ export function BannerAliado({ slot }: { slot: SlotBanner }) {
   }, []);
 
   return (
-    <figure className="banner-aliado" data-banner-aliado={slot} data-teclado={teclado ? "" : undefined}>
+    <figure
+      className="banner-aliado"
+      data-banner-aliado={slot}
+      data-teclado={teclado ? "" : undefined}
+      data-siempre-visible={siempreVisible ? "" : undefined}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={banner.src}

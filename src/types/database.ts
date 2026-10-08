@@ -4,12 +4,7 @@
  * con `supabase gen types typescript`.
  */
 
-import type {
-  MovimientoBeats,
-  PaginaHistorial,
-  ResumenBeats,
-  TipoMovimiento,
-} from "@/types/beats";
+import type { MovimientoBeats, PaginaHistorial, ResumenBeats, TipoMovimiento } from "@/types/beats";
 import type { Banner } from "@/types/banner";
 import type { ConfiguracionApp } from "@/types/configuracion";
 import type { Escaneo, EstadoQR, Marca, QRMarca } from "@/types/qr";
@@ -25,14 +20,12 @@ export type Database = {
           | "onboarding_visto"
           | "notificaciones_habilitadas"
           | "beats_balance"
+          | "avatar_path"
           | "created_at"
           | "updated_at"
         > &
           Partial<
-            Pick<
-              Usuario,
-              "onboarding_visto" | "notificaciones_habilitadas" | "beats_balance"
-            >
+            Pick<Usuario, "onboarding_visto" | "notificaciones_habilitadas" | "beats_balance" | "avatar_path">
           >;
         Update: Partial<Omit<Usuario, "id" | "created_at">>;
         Relationships: [];

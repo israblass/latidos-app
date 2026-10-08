@@ -1021,7 +1021,7 @@
   }
 
   @media (max-height: 699px) {
-    .banner-aliado {
+    .banner-aliado:not([data-siempre-visible]) {
       display: none;
     }
   }
@@ -1037,6 +1037,235 @@
     background: rgba(255, 255, 255, 0.85);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 2px 6px rgba(26, 35, 50, 0.12);
     @apply text-[10px] font-bold uppercase tracking-etiqueta text-texto-principal;
+  }
+
+  /*
+   * Perfil v1 (v2.11.0): el lenguaje del registro. Circulos del pulso arriba
+   * (.registro-arte), avatar de vidrio amarillo con iniciales, nombre en Anton,
+   * chip del tipo de usuario, tarjeta de tres numeros y listas de vidrio de
+   * radio 28. Una sola pieza con desenfoque: el avatar (con la barra, dos);
+   * las tarjetas y los chips son .vidrio-plano.
+   */
+  .perfil {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    min-height: 100vh;
+    min-height: 100dvh;
+    flex-direction: column;
+    padding: max(64px, calc(env(safe-area-inset-top, 0px) + 24px)) 16px
+      calc(var(--alto-barra) + env(safe-area-inset-bottom, 0px) + 24px);
+  }
+
+  .perfil-avatar {
+    @apply flex items-center justify-center font-display text-[40px] text-texto-principal;
+    width: 104px;
+    height: 104px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Mas especifico que .vidrio (definido abajo): circulo y aro blanco de 4px. */
+  .vidrio.perfil-avatar {
+    border-radius: 9999px;
+    box-shadow:
+      var(--vidrio-sombra),
+      0 0 0 4px rgba(255, 255, 255, 0.6),
+      0 12px 30px rgba(26, 35, 50, 0.16);
+  }
+
+  /* El avatar es un boton (v2.12.0): toca para cambiar la foto. */
+  .perfil-avatar-boton {
+    @apply relative rounded-full outline-none transition-transform active:scale-[0.97];
+  }
+
+  .perfil-avatar-boton:focus-visible {
+    @apply outline outline-2 outline-offset-4 outline-secundario;
+  }
+
+  /* Indicador de camara: circulo navy de 34px con borde crema de 3px. No es
+     la manija de un boton deslizable: solo dice que la foto se cambia. */
+  .perfil-avatar-camara {
+    @apply absolute flex items-center justify-center rounded-full border-[3px] border-fondo;
+    right: -2px;
+    bottom: -2px;
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Vista previa en la hoja: la foto ya recortada, en circulo de 160px. */
+  .perfil-foto-previa {
+    width: 160px;
+    height: 160px;
+    border-radius: 9999px;
+    object-fit: cover;
+    box-shadow:
+      0 0 0 4px rgba(255, 255, 255, 0.6),
+      0 12px 30px rgba(26, 35, 50, 0.16);
+  }
+
+  .perfil-nombre {
+    @apply font-display uppercase text-texto-principal;
+    margin-top: 16px;
+    font-size: 36px;
+    line-height: 1.05;
+    letter-spacing: 0.005em;
+  }
+
+  .perfil-chip {
+    @apply inline-flex items-center text-[13px] font-bold text-texto-principal;
+    gap: 8px;
+    padding: 8px 14px;
+    letter-spacing: 0.04em;
+  }
+
+  .perfil-chip-icono {
+    @apply flex shrink-0 items-center justify-center;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+  }
+
+  .vidrio.perfil-chip,
+  .vidrio.perfil-chip-pronto {
+    border-radius: 9999px;
+  }
+
+  .perfil-numeros {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr;
+    margin-top: 22px;
+    padding: 16px 6px;
+  }
+
+  .perfil-numero {
+    position: relative;
+    padding: 2px 6px;
+    text-align: center;
+  }
+
+  .perfil-numero + .perfil-numero::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 0;
+    width: 1px;
+    background: rgba(26, 35, 50, 0.1);
+  }
+
+  .perfil-numero-valor {
+    @apply font-display text-texto-principal;
+    line-height: 1;
+  }
+
+  .perfil-numero-etiqueta {
+    @apply text-texto-secundario;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .perfil-seccion {
+    @apply text-texto-secundario;
+    margin: 26px 8px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .perfil-lista {
+    padding: 4px 0;
+  }
+
+  .vidrio.perfil-numeros,
+  .vidrio.perfil-lista {
+    border-radius: 28px;
+  }
+
+  .perfil-lista > * {
+    position: relative;
+  }
+
+  .perfil-lista > * + *::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 18px;
+    left: 18px;
+    height: 1px;
+    background: rgba(26, 35, 50, 0.08);
+  }
+
+  .perfil-fila {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 44px;
+    padding: 15px 18px;
+  }
+
+  .perfil-fila-enlace {
+    @apply outline-none transition-opacity active:opacity-60;
+    border-radius: 24px;
+  }
+
+  .perfil-fila-enlace:focus-visible {
+    @apply outline outline-2 -outline-offset-2 outline-secundario;
+  }
+
+  .perfil-fila[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: default;
+  }
+
+  .perfil-fila-etiqueta {
+    @apply text-texto-secundario;
+    flex: none;
+    width: 84px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .perfil-fila-valor {
+    @apply flex min-w-0 flex-1 items-center gap-2 text-texto-principal;
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  /* Una linea con elipsis: el texto va en su propio nodo dentro del dd. */
+  .perfil-fila-valor > span:first-child {
+    @apply min-w-0 truncate;
+  }
+
+  .perfil-icono {
+    @apply flex shrink-0 items-center justify-center rounded-full bg-secundario/[0.12] text-secundario;
+    width: 42px;
+    height: 42px;
+  }
+
+  .perfil-chip-pronto {
+    @apply shrink-0 text-[10px] font-bold uppercase text-texto-principal;
+    padding: 5px 10px;
+    letter-spacing: 0.14em;
+  }
+
+  .perfil-cerrar-sesion {
+    @apply min-h-touch rounded-full px-4 text-[16px] font-bold text-texto-principal outline-none transition-opacity active:opacity-60;
+  }
+
+  .perfil-eliminar-cuenta {
+    @apply min-h-touch rounded-full px-4 text-[13px] text-texto-secundario underline outline-none transition-opacity active:opacity-60;
+    text-underline-offset: 3px;
+  }
+
+  .perfil-cerrar-sesion:focus-visible,
+  .perfil-eliminar-cuenta:focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-secundario;
   }
 
   .titulo-pantalla {
@@ -1357,6 +1586,19 @@
    */
   body[data-hoja-abierta] main .vidrio {
     --vidrio-filtro: none;
+  }
+
+  /*
+   * Vidrio plano (v2.11.0): el mismo vidrio (tinte, borde, reflejo y canto)
+   * sin desenfoque, para pantallas con muchas tarjetas (Perfil) sin pasar de
+   * dos capas con desenfoque. Sin el desenfoque detras, el tinte sube un poco.
+   * Los respaldos de abajo (sin backdrop-filter, menos transparencia) le
+   * aplican igual que a .vidrio.
+   */
+  .vidrio-plano {
+    --vidrio-filtro: none;
+    --vidrio-tinte-arriba: rgba(255, 255, 255, 0.78);
+    --vidrio-tinte-abajo: rgba(255, 255, 255, 0.66);
   }
 
   /*

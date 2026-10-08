@@ -2,11 +2,13 @@
 tipo: constitution
 producto: Latidos App
 slug: latidos-app
-version: 2.10.5
+version: 2.12.0
 fecha-creacion: 2026-08-20
 ultima-modificacion: 2026-10-03
 <!-- v2.0.0 | 2026-08-26 | Cambio de stack a PWA (Next.js + Capacitor) para lanzar en Android e iOS el 15 sept sin esperar aprobacion de tiendas. Fase 1 reordenada segun acuerdo con Kevin: prioriza registro + QR + Beats sobre Pulso completo. Beats por QR de marca ahora configurables en cualquier momento por el admin. -->
 <!-- v2.1.0 | 2026-09-10 | Cambio de design system: base clara/blanca en vez de fondo oscuro solido. El cliente pidio explicitamente alejarse del fondo oscuro por no ir con la tematica festiva del evento. Referencia de atmosfera: apps tipo Cashea/Yummy. La paleta de marca (amarillo/azul) y la tipografia no cambian, solo la base y los tonos de superficie. Pantallas ya construidas (bienvenida, registro, onboarding, Inicio) requieren pasada de restyle. -->
+<!-- v2.12.0 | 2026-10-08 | Foto de perfil: subir, cambiar y quitar desde el avatar del Perfil (hoja "Foto de perfil", vista previa, procesado a 512x512 en el telefono). Columna usuarios.avatar_path (migracion) y bucket privado avatares con politicas por carpeta (supabase/storage/avatares.sql, a mano en el SQL Editor). Componente Avatar reutilizable. La foto solo la ve su dueño. Service worker v19 (Storage nunca se cachea). -->
+<!-- v2.11.0 | 2026-10-08 | Perfil v1: pantalla de solo lectura con los datos existentes (avatar con iniciales, tipo de usuario, Beats/Escaneos/Canjes, Mis datos enmascarados, actividad, ajustes), estado "Próximamente" con chip PRONTO para lo que no tiene flujo, banner "Aliado" en el slot perfil-pie, cerrar sesión con confirmación y eliminar cuenta solo informativo. Vidrio plano (.vidrio-plano). Foto de perfil para una fase aparte con Supabase Storage. Service worker v18. -->
 <!-- v2.10.5 | 2026-10-08 | Registro: sale el corazon decorativo junto al titulo del paso 1 (con el banner "Aliado", que ya trae corazon, eran dos). Service worker v17. -->
 <!-- v2.10.4 | 2026-10-08 | Progreso del registro: ECG azul que se llena con punto amarillo (6 segmentos de 57 px), animado solo con transform. Titulos del registro a 38px, subtitulo 16px, tarjeta de radio 28 con aro azul de 2px en el campo enfocado y circulo de icono navy en la opcion elegida del paso 5. Service worker v16. -->
 <!-- v2.10.3 | 2026-10-08 | Botones tap del registro sin circulo: pildora de vidrio amarillo con texto centrado y flecha pequeña al lado. El circulo navy con flecha queda exclusivo del boton deslizable. Service worker v15. -->
@@ -280,6 +282,32 @@ Referencia aprobada por Isra (`referencia-v2/beats-dashboard`, 390px). Solo fron
 - **Carrusel**: los movimientos de marca de todo el historial cargado en pantalla (al abrir, los 7 dias con actividad mas recientes; crece al cargar mas), agrupados por el nombre actual de la marca, de la escaneada mas recientemente a la mas antigua. El primer lote siempre cubre la semana completa, asi que "Tu pulso" no depende de bajar.
 
 Capas de vidrio (v2.9.0): la tarjeta de Beats y la barra, dos. Con la hoja de ayuda abierta, la tarjeta apaga su desenfoque (ver "Liquid glass"). Las demas tarjetas son blancas opacas. El gris `#565E6D` de la tarjeta se mide contra el pixel mas oscuro del degradado real.
+
+### Perfil v1 (v2.11.0)
+
+Referencia `referencia-perfil-v1` (390px, margen lateral 16px). Solo lectura y solo con lo que ya existe: sin columnas nuevas ni migraciones (`src/lib/perfil/leer-perfil.ts` lee `usuarios` y cuenta `escaneos` con la sesion; RLS deja ver solo lo propio). No lleva `BotonDeslizar`.
+
+1. **Fondo**: crema con los circulos del pulso al 20% y mascara hacia abajo, como el registro.
+2. **Avatar**: circulo de 104px en vidrio amarillo con las iniciales (nombre + apellido) en Anton 40px navy, aro blanco translucido de 4px y sombra suave. Sin lapiz de edicion. Desde la v2.12.0 puede llevar foto (ver "Foto de perfil").
+3. **Nombre** en Anton 36px mayusculas (es el `h1`), **chip** de vidrio con el tipo (Estudiante UCV / Egresado UCV / Externo) y el birrete amarillo en circulo navy de 22px, y "Latiendo desde <mes> <año>" (mes en minuscula, hora de Caracas, desde `created_at`).
+4. **Numeros** (tarjeta de vidrio, radio 28, columnas 1.25fr 1fr 1fr): Beats = `beats_balance`; Escaneos = escaneos propios; Canjes = "—" hasta que exista el flujo. Un dato que no se pueda leer se muestra como "—", nunca como un cero inventado.
+5. **Mis datos** (sin "Editar"): cedula enmascarada (`V-••••5678`, con candado), telefono parcial (`0424 ••• 1977`) y correo completo, en una linea con elipsis. **Solo lectura en v1**: sin flechas ni edicion; los enmascarados llevan `aria-label` ("Cédula terminada en 5 6 7 8").
+6. **Mi actividad**: "Historial de Beats" lleva a `/beats`. **Ajustes**: Notificaciones, Ayuda y contacto, Terminos y privacidad.
+7. **Estado "Próximamente"**: lo que no tiene pantalla o flujo (Mis canjes y, hoy, los tres ajustes; "Ayuda y contacto" hasta que haya un contacto definido) va atenuado (opacidad .55), sin tap, sin flecha, con un chip de vidrio "PRONTO" y `aria-disabled="true"`.
+8. **Banner "Aliado"** en el slot `perfil-pie` de `src/lib/banners.ts` (330x165, radio 26, chip "Aliado"). Aqui no se oculta en pantallas bajas: la pagina se desplaza.
+9. **Cerrar sesión**: texto centrado que abre una hoja `.vidrio-hoja` "¿Cerrar sesión?" con dos botones tap (`BotonVidrio`, sin circulo navy): "Cerrar sesión" y "Cancelar". **Eliminar mi cuenta**: hoja informativa ("escríbenos a soporte"); no borra nada.
+10. Sin pie de version: el proyecto no tiene una fuente de version de la app.
+11. **Vidrio**: una sola pieza con desenfoque (el avatar; con la barra, dos capas). Las tarjetas y los chips son `.vidrio-plano`, el mismo vidrio sin desenfoque y con el tinte un poco mas alto, con los mismos respaldos.
+12. **Layout**: padding inferior = alto de la barra + zona segura + 24px; lo ultimo queda completo sobre la barra en 390x844 y 375x667.
+
+### Foto de perfil (v2.12.0)
+
+- **Avatar** (`src/components/ui/avatar.tsx`, reutilizable: tamaño, iniciales, ruta o URL): la foto en el circulo (object-fit cover) con el mismo aro; sin foto, mientras carga, sin red o si falla, las iniciales. Hoy solo se usa en el Perfil.
+- **En el Perfil** el avatar es un `<button>` "Cambiar foto de perfil" con un circulo navy de 34px y camara amarilla (borde crema de 3px) en la esquina: es un indicador, no la manija de un boton deslizable. Abre la hoja `.vidrio-hoja` "Foto de perfil": "Elegir o tomar foto" (vidrio amarillo; `<input type="file" accept="image/*">` oculto, en iOS ofrece camara y galeria), "Quitar foto" (vidrio blanco, solo si hay foto, con "¿Quitar tu foto?") y "Cancelar". Al elegir, vista previa en circulo de 160px con "Guardar" y "Elegir otra"; mientras sube, "Guardando…" deshabilitado y sin doble envio. Los errores (no es imagen, no se puede leer, sin conexion, fallo del servidor) se dicen en la hoja sin perder la seleccion.
+- **Procesado en el telefono** (`src/lib/avatar.ts`): se abre con un `<img>` (respeta la orientacion EXIF en iOS Safari), se recorta el cuadrado central a 512x512 y sale en WebP .82, o JPEG .85 si el navegador no codifica WebP de verdad (se mira `blob.type`). Entrada de hasta 15 MB; la salida queda muy por debajo de 1 MB.
+- **Guardado**: `usuarios.avatar_path` (`<uuid>/avatar-<ts>.<ext>`, con un check que exige la carpeta propia) y el archivo en el bucket privado `avatares` (1 MB, JPEG/WebP/PNG; politicas de select/insert/update/delete solo en `(storage.foldername(name))[1] = auth.uid()`). Se sube, se actualiza la ruta y solo entonces se borra la foto anterior. Quitar: `avatar_path = null` y se borra el archivo.
+- **Privacidad**: la foto solo la ve su dueño. Se muestra con URLs firmadas de una hora que se renuevan solas; no hay URL publica ni otra pantalla que la muestre. El service worker no cachea Storage (otro origen y, ademas, `/storage/v1/` excluido).
+- **SQL**: la columna va en `supabase/migrations` (la aplica el CI); el bucket y las politicas en `supabase/storage/avatares.sql`, que NO corre el CI (su Postgres no tiene el esquema `storage`) y se aplica a mano en el SQL Editor de Supabase. Los dos son idempotentes.
 
 ### Acordeon (v2.6.0)
 

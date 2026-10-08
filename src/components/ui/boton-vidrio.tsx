@@ -6,6 +6,8 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   tono?: "amarillo" | "blanco";
   /** Mientras espera respuesta: queda deshabilitado y sin flecha. */
   cargando?: boolean;
+  /** La flecha junto al texto. Sin ella cuando no lleva a ningun lado ("Cancelar"). */
+  flecha?: boolean;
 }
 
 /**
@@ -19,6 +21,7 @@ export function BotonVidrio({
   children,
   tono = "amarillo",
   cargando = false,
+  flecha = true,
   disabled,
   className = "",
   ...props
@@ -32,7 +35,7 @@ export function BotonVidrio({
       className={`vidrio ${tono === "amarillo" ? "vidrio-amarillo" : ""} boton-vidrio ${className}`}
     >
       <span>{children}</span>
-      {cargando ? null : (
+      {cargando || !flecha ? null : (
         <svg
           aria-hidden="true"
           data-flecha-boton=""

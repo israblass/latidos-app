@@ -33,6 +33,8 @@ export type Usuario = {
   onboarding_visto: boolean;
   notificaciones_habilitadas: boolean;
   beats_balance: number;
+  /** Ruta de la foto en el bucket privado `avatares` ("<id>/avatar-<ts>.webp"); null sin foto. */
+  avatar_path: string | null;
   created_at: string;
   updated_at: string;
 };

@@ -6,6 +6,7 @@ import { abrirBeats, cuentaConId, numeroDeBeats } from "../ayudantes/beats";
 import {
   completarRegistro,
   confirmarCorreo,
+  cerrarSesionDesdePerfil,
   cuentaEnInicio,
   datosDeRegistro,
   type DatosDeRegistro,
@@ -184,14 +185,18 @@ test.describe("perfil", () => {
     await expect(page.getByRole("button", { name: /^Ya tengo cuenta\./ })).toBeVisible();
   });
 
-  test("el tab Perfil lleva al correo de la persona y al boton de cerrar sesion", async ({ page }) => {
+  test("el tab Perfil lleva al nombre y correo de la persona y al boton de cerrar sesion", async ({
+    page,
+  }) => {
     const datos = await cuentaEnInicio(page);
     const tab = page.getByRole("navigation", { name: "Principal" }).getByRole("link", { name: "Perfil" });
     await tab.click();
     await page.waitForURL("**/perfil");
     await expect(tab).toHaveAttribute("aria-current", "page");
-    await expect(page.getByRole("heading", { name: "Perfil", level: 1 })).toBeVisible();
-    await expect(page.getByRole("region", { name: "Tu cuenta" })).toContainText(datos.correo);
+    await expect(
+      page.getByRole("heading", { name: `${datos.nombre} ${datos.apellido}`, level: 1 }),
+    ).toBeVisible();
+    await expect(page.getByRole("main")).toContainText(datos.correo);
     await expect(page.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
   });
 
@@ -241,7 +246,10 @@ test.describe("cerrar sesion", () => {
 
     // Una copia de otra cuenta que paso antes por este navegador.
     await page.evaluate(() =>
-      localStorage.setItem("latidos:beats:otra-cuenta", JSON.stringify({ version: 1, usuario_id: "otra-cuenta" })),
+      localStorage.setItem(
+        "latidos:beats:otra-cuenta",
+        JSON.stringify({ version: 1, usuario_id: "otra-cuenta" }),
+      ),
     );
     await expect.poll(() => clavesDeBeats(page)).toHaveLength(2);
     const antes = await clavesDeBeats(page);
@@ -252,11 +260,14 @@ test.describe("cerrar sesion", () => {
     await expect(page.getByText(datos.correo)).toBeVisible();
 
     mirando = true;
-    await page.getByRole("button", { name: "Cerrar sesión" }).click();
+    await cerrarSesionDesdePerfil(page);
     await page.waitForURL((url) => url.pathname === "/");
     await page.waitForLoadState("load");
     mirando = false;
-    expect(errores.filter((e) => !e.includes("ERR_TUNNEL_CONNECTION_FAILED")), errores.join("\n")).toEqual([]);
+    expect(
+      errores.filter((e) => !e.includes("ERR_TUNNEL_CONNECTION_FAILED")),
+      errores.join("\n"),
+    ).toEqual([]);
 
     expect(await clavesDeBeats(page)).toEqual([]);
     expect(await canalesDe(id)).toEqual({ canales: 0 });
@@ -287,7 +298,7 @@ test.describe("cerrar sesion", () => {
     await otroTelefono.waitForURL("**/inicio");
 
     await page.goto("/perfil");
-    await page.getByRole("button", { name: "Cerrar sesión" }).click();
+    await cerrarSesionDesdePerfil(page);
     await page.waitForURL((url) => url.pathname === "/");
     expect((await cierresDeSesion()).cierres).toEqual([{ usuario: id, alcance: "local" }]);
 
@@ -316,7 +327,7 @@ test.describe("cerrar sesion", () => {
     await expect(numeroDeBeats(page)).toHaveText("77");
 
     await page.goto("/perfil");
-    await page.getByRole("button", { name: "Cerrar sesión" }).click();
+    await cerrarSesionDesdePerfil(page);
     await page.waitForURL((url) => url.pathname === "/");
 
     // Se graba todo numero que llegue a pintarse en el contador.
@@ -352,7 +363,7 @@ test.describe("cerrar sesion", () => {
     await expect(numeroDeBeats(page)).toBeVisible();
 
     const copia = await page.evaluate(async () => {
-      const cache = await caches.open("latidos-shell-v17");
+      const cache = await caches.open("latidos-shell-v19");
       const respuesta = await cache.match("/beats");
       return respuesta ? respuesta.text() : null;
     });
@@ -361,9 +372,11 @@ test.describe("cerrar sesion", () => {
     expect(copia).not.toContain(datos.nombre);
     // Y ninguna otra respuesta guardada es una pantalla con sesion.
     const guardadas = await page.evaluate(async () =>
-      (await (await caches.open("latidos-shell-v17")).keys()).map((r) => new URL(r.url).pathname),
+      (await (await caches.open("latidos-shell-v19")).keys()).map((r) => new URL(r.url).pathname),
     );
-    expect(guardadas.filter((ruta) => /^\/(inicio|perfil|onboarding|escanear|api|auth)/.test(ruta))).toEqual([]);
+    expect(guardadas.filter((ruta) => /^\/(inicio|perfil|onboarding|escanear|api|auth)/.test(ruta))).toEqual(
+      [],
+    );
   });
 });
 
@@ -400,7 +413,9 @@ test.describe("accesibilidad", () => {
       orden.push(
         await page.evaluate(() => {
           const el = document.activeElement as HTMLInputElement | null;
-          return el?.getAttribute("aria-label") || el?.labels?.[0]?.textContent || el?.textContent?.trim() || "";
+          return (
+            el?.getAttribute("aria-label") || el?.labels?.[0]?.textContent || el?.textContent?.trim() || ""
+          );
         }),
       );
     }

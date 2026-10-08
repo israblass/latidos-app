@@ -24,7 +24,7 @@ const imagenesRotas = (page: Page) =>
       .filter((i) => i.getBoundingClientRect().width > 0 && (!i.complete || i.naturalWidth === 0))
       .map((i) => i.getAttribute("src")),
   );
-const CACHE_SW = "latidos-shell-v17";
+const CACHE_SW = "latidos-shell-v19";
 
 /**
  * Deja la pantalla lista para abrirse sin red: el service worker controlando
