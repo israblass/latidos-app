@@ -809,8 +809,10 @@
    * transform (seguro en WebKit): el recorte es una caja con overflow hidden
    * corrida a la izquierda y el trazo de adentro corrido lo mismo a la derecha.
    */
+  /* El registro tiene 20px de padding: -6px de margen y 4px de padding dejan
+     el dibujo a 18px del borde, con holgura para el borde del punto. */
   .registro-ecg {
-    margin: 8px -2px 0;
+    margin: 8px -6px 0;
     padding: 0 4px;
     overflow: hidden;
   }

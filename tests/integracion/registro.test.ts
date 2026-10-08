@@ -286,6 +286,11 @@ test.describe("rediseño del registro", () => {
     // En el paso 6 el punto cae sobre el final del trazo (x = 342).
     expect(await xDelPunto()).toBeCloseTo(342, 0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+    // A 390 de ancho el dibujo va a 18px de cada borde: 354px, escala 1.
+    const lienzo = (await page.locator(".registro-ecg-lienzo").boundingBox())!;
+    expect(lienzo.x).toBeCloseTo(18, 0);
+    expect(lienzo.width).toBeCloseTo(354, 0);
+    expect(lienzo.height).toBeCloseTo(30, 0);
     // Al volver, el punto regresa al paso anterior.
     await page.goBack();
     await expect(progreso).toHaveAttribute("data-paso", "5");
