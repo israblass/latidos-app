@@ -288,24 +288,35 @@ variante va sobre el amarillo pleno lo decide `LOGO_AMARILLO` en
 
 ### Logos del pie de la bienvenida (v2.10.1)
 
-El pie de la bienvenida lleva los logos de los aliados, en este orden: The Flame
-Creative Lab (navy), el sello de la UCV (a color) y MUN UCV (azul). Viven en
-`public/marca/pie/` (`logo-flame.webp`, `logo-ucv.webp`, `logo-mun-ucv.webp`,
-tomados de `logos-pie-v2/final/`) y se registran en `LOGOS_PIE`
-(`src/lib/assets.ts`). Solo se escalan proporcionalmente: no se deforman ni se
-recolorean.
+El pie de la bienvenida lleva dos logos de aliados, en negro de una sola tinta
+(pedido de la diseñadora): The Flame Creative Lab a la izquierda y el sello de
+la UCV a la derecha. MUN UCV se retiro por pedido del cliente. Viven en
+`public/marca/pie/` (`logo-flame-negro.webp`, `logo-ucv-negro.webp`, tomados de
+`logos-pie-v3/final/`) y se registran en `LOGOS_PIE` (`src/lib/assets.ts`). Los
+archivos ya vienen en negro: no se recolorean por CSS y solo se escalan
+proporcionalmente.
 
 **Pendiente antes de publicar:**
 
-- **El sello de la UCV es un redibujo hecho con IA** a partir del sello
-  oficial, NO es el archivo oficial. Hay que pedirle a la UCV (o a Kevin) el
+- **El sello de la UCV es una version redibujada** (con IA, a partir del sello
+  oficial), NO es el archivo oficial. Hay que pedirle a la UCV (o a Kevin) el
   vector oficial o su aprobacion de este.
-- **Flame y MUN UCV son ampliaciones 8x** de fuentes pequeñas (131 y 185 px
-  de ancho), no vectores. A tamaño de pie se leen bien, pero con los vectores
-  originales quedan mejor.
+- **Flame es un reescalado** de una fuente pequeña, no un vector. A tamaño de
+  pie se lee bien, pero con el vector original queda mejor.
 
 Para reemplazar cualquiera, basta con dejar el archivo nuevo con el mismo
 nombre en `public/marca/pie/` y actualizar su ancho y alto en `LOGOS_PIE`.
+
+### Reserva del logo LATIDOS en la bienvenida (v2.10.1)
+
+Ningun elemento figurativo de las ilustraciones entra en el area de reserva del
+logo: `RESERVA_LOGO` (`src/components/bienvenida/pantallas.ts`) = la mitad de
+la altura del wordmark (~20px), alrededor del wordmark y su badge. Cada pieza
+del arte declara en ese archivo si es `protagonista` (se escala con el pie
+anclado hasta quedar fuera de la reserva) o `escena` (baja lo necesario); las
+texturas de fondo no llevan rol. Lo comprueba
+`tests/integracion/bienvenida-reserva.test.ts` en las 4 laminas a 320, 375, 390
+y 430 de ancho.
 
 ### Pantalla de carga de la app instalada (v2.10.1)
 
@@ -614,9 +625,11 @@ WebKit no esta en el entorno de pruebas: esto se valida en un iPhone real.
        desvanece al cargar la bienvenida.
 4. [ ] **Borde superior.** En las 4 laminas no hay linea dura bajo la
        hora/bateria, y la hora y la bateria se leen sobre el arte.
-5. [ ] **Logos del pie.** Flame, UCV y MUN UCV se leen con claridad sobre el
+5. [ ] **Logos del pie.** Flame y el sello de la UCV, en negro, se leen con claridad sobre el
        crema en tu modelo, sin tocar los botones.
 6. [ ] **En Safari (sin instalar)** no aparece la pantalla de carga.
+7. [ ] **Reserva del logo.** En las 4 laminas hay aire alrededor del logo
+       LATIDOS: ningun dibujo lo toca.
 
 ## Cambios de design system no reflejados en la constitution
 
