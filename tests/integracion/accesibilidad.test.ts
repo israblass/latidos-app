@@ -37,7 +37,7 @@ test("los 6 pasos del registro", async ({ page }) => {
   await page.goto("/registro/paso-1");
   await revisar(page, "registro paso 1");
 
-  await page.getByLabel("Cedula").fill("V-12345678");
+  await page.getByLabel("Cédula").fill("V-12345678");
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-2");
   await revisar(page, "registro paso 2");
@@ -48,7 +48,7 @@ test("los 6 pasos del registro", async ({ page }) => {
   await page.waitForURL("**/paso-3");
   await revisar(page, "registro paso 3");
 
-  await page.getByLabel("Telefono").fill("04141234567");
+  await page.getByLabel("Teléfono").fill("04141234567");
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-4");
   await revisar(page, "registro paso 4");
@@ -136,7 +136,7 @@ test("pantallas de friccion del canje", async ({ page }) => {
   await cuentaEnInicio(page);
 
   await page.goto(`/escanear/confirmar?qr=${QR.agotado}`);
-  await expect(page.getByText(/ya no esta activo/)).toBeVisible();
+  await expect(page.getByText(/ya no está activo/)).toBeVisible();
   await revisar(page, "QR agotado");
 
   await page.goto(`/escanear/confirmar?qr=${QR.sinLimite}`);
@@ -232,7 +232,7 @@ test.describe("pantalla de Beats (T049)", () => {
     await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
     await page.reload();
     await expect
-      .poll(() => page.evaluate(() => caches.open("latidos-shell-v13").then((c) => c.match("/beats")).then(Boolean)))
+      .poll(() => page.evaluate(() => caches.open("latidos-shell-v14").then((c) => c.match("/beats")).then(Boolean)))
       .toBe(true);
 
     await cortarRed(context);

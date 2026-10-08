@@ -137,16 +137,16 @@ test("04 — descartar el prompt no impide registrarse", async ({ browser }) => 
   // El boton de registro sigue accesible y funciona.
   await pagina.getByRole("button", { name: /^Registrarme\./ }).click();
   await pagina.waitForURL("**/registro/paso-1");
-  await expect(pagina.getByLabel("Cedula")).toBeVisible();
+  await expect(pagina.getByLabel("Cédula")).toBeVisible();
   await contexto.close();
 });
 
 test("05 — los pasos del registro van en el orden de la spec", async ({ page }) => {
-  const esperado = ["Cedula", "Nombre", "Telefono", "Correo", null, "Contrasena"];
+  const esperado = ["Cédula", "Nombre", "Teléfono", "Correo", null, "Contraseña"];
   await page.goto("/registro/paso-1");
 
-  await expect(page.getByLabel("Cedula")).toBeVisible();
-  await page.getByLabel("Cedula").fill("V-12345678");
+  await expect(page.getByLabel("Cédula")).toBeVisible();
+  await page.getByLabel("Cédula").fill("V-12345678");
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-2");
 
@@ -157,8 +157,8 @@ test("05 — los pasos del registro van en el orden de la spec", async ({ page }
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-3");
 
-  await expect(page.getByLabel("Telefono")).toBeVisible();
-  await page.getByLabel("Telefono").fill("04141234567");
+  await expect(page.getByLabel("Teléfono")).toBeVisible();
+  await page.getByLabel("Teléfono").fill("04141234567");
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-4");
 
@@ -173,13 +173,13 @@ test("05 — los pasos del registro van en el orden de la spec", async ({ page }
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-6");
 
-  await expect(page.getByLabel("Contrasena")).toBeVisible();
+  await expect(page.getByLabel("Contraseña", { exact: true })).toBeVisible();
   expect(esperado).toHaveLength(6);
 });
 
 test("06 — cerrar la app a mitad del registro vacia el formulario", async ({ page }) => {
   await page.goto("/registro/paso-1");
-  await page.getByLabel("Cedula").fill("V-12345678");
+  await page.getByLabel("Cédula").fill("V-12345678");
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-2");
   await page.getByLabel("Nombre").fill("Maria");
@@ -187,14 +187,14 @@ test("06 — cerrar la app a mitad del registro vacia el formulario", async ({ p
   await page.reload();
 
   await expect(page).toHaveURL(/paso-1/);
-  await expect(page.getByLabel("Cedula")).toHaveValue("");
+  await expect(page.getByLabel("Cédula")).toHaveValue("");
 });
 
 test("07 — completar los 6 pasos crea la cuenta y deja la sesion iniciada", async ({ page }) => {
   // Matiz sobre la spec: con la confirmacion de correo activada en Supabase, la
   // sesion arranca al abrir el enlace del correo, no al tocar "Crear cuenta".
   const datos = await completarRegistro(page);
-  await expect(page.getByText(/Confirma tu correo/i)).toBeVisible();
+  await expect(page.getByText(/Revisa tu correo/i)).toBeVisible();
 
   await confirmarCorreo(page);
   await page.getByRole("button", { name: "Saltar" }).click();
@@ -339,7 +339,7 @@ test("18 — con modo evento activo el cierre invita a seguir escaneando", async
   await page.goto(`/escanear/confirmar?qr=${QR.sinLimite}`);
   await page.getByRole("button", { name: "Confirmar canje" }).click();
 
-  await expect(page.getByText(/hay mas marcas cerca/)).toBeVisible();
+  await expect(page.getByText(/hay más marcas cerca/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Seguir escaneando" })).toBeVisible();
 });
 
@@ -377,7 +377,7 @@ test("21 — el QR con limite alcanzado da un mensaje neutro, sin confirmacion",
   await cuentaEnInicio(page);
   await page.goto(`/escanear/confirmar?qr=${QR.agotado}`);
 
-  await expect(page.getByText(/Este codigo ya no esta activo/)).toBeVisible();
+  await expect(page.getByText(/Este código ya no está activo/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Confirmar canje" })).toHaveCount(0);
 
   const visible = await page.locator("main").innerText();
@@ -417,7 +417,7 @@ test("23 — sin conexion sugiere reintentar y no procesa nada en segundo plano"
 
   await context.setOffline(true);
   await page.getByRole("button", { name: "Confirmar canje" }).click();
-  await expect(page.getByText(/conexion/i).first()).toBeVisible();
+  await expect(page.getByText(/conexión/i).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Reintentar" })).toBeVisible();
 
   await context.setOffline(false);

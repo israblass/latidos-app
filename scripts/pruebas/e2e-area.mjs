@@ -13,8 +13,11 @@ import { existsSync } from "node:fs";
 import { ENV_PRUEBA, asegurarPostgres, correr, necesitanPostgres } from "./comun.mjs";
 
 const args = process.argv.slice(2);
-const archivos = args.filter((a) => !a.startsWith("-"));
-const opciones = args.filter((a) => a.startsWith("-"));
+// Los specs son los argumentos .ts; lo demas (--grep "...", --headed...) pasa
+// tal cual a Playwright, con sus valores.
+const esSpec = (a) => !a.startsWith("-") && a.endsWith(".ts");
+const archivos = args.filter(esSpec);
+const opciones = args.filter((a) => !esSpec(a));
 
 if (archivos.length === 0) {
   console.error("Uso: npm run test:e2e:area -- tests/integracion/<archivo>.test.ts [...]");
