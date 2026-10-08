@@ -84,3 +84,14 @@ export async function cuentaEnInicio(page: Page, datos = datosDeRegistro()) {
   await page.waitForURL("**/inicio");
   return datos;
 }
+
+/**
+ * "Cerrar sesión" desde el Perfil (v2.11.0): el texto abre la hoja de
+ * confirmacion y el boton de la hoja cierra. Hay que estar ya en /perfil.
+ */
+export async function cerrarSesionDesdePerfil(page: Page) {
+  await page.getByRole("main").getByRole("button", { name: "Cerrar sesión" }).click();
+  const hoja = page.getByRole("dialog", { name: "¿Cerrar sesión?" });
+  await expect(hoja).toBeVisible();
+  await hoja.getByRole("button", { name: "Cerrar sesión" }).click();
+}

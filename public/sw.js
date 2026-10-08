@@ -10,7 +10,7 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v17";
+const VERSION = "v18";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
@@ -44,6 +44,7 @@ const VERSION = "v17";
 // v15: el boton tap del registro pierde el circulo (CSS nuevo).
 // v16: el progreso del registro pasa a un ECG azul con punto amarillo animado (CSS nuevo).
 // v17: el paso 1 del registro pierde el corazon junto al titulo.
+// v18: Perfil v1 (CSS nuevo: .perfil, .vidrio-plano).
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 

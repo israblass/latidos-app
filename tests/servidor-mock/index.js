@@ -408,6 +408,16 @@ const servidor = http.createServer((req, res) => {
       return json(200, unico() ? salida : [salida]);
     }
 
+    // Conteo de los escaneos propios (Perfil): HEAD con Prefer count=exact,
+    // como PostgREST, que responde el total en content-range.
+    if (url.pathname === "/rest/v1/escaneos" && req.method === "HEAD") {
+      const id = sujeto();
+      if (!id) { res.writeHead(401, cors); return res.end(); }
+      const n = escaneos.filter((e) => e.usuario_id === id).length;
+      res.writeHead(200, { ...cors, "content-range": n ? `0-${n - 1}/${n}` : "*/0" });
+      return res.end();
+    }
+
     if (url.pathname === "/rest/v1/escaneos" && req.method === "GET") {
       const id = sujeto();
       if (!id) return json(401, { message: "no auth" });
@@ -428,7 +438,8 @@ const servidor = http.createServer((req, res) => {
         const fila = JSON.parse(cuerpo);
         if (fila.id !== id) return json(403, { code: "42501", message: "RLS" });
         if (perfiles.has(id)) return json(409, { code: "23505", message: "duplicate key" });
-        perfiles.set(id, { ...fila, beats_balance: 0, onboarding_visto: false, notificaciones_habilitadas: false });
+        // created_at: espeja el default now() de la tabla (el Perfil lo muestra).
+        perfiles.set(id, { ...fila, beats_balance: 0, onboarding_visto: false, notificaciones_habilitadas: false, created_at: new Date().toISOString() });
         // Espeja el disparador de bienvenida: el perfil nace en 0 y el bono
         // llega como movimiento, una sola vez.
         registrarMovimiento(id, "bienvenida", configuracion.beats_bienvenida ?? 5);

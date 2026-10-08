@@ -60,7 +60,7 @@ async function prepararCopia(page: Page) {
   await page.reload();
   await expect
     .poll(() =>
-      page.evaluate(() => caches.open("latidos-shell-v17").then((c) => c.match("/beats")).then(Boolean)),
+      page.evaluate(() => caches.open("latidos-shell-v18").then((c) => c.match("/beats")).then(Boolean)),
     )
     .toBe(true);
 }
