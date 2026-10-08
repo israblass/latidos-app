@@ -13,7 +13,7 @@ import { cortarRed, volverRed } from "../ayudantes/red";
  */
 test.beforeEach(reiniciarMock);
 
-const CACHE_SW = "latidos-shell-v15";
+const CACHE_SW = "latidos-shell-v16";
 const SIN_SENAL = "/ilustraciones/latido-ecg-ruido.webp";
 
 /** Imagenes de la pagina que no cargaron. */
@@ -31,7 +31,7 @@ const fuentes = (page: Page) =>
 async function esperarServiceWorker(page: Page) {
   await page.evaluate(() => navigator.serviceWorker.ready);
   await expect
-    .poll(() => page.evaluate(async () => Boolean(await (await caches.open("latidos-shell-v15")).match("/ilustraciones/latido-ecg-ruido.webp"))))
+    .poll(() => page.evaluate(async () => Boolean(await (await caches.open("latidos-shell-v16")).match("/ilustraciones/latido-ecg-ruido.webp"))))
     .toBe(true);
 }
 
