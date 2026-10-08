@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 
 import { ILUSTRACIONES } from "@/lib/ilustraciones";
 
@@ -17,17 +17,102 @@ interface Props {
   children: ReactNode;
 }
 
-/** Un tramo del trazo ECG: linea, un latido y linea, en 60 unidades de ancho. */
-const tramo = (i: number) => {
-  const x = i * 60;
-  return `M${x + 2} 16 H${x + 18} L${x + 24} 6 L${x + 30} 26 L${x + 36} 12 L${x + 40} 16 H${x + 58}`;
-};
+/**
+ * Trazo ECG de progreso (constitution §2, v2.10.4): 6 tramos de 57 unidades,
+ * cada uno con linea, un latido y linea. El viewBox empieza en -6 para que el
+ * punto amarillo quepa entero en el paso 0.
+ */
+export const ANCHO_TRAMO_ECG = 57;
+const VIEWBOX_X = -6;
+const VIEWBOX_ANCHO = 354;
+const VIEWBOX = `${VIEWBOX_X} 0 ${VIEWBOX_ANCHO} 30`;
+const TRAZO_ECG =
+  "M0,18 " +
+  Array.from({ length: TOTAL_PASOS_REGISTRO }, (_, i) => {
+    const x = i * ANCHO_TRAMO_ECG;
+    return `L${x + 18},18 L${x + 24},18 L${x + 28},6 L${x + 33},26 L${x + 37},12 L${x + 41},18 L${x + 57},18`;
+  }).join(" ");
+
+/** Fraccion del ancho del dibujo que ocupa la coordenada x del viewBox. */
+const fraccion = (x: number) => (x - VIEWBOX_X) / VIEWBOX_ANCHO;
+
+/*
+ * Ultimo paso pintado. Vive en el modulo, asi que sobrevive a las
+ * navegaciones internas entre pasos y el trazo puede animarse desde ahi
+ * (hacia adelante o hacia atras). En una carga en frio arranca un paso antes.
+ */
+let ultimoPaso: number | null = null;
+
+const useEfectoDeDisposicion = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+/**
+ * El trazo de progreso. Tres capas apiladas con el mismo viewBox: el trazo
+ * fantasma, el trazo azul recortado hasta x = paso * 57 y el punto amarillo.
+ *
+ * Para WebKit no se anima el ancho de un rect ni un clip-path: el recorte es
+ * un par de transform (la caja con overflow hidden se corre a la izquierda y
+ * el trazo de adentro se corre lo mismo a la derecha) y el punto se mueve con
+ * otro transform. Las tres transiciones son de transform, compuestas en GPU.
+ */
+function TrazoProgreso({ paso }: { paso: number }) {
+  const [x, setX] = useState(() => (ultimoPaso ?? paso - 1) * ANCHO_TRAMO_ECG);
+  const destino = paso * ANCHO_TRAMO_ECG;
+
+  // Con movimiento reducido, el trazo aparece ya en su sitio (antes de pintar).
+  useEfectoDeDisposicion(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setX(destino);
+  }, [destino]);
+
+  useEffect(() => {
+    ultimoPaso = paso;
+    // Dos cuadros: el primero pinta el punto de partida; el segundo arranca
+    // la transicion hacia el destino.
+    let segundo = 0;
+    const primero = requestAnimationFrame(() => {
+      segundo = requestAnimationFrame(() => setX(destino));
+    });
+    return () => {
+      cancelAnimationFrame(primero);
+      cancelAnimationFrame(segundo);
+    };
+  }, [paso, destino]);
+
+  const lleno = fraccion(x) * 100;
+  const oculto = 100 - lleno;
+
+  return (
+    <div className="registro-ecg-lienzo">
+      <svg aria-hidden="true" className="registro-ecg-capa registro-ecg-fantasma" viewBox={VIEWBOX}>
+        <path d={TRAZO_ECG} />
+      </svg>
+      <div className="registro-ecg-recorte" style={{ transform: `translateX(${-oculto}%)` }}>
+        <svg
+          aria-hidden="true"
+          className="registro-ecg-capa registro-ecg-lleno"
+          viewBox={VIEWBOX}
+          style={{ transform: `translateX(${oculto}%)` }}
+        >
+          <path d={TRAZO_ECG} />
+        </svg>
+      </div>
+      <div
+        className="registro-ecg-punto"
+        data-ecg-punto=""
+        style={{ transform: `translateX(${(x / VIEWBOX_ANCHO) * 100}%)` }}
+      >
+        <svg aria-hidden="true" className="registro-ecg-capa" viewBox={VIEWBOX}>
+          <circle cx="0" cy="18" r="6" />
+        </svg>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Envoltorio comun de las 6 pantallas del registro (constitution §2,
- * v2.10.2): fondo crema con los circulos del pulso muy suaves, boton para
- * volver, "Paso N de 6" con el trazo ECG de progreso (6 tramos, el activo
- * resaltado), titulo en Anton y subtitulo breve.
+ * v2.10.4): fondo crema con los circulos del pulso muy suaves, boton para
+ * volver, "Paso N de 6", el trazo ECG de progreso (azul con punto amarillo),
+ * titulo en Anton y subtitulo breve.
  */
 export function ProgresoRegistro({ paso, titulo, subtitulo, corazon = false, children }: Props) {
   const router = useRouter();
@@ -69,28 +154,16 @@ export function ProgresoRegistro({ paso, titulo, subtitulo, corazon = false, chi
         </div>
 
         <div
-          className="mt-2"
+          className="registro-ecg"
           role="progressbar"
           aria-valuenow={paso}
           aria-valuemin={1}
           aria-valuemax={TOTAL_PASOS_REGISTRO}
           aria-label="Progreso del registro"
+          data-paso={paso}
+          data-progreso-x={paso * ANCHO_TRAMO_ECG}
         >
-          <svg
-            aria-hidden="true"
-            className="registro-ecg"
-            viewBox={`0 0 ${TOTAL_PASOS_REGISTRO * 60} 32`}
-            preserveAspectRatio="none"
-          >
-            {Array.from({ length: TOTAL_PASOS_REGISTRO }, (_, i) => (
-              <path
-                key={i}
-                d={tramo(i)}
-                vectorEffect="non-scaling-stroke"
-                data-estado={i + 1 < paso ? "hecho" : i + 1 === paso ? "activo" : "pendiente"}
-              />
-            ))}
-          </svg>
+          <TrazoProgreso paso={paso} />
         </div>
 
         <div className="mt-6 flex items-start justify-between gap-3">
