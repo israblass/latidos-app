@@ -249,6 +249,23 @@ test.describe("rediseño del registro", () => {
     await expect(page.locator("[data-boton-deslizar]")).toHaveCount(0);
     await expect(page.locator("[data-boton-vidrio]")).toHaveCount(1);
   });
+
+  test("los botones tap no llevan circulo: texto centrado y flecha a su derecha", async ({ page }) => {
+    for (const paso of [1, 5, 6] as Paso[]) {
+      await llegarAlPaso(page, paso);
+      const boton = page.locator("[data-boton-vidrio]");
+      await expect(boton.locator(".circulo-flecha")).toHaveCount(0);
+      const texto = (await boton.locator("span").first().boundingBox())!;
+      const flecha = (await boton.locator("[data-flecha-boton]").boundingBox())!;
+      const caja = (await boton.boundingBox())!;
+      expect(flecha.width).toBeCloseTo(22, 0);
+      expect(Math.round(flecha.x - (texto.x + texto.width))).toBe(10);
+      // El conjunto texto + flecha, centrado en la pildora.
+      const centro = (texto.x + flecha.x + flecha.width) / 2;
+      expect(Math.abs(centro - (caja.x + caja.width / 2))).toBeLessThanOrEqual(1);
+      expect(caja.height).toBeGreaterThanOrEqual(64);
+    }
+  });
 });
 
 for (const [ancho, alto] of [
@@ -325,7 +342,8 @@ test.describe("Crear cuenta", () => {
     await boton.click();
     await expect(boton).toBeDisabled();
     await expect(boton).toHaveAttribute("aria-busy", "true");
-    await expect(boton).toContainText("Creando cuenta");
+    await expect(boton.locator("[data-flecha-boton]")).toHaveCount(0);
+    await expect(boton).toHaveText("Creando…");
     // Ni otro toque ni Enter mandan un segundo pedido.
     await boton.click({ force: true });
     await campo.press("Enter");
