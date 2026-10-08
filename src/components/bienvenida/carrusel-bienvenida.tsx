@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 
-import { PANTALLAS, type PiezaArte } from "@/components/bienvenida/pantallas";
+import { PANTALLAS, RESERVA_LOGO, type PiezaArte } from "@/components/bienvenida/pantallas";
 import { BotonDeslizar } from "@/components/ui/boton-deslizar";
 import { ALTO_LOGO, ANCHO_LOGO, LOGOS, LOGOS_PIE, logoSobreAmarillo } from "@/lib/assets";
 
@@ -21,16 +21,54 @@ import { ALTO_LOGO, ANCHO_LOGO, LOGOS, LOGOS_PIE, logoSobreAmarillo } from "@/li
 const reduceMovimiento = () =>
   typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-/** Posicion y tamaño de una pieza, en unidades del lienzo (--u = 1px de 390). */
+/**
+ * Posicion y tamaño de una pieza, en unidades del lienzo (--u = 1px de 390).
+ *
+ * Reserva del logo (v2.10.1, ver RESERVA_LOGO): --arriba-libre es la primera
+ * fila libre bajo el logo + su reserva, y --abajo-libre la ultima fila antes
+ * de los 8px sobre la etiqueta del titular, ambas medidas desde el borde de
+ * arriba del arte (globals.css, .bienvenida-lienzo > img).
+ * - Protagonista: su pie queda donde estaba (o 8px sobre la etiqueta, con
+ *   hastaEtiqueta) y su alto es el menor entre `escala` x su alto y lo que
+ *   cabe entre ese pie y --arriba-libre. Se centra en el mismo eje que antes.
+ * - Escena: mismo tamaño; baja hasta --arriba-libre si hiciera falta.
+ * Nada de esto se mide en JavaScript: todo es CSS y sale bien en la primera
+ * pintura.
+ */
 function estiloPieza(p: PiezaArte): CSSProperties {
   const u = (n: number) => `calc(${n} * var(--u))`;
+  const { ancho: aw, alto: ah } = p.ilustracion;
+  const altoNatural = p.alto ?? (p.ancho! * ah) / aw;
+  const anchoNatural = p.ancho ?? (p.alto! * aw) / ah;
+  const sombra = p.sombra ? `drop-shadow(0 10px 22px rgba(26, 35, 50, ${p.sombra}))` : undefined;
+
+  if (p.rol === "protagonista") {
+    const pieNatural = u(p.top + altoNatural);
+    const pie = p.hastaEtiqueta ? `min(${pieNatural}, var(--abajo-libre))` : pieNatural;
+    const centro =
+      p.centro !== undefined
+        ? `calc(50% + ${p.centro + anchoNatural / 2} * var(--u))`
+        : u((p.izquierda ?? 0) + anchoNatural / 2);
+    return {
+      ["--pie" as string]: pie,
+      ["--alto" as string]: `max(0px, min(${u((p.escala ?? 1) * altoNatural)}, calc(var(--pie) - var(--arriba-libre))))`,
+      left: centro,
+      top: "calc(var(--pie) - var(--alto))",
+      width: "auto",
+      height: "var(--alto)",
+      transform: "translateX(-50%)",
+      opacity: p.opacidad,
+      filter: sombra,
+    };
+  }
+
   return {
     left: p.centro !== undefined ? `calc(50% + ${p.centro} * var(--u))` : u(p.izquierda ?? 0),
-    top: u(p.top),
+    top: p.rol === "escena" ? `max(${u(p.top)}, var(--arriba-libre))` : u(p.top),
     width: p.ancho !== undefined ? u(p.ancho) : "auto",
     height: p.alto !== undefined ? u(p.alto) : "auto",
     opacity: p.opacidad,
-    filter: p.sombra ? `drop-shadow(0 10px 22px rgba(26, 35, 50, ${p.sombra}))` : undefined,
+    filter: sombra,
   };
 }
 
@@ -112,6 +150,7 @@ export function CarruselBienvenida() {
         onKeyDown={alTeclear}
         data-carrusel-bienvenida=""
         className="bienvenida-carrusel"
+        style={{ ["--reserva-logo" as string]: `${RESERVA_LOGO}px` }}
       >
         {PANTALLAS.map((p, i) => {
           const visible = i === activa;
@@ -135,6 +174,7 @@ export function CarruselBienvenida() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       key={pieza.ilustracion.src}
+                      data-rol-arte={pieza.rol}
                       src={pieza.ilustracion.src}
                       alt=""
                       width={pieza.ilustracion.ancho}
@@ -200,14 +240,13 @@ export function CarruselBienvenida() {
         />
         <footer className="bienvenida-pie">
           <p className="bienvenida-pie__rotulo">Un programa de</p>
-          {/* Orden fijo: Flame, UCV, MUN UCV. Alturas en globals.css
-              (.bienvenida-logo-pie--*). */}
+          {/* Orden fijo: Flame a la izquierda, UCV a la derecha. Alturas en
+              globals.css (.bienvenida-logo-pie--*). */}
           <div className="bienvenida-pie__logos">
             {(
               [
                 ["flame", LOGOS_PIE.flame, "bienvenida-logo-pie bienvenida-logo-pie--flame"],
                 ["ucv", LOGOS_PIE.ucv, "bienvenida-logo-pie bienvenida-logo-pie--ucv"],
-                ["mun-ucv", LOGOS_PIE.munUcv, "bienvenida-logo-pie bienvenida-logo-pie--mun"],
               ] as const
             ).map(([nombre, logo, clase]) => (
               // eslint-disable-next-line @next/next/no-img-element

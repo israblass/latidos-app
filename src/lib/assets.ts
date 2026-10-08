@@ -18,7 +18,6 @@ export const ASSETS = {
   /** Logos institucionales, para creditos. */
   flame: `${BUCKET}/flame-logo.png`,
   ucv: `${BUCKET}/Logo-UCV.png`,
-  munUcv: `${BUCKET}/Logo-MUN-UCV.png`,
 
   /** Lettering de cada fase del programa. */
   letteringPulso: `${BUCKET}/pulso-lettering.png`,
@@ -57,19 +56,20 @@ export const logoSobreAmarillo = () => (LOGO_AMARILLO === "blanco" ? LOGOS.blanc
 
 /**
  * Logos de los aliados en el pie de la bienvenida (v2.10.1), servidos desde
- * public/marca/pie (logos-pie-v2/final). Se escalan proporcionalmente y nada
- * mas: no se deforman ni se recolorean. Ancho y alto son los del archivo, para
- * reservar su proporcion antes de que carguen.
+ * public/marca/pie (logos-pie-v3/final): The Flame Creative Lab y el sello de
+ * la UCV, en negro de una sola tinta por pedido de la diseñadora (MUN UCV se
+ * retiro por pedido del cliente). Los archivos ya vienen en negro: no se
+ * recolorean ni se deforman, solo se escalan. Ancho y alto son los del
+ * archivo, para reservar su proporcion antes de que carguen.
  *
- * - El sello de la UCV es un redibujo hecho con IA a partir del oficial, NO el
- *   archivo oficial: falta la aprobacion de la UCV (o de Kevin) o el vector.
- * - Flame y MUN UCV son ampliaciones 8x de fuentes pequeñas: se reemplazan con
- *   el mismo nombre de archivo cuando lleguen los vectores.
+ * - El sello de la UCV es un redibujo (hecho con IA a partir del oficial), NO
+ *   el archivo oficial: falta la aprobacion de la UCV (o de Kevin) o el vector.
+ * - Flame es una ampliacion de una fuente pequeña: se reemplaza con el mismo
+ *   nombre de archivo cuando llegue el vector original.
  */
 export const LOGOS_PIE = {
-  flame: { src: "/marca/pie/logo-flame.webp", ancho: 1488, alto: 432, alt: "The Flame Creative Lab" },
-  ucv: { src: "/marca/pie/logo-ucv.webp", ancho: 1024, alto: 1024, alt: "Universidad Central de Venezuela" },
-  munUcv: { src: "/marca/pie/logo-mun-ucv.webp", ancho: 1049, alto: 615, alt: "MUN UCV" },
+  flame: { src: "/marca/pie/logo-flame-negro.webp", ancho: 1488, alto: 432, alt: "The Flame Creative Lab" },
+  ucv: { src: "/marca/pie/logo-ucv-negro.webp", ancho: 1024, alto: 1024, alt: "Universidad Central de Venezuela" },
 } as const;
 
 /*
