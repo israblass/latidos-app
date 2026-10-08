@@ -13,7 +13,11 @@
     "test:ui": "playwright test --ui",
     "test:bd": "playwright test tests/integracion/rls.test.ts tests/integracion/qr-concurrencia.test.ts tests/integracion/limite-diario.test.ts tests/integracion/libro-movimientos.test.ts tests/integracion/lectura-beats.test.ts tests/integracion/libro-concurrencia.test.ts",
     "rendimiento": "PROBAR_RENDIMIENTO=1 playwright test tests/integracion/rendimiento.test.ts",
-    "splash": "node scripts/generar-splash.mjs"
+    "splash": "node scripts/generar-splash.mjs",
+    "test:rapido": "tsc --noEmit && next lint --quiet && playwright test -c playwright.rapido.config.ts",
+    "test:e2e:area": "node scripts/pruebas/e2e-area.mjs",
+    "test:completo": "node scripts/pruebas/completo.mjs",
+    "capturas": "node scripts/pruebas/capturas.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

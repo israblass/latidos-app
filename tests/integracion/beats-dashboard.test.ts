@@ -14,7 +14,7 @@ import type { DiaHistorial, Movimiento, TipoMovimiento } from "../../src/types/b
  */
 test.use({ viewport: { width: 390, height: 844 } });
 
-test.describe("metricas y marcas (sin pantalla)", () => {
+test.describe("metricas y marcas (sin pantalla)", { tag: "@rapido" }, () => {
   let n = 0;
   const mov = (
     tipo: TipoMovimiento,
@@ -329,7 +329,7 @@ test.describe("en pantalla", () => {
     await expect(comoGanar(page)).toBeFocused();
   });
 
-  test("tituloDia: Hoy, Ayer y la fecha en tipo oracion", () => {
+  test("tituloDia: Hoy, Ayer y la fecha en tipo oracion", { tag: "@rapido" }, () => {
     const ahora = new Date("2026-10-01T16:00:00Z");
     expect(tituloDia("2026-10-01", ahora)).toBe("Hoy");
     expect(tituloDia("2026-09-30", ahora)).toBe("Ayer");

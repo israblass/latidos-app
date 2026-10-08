@@ -170,7 +170,7 @@ test("en el navegador el overlay tambien sale del DOM y no vuelve en las navegac
   await expect(page.locator("#splash-inicial")).toHaveCount(0);
 });
 
-test("el manifest conserva el crema y los iconos de siempre", () => {
+test("el manifest conserva el crema y los iconos de siempre", { tag: "@rapido" }, () => {
   const manifest = JSON.parse(readFileSync(join(RAIZ, "public", "manifest.json"), "utf8"));
   expect(manifest.background_color).toBe("#FFFFF5");
   expect(manifest.theme_color).toBe("#FFFFF5");

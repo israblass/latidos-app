@@ -207,7 +207,7 @@ test("se ve solo donde se veia: no en bienvenida, entrar, escaner ni sin conexio
   expect(encima).toBe(false);
 });
 
-test("el componente no define vidrio propio: usa la clase central", () => {
+test("el componente no define vidrio propio: usa la clase central", { tag: "@rapido" }, () => {
   const codigo = readFileSync(
     join(__dirname, "..", "..", "src", "components", "navegacion", "tab-bar.tsx"),
     "utf8",

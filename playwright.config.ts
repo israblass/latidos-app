@@ -80,7 +80,10 @@ export default defineConfig({
           stdout: "pipe",
         },
         {
-          command: "npm run dev",
+          // Por defecto, el servidor de desarrollo. Con PW_SERVIDOR=produccion
+          // (npm run test:completo, despues de `next build`) se sirve el build
+          // de produccion, que es lo que mide la prueba de rendimiento.
+          command: process.env.PW_SERVIDOR === "produccion" ? "npx next start -p 3000" : "npm run dev",
           url: URL_BASE,
           reuseExistingServer: !process.env.CI,
           env: {

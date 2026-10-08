@@ -20,7 +20,7 @@ import { inicioDelDia, esDeHoy } from "../../src/lib/fecha/limite-diario";
 
 const CARACAS = "America/Caracas";
 
-test.describe("el corte del dia se calcula en la zona del programa", () => {
+test.describe("el corte del dia se calcula en la zona del programa", { tag: "@rapido" }, () => {
   test("medianoche de Caracas, no del servidor en UTC", () => {
     // En Vercel el proceso corre en UTC, donde medianoche cae a las 8pm en
     // Venezuela. Alguien que escanea a las 9pm veria su limite reiniciado el

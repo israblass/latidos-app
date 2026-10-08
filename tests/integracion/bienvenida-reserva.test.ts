@@ -83,7 +83,7 @@ function medir(page: Page, i: number) {
 
 const seTocan = (a: Caja, b: Caja) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
 
-test("la reserva es la mitad del alto del wordmark (~20px)", () => {
+test("la reserva es la mitad del alto del wordmark (~20px)", { tag: "@rapido" }, () => {
   expect(ALTO_WORDMARK).toBeCloseTo(40.3, 1);
   expect(RESERVA_LOGO).toBeCloseTo(20.2, 1);
 });
