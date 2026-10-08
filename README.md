@@ -164,6 +164,10 @@ detiene y pide que se pegue el enlace que llego al buzon.
 
 ## Pruebas
 
+> **Por niveles** (ver `docs/pruebas.md`): `npm run test:rapido` tras cada cambio,
+> `npm run test:e2e:area -- <specs>` para el área tocada y `npm run test:completo`
+> (la suite entera) en GitHub Actions en cada PR.
+
 ```bash
 npm test                 # suite completa (levanta mock + app)
 npm run test:ui          # la misma suite en modo interactivo
