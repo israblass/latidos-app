@@ -197,7 +197,7 @@ test("se ve solo donde se veia: no en bienvenida, entrar, escaner ni sin conexio
 
   // Con una hoja abierta, la hoja queda encima: la barra no se puede tocar.
   await abrirBeats(page);
-  await page.getByRole("button", { name: "¿Cómo gano Beats?" }).click();
+  await page.getByRole("button", { name: "Cómo ganar" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   const caja = (await barra(page).boundingBox())!;
   const encima = await page.evaluate(

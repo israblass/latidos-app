@@ -57,7 +57,7 @@ test.describe("entrar", () => {
     // v2.10.0: boton de deslizar; un toque tambien lleva.
     await page.getByRole("button", { name: /^Ya tengo cuenta\./ }).click();
     await page.waitForURL("**/entrar");
-    await expect(page.getByRole("heading", { name: "Entrar", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Qué bueno verte de nuevo", level: 1 })).toBeVisible();
     // Y desde Entrar se puede ir a crear una cuenta.
     await page.getByRole("link", { name: "Crear cuenta" }).click();
     await page.waitForURL("**/registro/paso-1");
@@ -363,7 +363,7 @@ test.describe("cerrar sesion", () => {
     await expect(numeroDeBeats(page)).toBeVisible();
 
     const copia = await page.evaluate(async () => {
-      const cache = await caches.open("latidos-shell-v19");
+      const cache = await caches.open("latidos-shell-v20");
       const respuesta = await cache.match("/beats");
       return respuesta ? respuesta.text() : null;
     });
@@ -372,7 +372,7 @@ test.describe("cerrar sesion", () => {
     expect(copia).not.toContain(datos.nombre);
     // Y ninguna otra respuesta guardada es una pantalla con sesion.
     const guardadas = await page.evaluate(async () =>
-      (await (await caches.open("latidos-shell-v19")).keys()).map((r) => new URL(r.url).pathname),
+      (await (await caches.open("latidos-shell-v20")).keys()).map((r) => new URL(r.url).pathname),
     );
     expect(guardadas.filter((ruta) => /^\/(inicio|perfil|onboarding|escanear|api|auth)/.test(ruta))).toEqual(
       [],

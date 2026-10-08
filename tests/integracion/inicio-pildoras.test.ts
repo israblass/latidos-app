@@ -165,7 +165,7 @@ test("un nombre largo baja a 32 px y envuelve sin romper el layout", async ({ pa
 test("Escanear QR navega a /escanear y es el CTA de 64 px con su flecha", async ({ page }) => {
   await cuentaEnInicio(page);
   // v2.9.0: es el boton de deslizar; un toque en el circulo tambien abre.
-  const control = page.getByRole("main").locator("[data-boton-deslizar]");
+  const control = page.getByRole("main").locator("[data-boton-deslizar]").filter({ hasText: "Escanear QR" });
   const caja = (await control.boundingBox())!;
   expect(Math.round(caja.height)).toBe(64);
   await expect(control).toHaveCSS("background-color", "rgb(253, 251, 5)");
@@ -229,8 +229,9 @@ test("actividad reciente: hasta 3 movimientos con su monto y Ver historial lleva
   await expect(lista).toContainText("KFC");
   await expect(lista).toContainText("+15");
 
-  const ver = page.getByRole("link", { name: "Ver historial" });
-  await expect(ver).toHaveClass(/boton-oscuro/);
+  // v2.13.0: deslizable navy (lleva el circulo, asi que se desliza); un toque tambien lleva.
+  const ver = page.getByRole("button", { name: "Desliza para ver tu historial" });
+  await expect(page.locator("[data-boton-deslizar]").filter({ has: ver })).toHaveClass(/deslizar--navy/);
   expect((await ver.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   await ver.click();
   await page.waitForURL("**/beats");

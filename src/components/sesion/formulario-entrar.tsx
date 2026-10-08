@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 
-import { CampoTexto } from "@/components/registro/campo-texto";
+import { useTecladoAbierto } from "@/hooks/use-teclado-abierto";
+import { ILUSTRACIONES } from "@/lib/ilustraciones";
 import { crearClienteNavegador } from "@/lib/supabase/client";
 
 /**
@@ -16,6 +17,14 @@ import { crearClienteNavegador } from "@/lib/supabase/client";
  * No decide a donde ir despues: manda a Inicio, y las guardias que ya existen
  * llevan al onboarding si no se vio, o a confirmar el correo si falta el
  * perfil.
+ *
+ * Diseño (constitution §2, v2.13.0, opcion A "heroe"): circulos del pulso y
+ * degradado de marca, el corazon con audifonos, "Qué bueno verte de nuevo",
+ * una sola tarjeta de vidrio con correo y contraseña, "Entrar" tap de vidrio
+ * amarillo (sin circulo: no se desliza) y "Crear cuenta" de vidrio blanco.
+ * Capas con desenfoque: la tarjeta y "Entrar"; el boton atras y "Crear
+ * cuenta" son .vidrio-plano. Con el teclado abierto se va el corazon y los
+ * botones suben bajo la tarjeta, para que campos y "Entrar" se alcancen.
  */
 
 /** Sintaxis basica de correo: algo, arroba, dominio con punto. */
@@ -50,6 +59,9 @@ function IconoOjo({ tachado }: { tachado: boolean }) {
 
 export function FormularioEntrar() {
   const router = useRouter();
+  const teclado = useTecladoAbierto();
+  const id = useId();
+  const corazon = ILUSTRACIONES.corazonAudifonosEntrar;
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [verContrasena, setVerContrasena] = useState(false);
@@ -60,10 +72,14 @@ export function FormularioEntrar() {
   const campoCorreo = useRef<HTMLInputElement>(null);
   const campoContrasena = useRef<HTMLInputElement>(null);
 
+  // "Entrar" se apaga hasta que los dos campos tengan algo.
+  const incompleto = !correo || !contrasena;
+
   async function entrar(evento: FormEvent) {
     evento.preventDefault();
-    // Sin doble envio: un segundo toque mientras se espera no hace nada.
-    if (enviando) return;
+    // Sin doble envio: un segundo toque mientras se espera no hace nada. Con
+    // un campo vacio el boton esta apagado y Enter tampoco envia.
+    if (enviando || incompleto) return;
 
     const correoLimpio = correo.trim().toLowerCase();
     setErrorGeneral(null);
@@ -123,102 +139,155 @@ export function FormularioEntrar() {
     setEnviando(false);
   }
 
+  const idCorreo = `${id}-correo`;
+  const idContrasena = `${id}-contrasena`;
+  const errorCampo = errorCorreo ?? errorContrasena;
+
   return (
-    <main className="flex min-h-dvh flex-col px-5 pb-8 pt-4">
-      <header>
-        <Link
-          href="/"
-          aria-label="Volver a la bienvenida"
-          className="-ml-2 flex h-12 w-12 items-center justify-center rounded-control text-texto-secundario transition-opacity active:opacity-60"
+    <main className="entrar" data-teclado={teclado ? "" : undefined}>
+      <div aria-hidden="true" className="fondo-inicio" />
+      <div aria-hidden="true" className="registro-arte">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={ILUSTRACIONES.circulosPulsoBienvenida.src}
+          alt=""
+          width={ILUSTRACIONES.circulosPulsoBienvenida.ancho}
+          height={ILUSTRACIONES.circulosPulsoBienvenida.alto}
+          decoding="async"
+        />
+      </div>
+
+      <Link href="/" aria-label="Volver a la bienvenida" className="vidrio vidrio-plano entrar-atras">
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </Link>
-        <h1 className="titulo-pantalla mt-8">Entrar</h1>
-        <p className="mt-2 text-texto-secundario">Con el correo y la contraseña de tu cuenta.</p>
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </Link>
+
+      <header className="flex flex-col items-center text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={corazon.src}
+          alt=""
+          width={corazon.ancho}
+          height={corazon.alto}
+          decoding="async"
+          data-heroe-entrar=""
+          className="entrar-heroe"
+        />
+        <h1 className="entrar-titulo">
+          <span className="block">Qué bueno verte</span> <span className="block">de nuevo</span>
+        </h1>
       </header>
 
-      <form noValidate onSubmit={entrar} className="mt-6 flex flex-1 flex-col">
-        <div className="flex flex-col gap-5">
-          <CampoTexto
-            ref={campoCorreo}
-            etiqueta="Correo"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            autoCapitalize="none"
-            spellCheck={false}
-            value={correo}
-            error={errorCorreo}
-            onChange={(e) => {
-              setCorreo(e.target.value);
-              setErrorCorreo(null);
-            }}
-          />
-
-          <CampoTexto
-            ref={campoContrasena}
-            etiqueta="Contraseña"
-            type={verContrasena ? "text" : "password"}
-            autoComplete="current-password"
-            value={contrasena}
-            error={errorContrasena}
-            onChange={(e) => {
-              setContrasena(e.target.value);
-              setErrorContrasena(null);
-            }}
-            accesorio={
-              // Nombre fijo y el estado en aria-pressed: un lector de pantalla
-              // anuncia "Mostrar contraseña, botón, presionado / no presionado".
+      <form noValidate onSubmit={entrar} className="entrar-formulario">
+        <div className="vidrio entrar-tarjeta">
+          <div className="entrar-fila">
+            <label htmlFor={idCorreo} className="entrar-etiqueta">
+              Correo
+            </label>
+            <input
+              ref={campoCorreo}
+              id={idCorreo}
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              autoCapitalize="none"
+              spellCheck={false}
+              value={correo}
+              aria-invalid={errorCorreo ? true : undefined}
+              aria-describedby={errorCorreo ? `${id}-error` : undefined}
+              onChange={(e) => {
+                setCorreo(e.target.value);
+                setErrorCorreo(null);
+              }}
+              className="entrar-campo"
+            />
+          </div>
+          <div className="entrar-fila">
+            <label htmlFor={idContrasena} className="entrar-etiqueta">
+              Contraseña
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                ref={campoContrasena}
+                id={idContrasena}
+                type={verContrasena ? "text" : "password"}
+                autoComplete="current-password"
+                value={contrasena}
+                aria-invalid={errorContrasena ? true : undefined}
+                aria-describedby={errorContrasena ? `${id}-error` : undefined}
+                onChange={(e) => {
+                  setContrasena(e.target.value);
+                  setErrorContrasena(null);
+                }}
+                className="entrar-campo"
+              />
+              {/* Nombre fijo y el estado en aria-pressed: un lector de pantalla
+                  anuncia "Mostrar contraseña, botón, presionado / no presionado". */}
               <button
                 type="button"
                 aria-label="Mostrar contraseña"
                 aria-pressed={verContrasena}
                 onClick={() => setVerContrasena((v) => !v)}
-                className="flex h-12 w-12 items-center justify-center rounded-control text-texto-secundario active:opacity-60"
+                className="-mr-3 -my-2 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-texto-secundario active:opacity-60"
               >
                 <IconoOjo tachado={verContrasena} />
               </button>
-            }
-          />
+            </div>
+          </div>
         </div>
+
+        {errorCampo ? (
+          <p id={`${id}-error`} className="mt-3 px-2 text-sm text-error-texto">
+            {errorCampo}
+          </p>
+        ) : null}
 
         {/* role="alert": el lector de pantalla lo anuncia al aparecer, sin
             mover el foco, que se queda en el boton que se acaba de tocar. */}
-        <p role="alert" className="mt-4 min-h-[1.25rem] text-sm text-error-texto">
+        <p role="alert" className="mt-3 min-h-[1.25rem] px-2 text-sm text-error-texto">
           {errorGeneral}
         </p>
 
-        <div className="mt-auto flex flex-col gap-3 pt-8">
+        <div className="entrar-acciones">
           <button
             type="submit"
             // aria-disabled y no disabled: un boton deshabilitado suelta el foco.
-            aria-disabled={enviando}
-            className={`boton-primario ${enviando ? "opacity-60" : ""}`}
+            aria-disabled={enviando || incompleto}
+            aria-busy={enviando || undefined}
+            data-boton-vidrio=""
+            className="vidrio vidrio-amarillo boton-vidrio"
           >
-            {enviando ? (
-              <>
-                <span className="girador mr-2" aria-hidden="true" />
-                Entrando…
-              </>
-            ) : (
-              "Entrar"
+            <span>{enviando ? "Entrando…" : "Entrar"}</span>
+            {enviando ? null : (
+              <svg
+                aria-hidden="true"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
             )}
           </button>
 
-          <p className="text-center text-sm text-texto-secundario">¿Todavía no tienes cuenta?</p>
-          <Link href="/registro/paso-1" className="boton-ghost">
+          <p className="text-center text-[15px] text-texto-secundario">¿Todavía no tienes cuenta?</p>
+          <Link href="/registro/paso-1" className="vidrio vidrio-plano boton-vidrio">
             Crear cuenta
           </Link>
         </div>

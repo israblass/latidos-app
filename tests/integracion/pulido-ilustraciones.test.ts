@@ -15,7 +15,8 @@ import { cortarRed, volverRed } from "../ayudantes/red";
 test.use({ viewport: { width: 390, height: 844 } });
 test.beforeEach(reiniciarMock);
 
-const deslizar = (page: Page) => page.locator("[data-boton-deslizar]");
+// En el Inicio hay dos deslizables desde la v2.13.0: "Escanear QR" y "Ver historial".
+const deslizar = (page: Page) => page.locator("[data-boton-deslizar]").filter({ hasText: "Escanear QR" });
 const circulo = (page: Page) =>
   page.getByRole("button", { name: "Escanear QR. Desliza o toca para abrir el escáner." });
 
@@ -106,8 +107,8 @@ test.describe("boton de deslizar", () => {
     expect(c.height).toBeGreaterThanOrEqual(44);
     // Sin enlace arrastrable adentro.
     await expect(deslizar(page).locator("a")).toHaveCount(0);
-    // "Ver historial" sigue siendo un enlace de toque.
-    await expect(page.getByRole("link", { name: "Ver historial" })).toHaveCount(1);
+    // "Ver historial" lleva circulo, asi que tambien se desliza (v2.13.0).
+    await expect(page.getByRole("button", { name: "Desliza para ver tu historial" })).toHaveCount(1);
   });
 
   test("con movimiento normal hay destello; con prefers-reduced-motion, no", async ({ page }) => {
@@ -251,7 +252,7 @@ test.describe("ilustraciones del Inicio", () => {
     await expect
       .poll(() =>
         page.evaluate(
-          (lista) => caches.open("latidos-shell-v19").then((c) => Promise.all(lista.map((r) => c.match(r).then(Boolean)))),
+          (lista) => caches.open("latidos-shell-v20").then((c) => Promise.all(lista.map((r) => c.match(r).then(Boolean)))),
           rutas,
         ),
       )

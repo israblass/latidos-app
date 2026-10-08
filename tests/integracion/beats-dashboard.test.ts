@@ -119,7 +119,6 @@ test.describe("en pantalla", () => {
   test.beforeEach(reiniciarMock);
 
   const hoja = (page: Page) => page.getByRole("dialog", { name: "¿Cómo gano Beats?" });
-  const pildora = (page: Page) => page.getByRole("button", { name: "¿Cómo gano Beats?" });
   const comoGanar = (page: Page) => page.getByRole("button", { name: "Cómo ganar" });
   const carrusel = (page: Page) => page.getByRole("list", { name: "Marcas donde has sumado" });
   const tarjetasDeMarca = (page: Page) => carrusel(page).locator("li[data-marca]");
@@ -301,32 +300,33 @@ test.describe("en pantalla", () => {
     expect(duracion).toBeLessThan(0.001);
   });
 
-  test("la hoja de Cómo ganar abre desde la pildora y desde el boton, y cierra con Escape", async ({ page }) => {
+  test("sin el '?' de la cabecera: Cómo ganar es un boton amarillo sin flecha que abre la hoja", async ({ page }) => {
     await conDatos(page);
-    // La pildora navy de la cabecera, la de siempre: una sola.
-    await expect(pildora(page)).toHaveCount(1);
-    await expect(pildora(page)).toHaveCSS("background-color", "rgb(26, 35, 50)");
-    const caja = (await pildora(page).boundingBox())!;
-    expect(Math.round(caja.width)).toBe(108);
-    expect(Math.round(caja.height)).toBe(58);
-
-    await pildora(page).click();
-    await expect(hoja(page)).toBeVisible();
-    await page.keyboard.press("Escape");
-    await expect(hoja(page)).toHaveCount(0);
-    await expect(pildora(page)).toBeFocused();
+    // v2.13.0: la pildora "?" se fue; "Tus Beats" queda solo, a la izquierda.
+    await expect(page.getByRole("button", { name: "¿Cómo gano Beats?" })).toHaveCount(0);
+    const cabecera = page.locator("main header");
+    await expect(cabecera.locator("button")).toHaveCount(0);
+    expect((await cabecera.getByRole("heading", { level: 1 }).boundingBox())!.x).toBeLessThan(30);
 
     await comoGanar(page).scrollIntoViewIfNeeded();
-    // Pildora blanca con borde y el circulo navy con flecha amarilla.
-    await expect(comoGanar(page)).toHaveCSS("background-color", "rgb(255, 255, 255)");
-    expect((await comoGanar(page).boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    await expect(comoGanar(page).locator(".circulo-flecha")).toHaveCSS("background-color", "rgb(26, 35, 50)");
-    await comoGanar(page).focus();
-    await page.keyboard.press("Enter");
+    // Pildora de vidrio amarillo, tap: sin circulo ni flecha.
+    await expect(comoGanar(page)).toHaveClass(/vidrio-amarillo/);
+    await expect(comoGanar(page).locator(".circulo-flecha, .circulo-navy, svg")).toHaveCount(0);
+    const caja = (await comoGanar(page).boundingBox())!;
+    expect(caja.height).toBeGreaterThanOrEqual(56);
+    expect(caja.height).toBeLessThanOrEqual(64);
+    await expect(comoGanar(page)).toHaveCSS("font-size", "17px");
+    await expect(comoGanar(page)).toHaveCSS("font-weight", "700");
+    // El recordatorio de abajo se queda.
+    await expect(page.getByText("Pronto podrás cambiarlos por entradas al concierto, merch y cursos.")).toBeVisible();
+
+    await comoGanar(page).click();
     await expect(hoja(page)).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(hoja(page)).toHaveCount(0);
     await expect(comoGanar(page)).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(hoja(page)).toBeVisible();
   });
 
   test("tituloDia: Hoy, Ayer y la fecha en tipo oracion", { tag: "@rapido" }, () => {

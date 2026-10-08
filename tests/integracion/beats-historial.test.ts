@@ -104,7 +104,7 @@ test.describe("pantalla", () => {
     expect(await anchoSobrante()).toBe(0);
     await abrirBeats(page);
     expect(await anchoSobrante()).toBe(0);
-    await page.getByRole("button", { name: "¿Cómo gano Beats?" }).click();
+    await page.getByRole("button", { name: "Cómo ganar" }).click();
     expect(await anchoSobrante()).toBe(0);
   });
 

@@ -7,7 +7,7 @@ import { EstadoInicial } from "@/components/beats/estado-inicial";
 import { HojaComoGanar } from "@/components/beats/hoja-como-ganar";
 import { AnuncioVivo } from "@/components/beats/anuncio-vivo";
 import { CarruselMarcas, TarjetaBeats } from "@/components/beats/dashboard-beats";
-import { CirculoFlecha } from "@/components/ui/circulo-flecha";
+import { BotonVidrio } from "@/components/ui/boton-vidrio";
 import { TabBar } from "@/components/navegacion/tab-bar";
 import { AvisoEstado } from "@/components/beats/aviso-estado";
 import { SinConexionBeats } from "@/components/beats/sin-conexion-beats";
@@ -20,7 +20,7 @@ import { marcasDelHistorial, metricasDeLaSemana } from "@/lib/beats/dashboard";
 
 /**
  * Pantalla de Beats (T020), como dashboard desde la v2.8.0 (constitution §2):
- * cabecera "Tus Beats" con la pildora de ayuda, tarjeta de vidrio con el
+ * cabecera "Tus Beats" (sin la pildora "?" desde la v2.13.0), tarjeta de vidrio con el
  * saldo y "Tu pulso" de la semana (v2.9.0), carrusel de marcas, historial por dias en acordeon,
  * "Cómo ganar" y el recordatorio del canje.
  *
@@ -161,33 +161,10 @@ export function PantallaBeats() {
           <AvisoEstado tipo="error" alReintentar={reintentar} reintentando={reintentando} />
         ) : null}
 
-        <header className="flex items-start justify-between gap-3">
+        <header>
           <h1 className="mx-1 pt-2 text-[40px] font-light leading-[1.1] tracking-[-0.01em] text-texto-principal">
             Tus <b className="block font-bold">Beats</b>
           </h1>
-          {/* La pildora de ayuda de siempre, ahora navy (v2.8.0). */}
-          <button
-            type="button"
-            onClick={() => setHojaAbierta(true)}
-            aria-haspopup="dialog"
-            aria-label="¿Cómo gano Beats?"
-            className="flex h-[58px] w-[108px] shrink-0 items-center justify-center rounded-full bg-texto-principal text-texto-inverso outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secundario active:scale-[0.97] motion-reduce:active:scale-100"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="9" />
-              <path d="M9.6 9.4a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1.1.9-1.1 1.8M12 17h.01" />
-            </svg>
-          </button>
         </header>
 
         <TarjetaBeats saldo={resumen?.saldo ?? null} metricas={metricas} cargando={!fallo} />
@@ -237,11 +214,7 @@ export function PantallaBeats() {
                 ) : null}
                 {historial.errorAlCargarMas ? (
                   <div className="flex justify-center py-2">
-                    <button
-                      type="button"
-                      onClick={() => void historial.cargarMas()}
-                      className="boton-ghost"
-                    >
+                    <button type="button" onClick={() => void historial.cargarMas()} className="boton-ghost">
                       Reintentar
                     </button>
                   </div>
@@ -251,18 +224,21 @@ export function PantallaBeats() {
           </section>
 
           {/* Solo mientras no haya ningun escaneo: con el primero se retira y
-              la explicacion queda en la pildora y en "Cómo ganar" (spec §8.1). */}
+              la explicacion queda en "Cómo ganar" (spec §8.1). */}
           {tieneDatos && resumen && !resumen.tiene_escaneos ? <EstadoInicial /> : null}
 
-          <button
+          {/* Tap: sin circulo ni flecha (el circulo es solo del deslizable, v2.13.0). */}
+          <BotonVidrio
             type="button"
+            flecha={false}
+            // Sin desenfoque: la tarjeta de Beats y la barra ya son las dos capas.
+            className="vidrio-plano"
             onClick={() => setHojaAbierta(true)}
             aria-haspopup="dialog"
-            className="boton-secundario boton--flecha text-[16px] font-bold"
+            data-como-ganar=""
           >
             Cómo ganar
-            <CirculoFlecha tamano={40} />
-          </button>
+          </BotonVidrio>
 
           <p className="text-center text-[13px] text-texto-secundario">
             Pronto podrás cambiarlos por entradas al concierto, merch y cursos.
