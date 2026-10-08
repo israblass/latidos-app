@@ -46,7 +46,7 @@ let banners;
 // revocado. Supabase revoca la sesion del token con scope=local y todas las
 // de la persona con scope=global (el default).
 let cierres, sesionesRevocadas, revocadoAntesDe;
-let marcas, qrs, escaneos, movimientos, configuracion, usuariosAuth, perfiles, tokens, ultimoEnlace;
+let objetos, marcas, qrs, escaneos, movimientos, configuracion, usuariosAuth, perfiles, tokens, ultimoEnlace;
 // Fallas simuladas por nombre de RPC (Fase 5: "No pudimos actualizar").
 let fallas;
 
@@ -59,6 +59,7 @@ function reiniciar() {
   revocadoAntesDe = new Map(); // usuario -> segundos: tokens emitidos hasta ahi
   qrs = SEMILLA.qrs.map((q) => ({ ...q }));
   escaneos = [];
+  objetos = new Map(); // "avatares/<ruta>" -> { bytes, tipo } (Storage)
   movimientos = [];
   configuracion = { modo_evento_activo: false, beats_bienvenida: 5 };
   usuariosAuth = new Map(); // correo -> registro de auth
@@ -161,9 +162,12 @@ const usuarioDe = (reg) => ({
 });
 
 const servidor = http.createServer((req, res) => {
-  let cuerpo = "";
-  req.on("data", (c) => (cuerpo += c));
+  const trozos = [];
+  req.on("data", (c) => trozos.push(c));
   req.on("end", () => {
+    // Binario para las subidas de Storage; texto para todo lo demas.
+    const bruto = Buffer.concat(trozos);
+    const cuerpo = bruto.toString();
     const url = new URL(req.url, "http://local");
     // CORS como el de Supabase: la pantalla de Beats lee desde el navegador,
     // no desde el servidor de Next, y el navegador exige estas cabeceras.
@@ -172,7 +176,7 @@ const servidor = http.createServer((req, res) => {
       "access-control-allow-credentials": "true",
       "access-control-allow-headers":
         req.headers["access-control-request-headers"] || "authorization, apikey, content-type, x-client-info, prefer, accept-profile, content-profile",
-      "access-control-allow-methods": "GET, POST, PATCH, DELETE, OPTIONS",
+      "access-control-allow-methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
       "access-control-expose-headers": "content-range",
     };
     if (req.method === "OPTIONS") {
@@ -295,6 +299,12 @@ const servidor = http.createServer((req, res) => {
       else fallas.delete(rpc);
       return json(200, { fallas: [...fallas] });
     }
+    if (url.pathname === "/prueba/objetos" && req.method === "GET") {
+      return json(200, [...objetos.entries()].map(([clave, o]) => ({ clave, tipo: o.tipo, tamano: o.bytes.length })));
+    }
+    if (url.pathname === "/prueba/perfil" && req.method === "GET") {
+      return json(200, perfiles.get(url.searchParams.get("id")) || null);
+    }
     if (url.pathname === "/prueba/balance" && req.method === "GET") {
       const p = perfiles.get(url.searchParams.get("id"));
       return json(200, { beats_balance: p ? p.beats_balance : null });
@@ -408,6 +418,71 @@ const servidor = http.createServer((req, res) => {
       return json(200, unico() ? salida : [salida]);
     }
 
+    // ---------- Storage: bucket privado "avatares" ----------
+    // Espeja supabase/storage/avatares.sql: privado, 1 MB, JPEG/WebP/PNG, y
+    // cada quien solo toca su carpeta (<uuid>/...).
+    if (url.pathname.startsWith("/storage/v1/object/")) {
+      const resto = decodeURIComponent(url.pathname.slice("/storage/v1/object/".length));
+      const firmada = resto.startsWith("sign/");
+      const clave = firmada ? resto.slice(5) : resto;
+      const [bucket, ...partes] = clave.split("/");
+      const ruta = partes.join("/");
+      const errorStorage = (c, mensaje) => json(c, { statusCode: String(c), error: mensaje, message: mensaje });
+      if (bucket !== "avatares") return errorStorage(400, "Bucket not found");
+
+      // Leer con la URL firmada: no lleva sesion, lleva el token.
+      if (firmada && req.method === "GET") {
+        const obj = objetos.get(clave);
+        if (!obj || url.searchParams.get("token") !== `firma:${clave}`) return errorStorage(400, "Object not found");
+        res.writeHead(200, { ...cors, "content-type": obj.tipo, "cache-control": "no-store" });
+        return res.end(obj.bytes);
+      }
+
+      const id = sujeto();
+      if (!id) return errorStorage(401, "Unauthorized");
+      const propia = (r) => r.split("/")[0] === id;
+      if (fallas.has("storage")) return errorStorage(500, "Internal Server Error");
+
+      if (firmada && req.method === "POST") {
+        if (!propia(ruta) || !objetos.has(clave)) return errorStorage(400, "Object not found");
+        return json(200, { signedURL: `/object/sign/${clave}?token=firma:${clave}` });
+      }
+      if (req.method === "POST" && ruta) {
+        if (!propia(ruta)) return errorStorage(403, "new row violates row-level security policy");
+        let bytes = bruto;
+        let tipo = req.headers["content-type"] || "";
+        // supabase-js manda un Blob dentro de un FormData: se saca la parte del archivo.
+        const limite = /boundary=(.+)$/.exec(tipo)?.[1];
+        if (limite) {
+          const marca = Buffer.from(`--${limite}`);
+          let desde = 0;
+          while ((desde = bruto.indexOf(marca, desde)) !== -1) {
+            const finCabecera = bruto.indexOf("\r\n\r\n", desde);
+            if (finCabecera === -1) break;
+            const cabecera = bruto.subarray(desde, finCabecera).toString();
+            const siguiente = bruto.indexOf(marca, finCabecera);
+            if (/filename=/.test(cabecera)) {
+              bytes = bruto.subarray(finCabecera + 4, siguiente - 2);
+              tipo = /content-type:\s*([^\r\n]+)/i.exec(cabecera)?.[1] || "";
+              break;
+            }
+            desde = siguiente;
+          }
+        }
+        if (bytes.length > 1048576) return errorStorage(413, "Payload too large");
+        if (!["image/jpeg", "image/webp", "image/png"].includes(tipo)) return errorStorage(415, "mime type not supported");
+        if (objetos.has(clave) && req.headers["x-upsert"] !== "true") return errorStorage(409, "Duplicate");
+        objetos.set(clave, { bytes: Buffer.from(bytes), tipo });
+        return json(200, { Id: clave, Key: clave });
+      }
+      if (req.method === "DELETE" && !ruta) {
+        const { prefixes = [] } = JSON.parse(cuerpo || "{}");
+        const borradas = prefixes.filter((r) => propia(r) && objetos.delete(`avatares/${r}`));
+        return json(200, borradas.map((name) => ({ name, bucket_id: "avatares" })));
+      }
+      return errorStorage(400, "no soportado por el mock");
+    }
+
     // Conteo de los escaneos propios (Perfil): HEAD con Prefer count=exact,
     // como PostgREST, que responde el total en content-range.
     if (url.pathname === "/rest/v1/escaneos" && req.method === "HEAD") {
@@ -452,6 +527,10 @@ const servidor = http.createServer((req, res) => {
         // Espeja el trigger proteger_beats_balance: el cliente no toca su saldo.
         if ("beats_balance" in cambios && cambios.beats_balance !== actual.beats_balance) {
           return json(403, { code: "P0001", message: "beats_balance no se modifica desde el cliente" });
+        }
+        // Espeja el check usuarios_avatar_path_propio: solo rutas de su carpeta.
+        if (cambios.avatar_path != null && !String(cambios.avatar_path).startsWith(`${id}/`)) {
+          return json(400, { code: "23514", message: "usuarios_avatar_path_propio" });
         }
         perfiles.set(id, { ...actual, ...cambios });
         return json(200, perfiles.get(id));

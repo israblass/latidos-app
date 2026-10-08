@@ -24,8 +24,7 @@ export const reiniciarMock = () => pedir("/prueba/reiniciar", { method: "POST" }
 export const ultimoEnlaceDeConfirmacion = (): Promise<{ enlace: string | null }> =>
   pedir("/prueba/ultimo-enlace");
 
-export const ponerModoEvento = (activo: boolean) =>
-  enviar("/prueba/modo-evento", { activo });
+export const ponerModoEvento = (activo: boolean) => enviar("/prueba/modo-evento", { activo });
 
 export const estadoDelQR = (
   id: string,
@@ -34,11 +33,9 @@ export const estadoDelQR = (
   escaneos: number;
 }> => pedir(`/prueba/estado-qr?id=${id}`);
 
-export const cambiarBeatsDelQR = (id: string, beats: number) =>
-  enviar("/prueba/beats-qr", { id, beats });
+export const cambiarBeatsDelQR = (id: string, beats: number) => enviar("/prueba/beats-qr", { id, beats });
 
-export const ultimoUsuario = (): Promise<{ id: string | null }> =>
-  pedir("/prueba/ultimo-usuario");
+export const ultimoUsuario = (): Promise<{ id: string | null }> => pedir("/prueba/ultimo-usuario");
 
 export const balanceDe = (id: string): Promise<{ beats_balance: number | null }> =>
   pedir(`/prueba/balance?id=${id}`);
@@ -75,9 +72,7 @@ export const sembrarMovimiento = (opciones: {
   minuto?: number;
   marcaId?: string;
 }) => {
-  const hoyCaracas = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Caracas" }).format(
-    new Date(),
-  );
+  const hoyCaracas = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Caracas" }).format(new Date());
   const [a, m, d] = hoyCaracas.split("-").map(Number);
   // Caracas es UTC-4 todo el año (no tiene horario de verano).
   const cuando = new Date(
@@ -99,8 +94,7 @@ export const cambiarEstadoQR = (id: string, estado: "activo" | "inactivo") =>
   enviar("/prueba/qr-estado", { id, estado });
 
 /** Hace fallar una RPC del mock (500) hasta que se apague. */
-export const simularFalla = (rpc: string, activa: boolean) =>
-  enviar("/prueba/falla", { rpc, activa });
+export const simularFalla = (rpc: string, activa: boolean) => enviar("/prueba/falla", { rpc, activa });
 
 export const movimientosDe = (id: string): Promise<{ tipo: string; beats: number }[]> =>
   pedir(`/prueba/movimientos?id=${id}`);
@@ -109,8 +103,7 @@ export const movimientosDe = (id: string): Promise<{ tipo: string; beats: number
 export const ponerTiempoRealCaido = (caido: boolean) => enviar("/prueba/tiempo-real", { caido });
 
 /** Canales de tiempo real unidos ahora por esa cuenta. */
-export const canalesDe = (id: string): Promise<{ canales: number }> =>
-  pedir(`/prueba/canales?id=${id}`);
+export const canalesDe = (id: string): Promise<{ canales: number }> => pedir(`/prueba/canales?id=${id}`);
 
 /** Corre hacia atras todos los movimientos de una cuenta. */
 export const moverMovimientos = (usuarioId: string, dias: number) =>
@@ -124,3 +117,11 @@ export const ponerBanners = (
 /** Los cierres de sesion que recibio el mock, con su alcance. */
 export const cierresDeSesion = (): Promise<{ cierres: { usuario: string | null; alcance: string }[] }> =>
   pedir("/prueba/cierres");
+
+/** Archivos guardados en el Storage del mock (bucket "avatares"). */
+export const objetosDeStorage = (): Promise<Array<{ clave: string; tipo: string; tamano: number }>> =>
+  pedir("/prueba/objetos");
+
+/** La fila de `usuarios` tal como la tiene el mock. */
+export const perfilDelMock = (id: string): Promise<{ avatar_path?: string | null } | null> =>
+  pedir(`/prueba/perfil?id=${id}`);
