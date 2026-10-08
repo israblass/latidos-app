@@ -390,13 +390,17 @@
    * primera pintura.
    */
   .bienvenida {
-    --reserva: 436px;
+    /* Distancia del borde de abajo al texto. v2.10.1: 444 (antes 436) porque
+       el pie con el sello de 44px crece 8px y los puntos chocaban con el
+       subtitulo; asi el texto conserva sus 6px sobre los puntos. */
+    --reserva: 444px;
     /* Zona segura de arriba (v2.10.1): el arte llega al borde fisico y se
        corre hacia abajo lo mismo que mide la zona segura. */
     --zona-arriba: env(safe-area-inset-top, 0px);
     --top-logo: max(54px, calc(var(--zona-arriba) + 16px));
     --tam-titulo: 48px;
     --lienzo: clamp(195px, min(100vw, calc((100vh - 432px) * 390 / 430)), 448.5px);
+    --alto-pantalla: 100vh;
     position: relative;
     isolation: isolate;
     height: 100vh;
@@ -407,6 +411,7 @@
   @supports (height: 100dvh) {
     .bienvenida {
       --lienzo: clamp(195px, min(100vw, calc((100dvh - 432px) * 390 / 430)), 448.5px);
+      --alto-pantalla: 100dvh;
     }
   }
 
@@ -517,6 +522,14 @@
 
   .bienvenida-lienzo > img {
     --u: calc(100cqw / 390);
+    /* Reserva del logo (v2.10.1): limites para las piezas con rol, medidos
+       desde el borde de arriba del arte (que esta en la zona segura).
+       --reserva-logo viene de RESERVA_LOGO (pantallas.ts); 52px es el alto
+       del logo (.bienvenida-logo). */
+    --arriba-libre: calc(var(--top-logo) + 52px + var(--reserva-logo, 20px) - var(--zona-arriba));
+    --abajo-libre: calc(
+      var(--alto-pantalla) - var(--reserva) - env(safe-area-inset-bottom, 0px) - 8px - var(--zona-arriba)
+    );
   }
 
   .bienvenida-logo {
@@ -671,26 +684,24 @@
   }
 
   /*
-   * Logos del pie (v2.10.1): The Flame Creative Lab, sello de la UCV y MUN UCV
-   * (public/marca/pie), en ese orden y alineados al centro vertical. Grid de
-   * tres columnas 1fr / auto / 1fr: las dos laterales miden lo mismo, asi que
-   * el sello queda en el centro exacto de la pantalla (en el eje de los
-   * botones y los puntos) y a la misma distancia de sus dos vecinos, aunque
-   * Flame sea mas ancho que MUN. Alturas de partida: Flame 24, UCV 36, MUN 32
-   * (el ancho sale de la proporcion de cada archivo; nunca se deforman). Si
-   * el grupo no cabe en el 85% del ancho, se escala entero: cada alto se
-   * limita a su parte de ese ancho (201.3 = 2 x Flame + UCV a escala 1, porque
-   * las columnas laterales miden lo que Flame). --escala-pie lo reduce en
-   * pantallas bajas.
+   * Logos del pie (v2.10.1): The Flame Creative Lab a la izquierda y el sello
+   * de la UCV a la derecha (public/marca/pie), en negro de una sola tinta: los
+   * archivos ya vienen asi, no se recolorean. Centrados como un solo grupo en
+   * el eje de la pantalla y alineados al centro vertical. Alturas de partida:
+   * Flame 28, UCV 44 (el ancho sale de la proporcion de cada archivo; nunca
+   * se deforman). 28px entre ellos (20px a 320 de ancho o menos). Si el grupo
+   * no cabe en el 85% del ancho, se escala entero: cada alto se limita a su
+   * parte de ese ancho (140.4 = ancho de Flame + UCV a escala 1).
+   * --escala-pie lo reduce en pantallas bajas.
    */
   .bienvenida-pie__logos {
     --escala-pie: 1;
-    --sep-logos: 24px;
-    --ancho-grupo: calc(85vw - 2 * var(--sep-logos));
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    --sep-logos: 28px;
+    --ancho-grupo: calc(85vw - var(--sep-logos));
+    display: flex;
     max-width: 85vw;
     align-items: center;
+    justify-content: center;
     column-gap: var(--sep-logos);
   }
 
@@ -702,24 +713,21 @@
     object-fit: contain;
   }
 
+  /* Las letras de FLAME y el peso de la gota caen ~1.3px mas abajo que el
+     centro visual del sello: se sube 1px para que los dos lean en la misma
+     linea (medido sobre el alfa de los archivos). */
   .bienvenida-logo-pie--flame {
-    justify-self: end;
-    height: min(calc(24px * var(--escala-pie)), calc(var(--ancho-grupo) * 24 / 201.3));
+    transform: translateY(-1px);
+    height: min(calc(28px * var(--escala-pie)), calc(var(--ancho-grupo) * 28 / 140.4));
   }
 
   .bienvenida-logo-pie--ucv {
-    justify-self: center;
-    height: min(calc(36px * var(--escala-pie)), calc(var(--ancho-grupo) * 36 / 201.3));
-  }
-
-  .bienvenida-logo-pie--mun {
-    justify-self: start;
-    height: min(calc(32px * var(--escala-pie)), calc(var(--ancho-grupo) * 32 / 201.3));
+    height: min(calc(44px * var(--escala-pie)), calc(var(--ancho-grupo) * 44 / 140.4));
   }
 
   @media (max-width: 320px) {
     .bienvenida-pie__logos {
-      --sep-logos: 16px;
+      --sep-logos: 20px;
     }
   }
 
