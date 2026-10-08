@@ -21,6 +21,8 @@ export const ILUSTRACIONES = {
   estadioBeisbol: { src: "/ilustraciones/estadio-beisbol.webp", ancho: 251, alto: 192 },
   /** Avatar de la pildora de perfil del Inicio (v2.7.0), a 46px de alto. */
   corazonAudifonos: { src: "/ilustraciones/corazon-audifonos.webp", ancho: 80, alto: 92 },
+  /** Heroe de Entrar (v2.13.0), a 168px de ancho. */
+  corazonAudifonosEntrar: { src: "/ilustraciones/corazon-audifonos-entrar.webp", ancho: 336, alto: 388 },
   nubesTecho: { src: "/ilustraciones/nubes-techo.webp", ancho: 560, alto: 234 },
 
   /*
