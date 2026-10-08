@@ -1073,6 +1073,36 @@
       0 12px 30px rgba(26, 35, 50, 0.16);
   }
 
+  /* El avatar es un boton (v2.12.0): toca para cambiar la foto. */
+  .perfil-avatar-boton {
+    @apply relative rounded-full outline-none transition-transform active:scale-[0.97];
+  }
+
+  .perfil-avatar-boton:focus-visible {
+    @apply outline outline-2 outline-offset-4 outline-secundario;
+  }
+
+  /* Indicador de camara: circulo navy de 34px con borde crema de 3px. No es
+     la manija de un boton deslizable: solo dice que la foto se cambia. */
+  .perfil-avatar-camara {
+    @apply absolute flex items-center justify-center rounded-full border-[3px] border-fondo;
+    right: -2px;
+    bottom: -2px;
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Vista previa en la hoja: la foto ya recortada, en circulo de 160px. */
+  .perfil-foto-previa {
+    width: 160px;
+    height: 160px;
+    border-radius: 9999px;
+    object-fit: cover;
+    box-shadow:
+      0 0 0 4px rgba(255, 255, 255, 0.6),
+      0 12px 30px rgba(26, 35, 50, 0.16);
+  }
+
   .perfil-nombre {
     @apply font-display uppercase text-texto-principal;
     margin-top: 16px;

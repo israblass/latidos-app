@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { TabBar } from "@/components/navegacion/tab-bar";
 import { EliminarCuenta } from "@/components/perfil/eliminar-cuenta";
+import { FotoPerfil } from "@/components/perfil/foto-perfil";
 import { IconoPerfil, type NombreIcono } from "@/components/perfil/iconos";
 import { BannerAliado } from "@/components/registro/banner-aliado";
 import { BotonCerrarSesion } from "@/components/sesion/boton-cerrar-sesion";
@@ -25,7 +26,8 @@ export const metadata: Metadata = { title: "Perfil · Latidos" };
  * existen. Avatar con iniciales, nombre, tipo de usuario, tres numeros, "Mis
  * datos" enmascarados, actividad, ajustes, banner "Aliado" y cerrar sesion.
  * Lo que aun no tiene flujo (canjes, ajustes, ayuda, terminos) va atenuado con
- * el chip "Pronto" y sin tap. Sin foto de perfil: llega en otra fase.
+ * el chip "Pronto" y sin tap. La foto de perfil (v2.12.0) es privada: solo
+ * la ve la persona, con URLs firmadas de su carpeta en el bucket `avatares`.
  *
  * Vidrio: el avatar es la unica pieza con desenfoque (junto con la barra, dos
  * capas); las tarjetas y los chips son .vidrio-plano, el mismo vidrio sin
@@ -55,9 +57,11 @@ export default async function Perfil() {
         </div>
 
         <header className="flex flex-col items-center text-center">
-          <span aria-hidden="true" className="vidrio vidrio-amarillo perfil-avatar">
-            {iniciales(nombre, apellido)}
-          </span>
+          <FotoPerfil
+            usuarioId={perfil.id}
+            iniciales={iniciales(nombre, apellido)}
+            rutaInicial={datos?.avatar_path ?? null}
+          />
           <h1 className="perfil-nombre">{`${nombre} ${apellido}`.trim()}</h1>
           {datos ? (
             <p className="vidrio vidrio-plano perfil-chip mt-3" data-tipo-usuario={datos.tipo_usuario}>

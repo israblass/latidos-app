@@ -10,7 +10,7 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v18";
+const VERSION = "v19";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
@@ -45,6 +45,7 @@ const VERSION = "v18";
 // v16: el progreso del registro pasa a un ECG azul con punto amarillo animado (CSS nuevo).
 // v17: el paso 1 del registro pierde el corazon junto al titulo.
 // v18: Perfil v1 (CSS nuevo: .perfil, .vidrio-plano).
+// v19: foto de perfil (CSS y JS nuevos). Storage nunca se cachea.
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 
@@ -257,6 +258,12 @@ self.addEventListener("fetch", (evento) => {
   } catch {
     return;
   }
+
+  // Supabase Storage (fotos de perfil con URL firmada, subidas, borrados) va
+  // siempre directo a la red: es privado y la firma vence. Hoy ya queda fuera
+  // por ser de otro origen; esto lo asegura aunque algun dia se sirva desde
+  // el mismo dominio.
+  if (url.pathname.startsWith("/storage/v1/")) return;
 
   if (url.origin !== self.location.origin) return;
   if (!url.protocol.startsWith("http")) return;
