@@ -18,7 +18,7 @@ test.use({ viewport: { width: 390, height: 844 } });
 test.beforeEach(reiniciarMock);
 
 const campana = (page: Page) => page.getByRole("button", { name: "Notificaciones" });
-const perfil = (page: Page) => page.getByRole("main").getByRole("link", { name: "Mi perfil" });
+const perfil = (page: Page) => page.getByRole("main").getByRole("link", { name: "Ir a tu perfil" });
 const acordeon = (page: Page, titulo: string) =>
   page.getByRole("heading", { level: 2, name: new RegExp(titulo) }).getByRole("button");
 const chip = (page: Page) => page.locator("[data-chip-semana]");

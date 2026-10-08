@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { PanelInicio } from "@/components/inicio/panel-inicio";
 import { TabBar } from "@/components/navegacion/tab-bar";
 import { leerBannersActivos } from "@/lib/banners/leer-banners";
+import { leerAvatarPath } from "@/lib/perfil/leer-avatar";
 import { exigirPerfil } from "@/lib/usuario/sesion";
 
 /**
@@ -27,7 +28,7 @@ export default async function Inicio() {
   // Quien todavia no vio el onboarding pasa por el antes de llegar aqui.
   if (!perfil.onboarding_visto) redirect("/onboarding/pantalla-1");
 
-  const banners = await leerBannersActivos();
+  const [banners, avatarPath] = await Promise.all([leerBannersActivos(), leerAvatarPath(perfil.id)]);
 
   return (
     <>
@@ -46,6 +47,7 @@ export default async function Inicio() {
           usuarioId={perfil.id}
           saldoInicial={perfil.beats_balance}
           banners={banners}
+          avatarPath={avatarPath}
         />
       </main>
 

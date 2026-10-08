@@ -10,6 +10,7 @@ import { HojaNotificaciones, IconoCampana } from "@/components/inicio/hoja-notif
 import { QueEsLatidos } from "@/components/inicio/que-es-latidos";
 import { SaldoInicio } from "@/components/inicio/saldo-inicio";
 import { Acordeon } from "@/components/ui/acordeon";
+import { Avatar } from "@/components/ui/avatar";
 import { BotonDeslizar } from "@/components/ui/boton-deslizar";
 import { useActividadReciente } from "@/hooks/use-actividad-reciente";
 import { beatsDeLaSemana, movimientosRecientes } from "@/lib/beats/actividad";
@@ -52,19 +53,23 @@ function IconoCorazon() {
 }
 
 /** Pildoras de la cabecera: 108 x 58. */
-const PILDORA =
-  "flex h-[58px] w-[108px] items-center justify-center overflow-hidden rounded-full outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secundario active:scale-[0.97] motion-reduce:active:scale-100";
+const PILDORA_BASE =
+  "flex h-[58px] w-[108px] items-center justify-center overflow-hidden rounded-full outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secundario";
+const PILDORA = `${PILDORA_BASE} active:scale-[0.97] motion-reduce:active:scale-100`;
 
 export function PanelInicio({
   nombre,
   usuarioId,
   saldoInicial,
   banners,
+  avatarPath = null,
 }: {
   nombre: string;
   usuarioId: string;
   saldoInicial: number;
   banners: BannerInicio[];
+  /** Ruta de la foto de perfil en el bucket privado; null sin foto. */
+  avatarPath?: string | null;
 }) {
   const [hojaAbierta, setHojaAbierta] = useState(false);
   const dias = useActividadReciente(usuarioId);
@@ -88,21 +93,29 @@ export function PanelInicio({
         >
           <IconoCampana tamano={24} />
         </button>
-        {/* Avatar de marca. Elegir otro llega con el Perfil completo; por
-            ahora es el mismo para todos y no se guarda. */}
+        {/* Avatar (v2.14.0): la foto de perfil en un circulo de 46px, del alto
+            del corazon; sin foto, mientras carga o si falla, el corazon con
+            audifonos de siempre. Lleva a Perfil. */}
         <Link
           href="/perfil"
-          aria-label="Mi perfil"
+          aria-label="Ir a tu perfil"
           data-pildora-perfil=""
-          className={`${PILDORA} border border-white/90 bg-white/85 shadow-[0_6px_18px_rgba(26,35,50,0.08)]`}
+          className={`${PILDORA_BASE} border border-white/90 bg-white/85 shadow-[0_6px_18px_rgba(26,35,50,0.08)] transition-transform active:scale-[0.96] motion-reduce:active:scale-100`}
         >
-          <Image
-            src={ILUSTRACIONES.corazonAudifonos.src}
-            alt=""
-            width={40}
-            height={46}
-            priority
-            className="h-[46px] w-auto"
+          <Avatar
+            tamano={46}
+            ruta={avatarPath}
+            respaldo={
+              <Image
+                src={ILUSTRACIONES.corazonAudifonos.src}
+                alt=""
+                width={40}
+                height={46}
+                priority
+                data-corazon-perfil=""
+                className="h-[46px] w-auto"
+              />
+            }
           />
         </Link>
       </header>
