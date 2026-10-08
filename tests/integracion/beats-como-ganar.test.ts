@@ -11,7 +11,7 @@ import { QR } from "../ayudantes/qr";
 test.beforeEach(reiniciarMock);
 
 const hoja = (page: Page) => page.getByRole("dialog", { name: "¿Cómo gano Beats?" });
-const botonComoGano = (page: Page) => page.getByRole("button", { name: "¿Cómo gano Beats?" });
+const botonComoGano = (page: Page) => page.getByRole("button", { name: "Cómo ganar" });
 const lineaGuia = (page: Page) => page.getByText("Escanea tu primer QR para sumar.");
 
 /** Titulo y detalle de cada item de "como ganar", en orden, dentro de `raiz`. */

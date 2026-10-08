@@ -104,7 +104,7 @@ test("Beats: la barra con la lista debajo y la hoja de ayuda", async ({ page }) 
   await abrirBeats(page);
   await comprobar(page, "barra en Beats", barra(page), false);
 
-  await page.getByRole("button", { name: "¿Cómo gano Beats?" }).click();
+  await page.getByRole("button", { name: "Cómo ganar" }).click();
   const hoja = page.getByRole("dialog");
   await page.waitForTimeout(600);
   await comprobar(page, "hoja", hoja);
@@ -120,7 +120,7 @@ test("barra y hojas pasan AA sobre negro puro con los valores finales", async ({
   await cuentaConId(page);
   await abrirBeats(page);
   const recetaBarra = await recetaDe(barra(page));
-  await page.getByRole("button", { name: "¿Cómo gano Beats?" }).click();
+  await page.getByRole("button", { name: "Cómo ganar" }).click();
   const recetaHoja = await recetaDe(page.getByRole("dialog"));
 
   for (const [nombre, receta] of [

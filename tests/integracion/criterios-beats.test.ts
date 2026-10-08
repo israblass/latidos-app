@@ -49,7 +49,7 @@ const haceDias = (n: number) => {
   return new Date(Date.UTC(a, m - 1, d - n)).toISOString().slice(0, 10);
 };
 const barra = (page: Page) => page.getByRole("navigation", { name: "Principal" });
-const botonComoGano = (page: Page) => page.getByRole("button", { name: "¿Cómo gano Beats?" });
+const botonComoGano = (page: Page) => page.getByRole("button", { name: "Cómo ganar" });
 const lineaGuia = (page: Page) => page.getByText("Escanea tu primer QR para sumar.");
 
 async function prepararCopia(page: Page) {
@@ -60,7 +60,7 @@ async function prepararCopia(page: Page) {
   await page.reload();
   await expect
     .poll(() =>
-      page.evaluate(() => caches.open("latidos-shell-v19").then((c) => c.match("/beats")).then(Boolean)),
+      page.evaluate(() => caches.open("latidos-shell-v20").then((c) => c.match("/beats")).then(Boolean)),
     )
     .toBe(true);
 }

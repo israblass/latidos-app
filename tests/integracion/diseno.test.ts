@@ -351,7 +351,7 @@ test.describe("en pantalla", () => {
     await expect(page.locator("section[aria-label='Historial de Beats'] > div")).toHaveCSS("background-color", "rgb(255, 255, 255)");
     expect(await incumplimientosDeColor(page)).toEqual([]);
 
-    await page.getByRole("button", { name: "¿Cómo gano Beats?" }).click();
+    await page.getByRole("button", { name: "Cómo ganar" }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
     const capas = await capasDeVidrio(page);
     expect(capas.length).toBeLessThanOrEqual(2);

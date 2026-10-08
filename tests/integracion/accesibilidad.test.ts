@@ -188,7 +188,7 @@ test.describe("pantalla de Beats (T049)", () => {
   test("hoja ¿Cómo gano Beats?", async ({ page }) => {
     await cuentaEnInicio(page);
     await abrirBeats(page);
-    await page.getByRole("button", { name: "¿Cómo gano Beats?" }).click();
+    await page.getByRole("button", { name: "Cómo ganar" }).click();
     const hoja = page.getByRole("dialog", { name: "¿Cómo gano Beats?" });
     await expect(hoja).toHaveAttribute("aria-modal", "true");
     await page.waitForTimeout(400); // que termine de entrar
@@ -232,7 +232,7 @@ test.describe("pantalla de Beats (T049)", () => {
     await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
     await page.reload();
     await expect
-      .poll(() => page.evaluate(() => caches.open("latidos-shell-v19").then((c) => c.match("/beats")).then(Boolean)))
+      .poll(() => page.evaluate(() => caches.open("latidos-shell-v20").then((c) => c.match("/beats")).then(Boolean)))
       .toBe(true);
 
     await cortarRed(context);

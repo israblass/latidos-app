@@ -10,7 +10,7 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v19";
+const VERSION = "v20";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
@@ -46,6 +46,7 @@ const VERSION = "v19";
 // v17: el paso 1 del registro pierde el corazon junto al titulo.
 // v18: Perfil v1 (CSS nuevo: .perfil, .vidrio-plano).
 // v19: foto de perfil (CSS y JS nuevos). Storage nunca se cachea.
+// v20: Entrar "heroe", Ver historial deslizable, Cómo ganar sin flecha y Beats sin "?".
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 
