@@ -41,7 +41,11 @@ export type Escaneo = {
 };
 
 /** Motivos por los que un QR no se puede canjear (contrato del plan §3). */
-export const MOTIVOS_INVALIDO = ["ya_escaneado_hoy", "limite_alcanzado", "qr_invalido"] as const;
+export const MOTIVOS_INVALIDO = [
+  "ya_escaneado_hoy",
+  "limite_alcanzado",
+  "qr_invalido",
+] as const;
 
 export type MotivoInvalido = (typeof MOTIVOS_INVALIDO)[number];
 
