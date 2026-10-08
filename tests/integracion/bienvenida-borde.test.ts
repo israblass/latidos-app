@@ -138,7 +138,15 @@ async function logosPie(page: Page) {
   return page.evaluate(() =>
     Array.from(document.querySelectorAll<HTMLImageElement>("[data-logo-pie]")).map((img) => {
       const r = img.getBoundingClientRect();
-      return { nombre: img.dataset.logoPie!, izq: r.left, der: r.right, alto: r.height, centro: r.top + r.height / 2, cargado: img.complete && img.naturalWidth > 0 };
+      return {
+        nombre: img.dataset.logoPie!,
+        src: img.getAttribute("src")!,
+        izq: r.left,
+        der: r.right,
+        alto: r.height,
+        centro: r.top + r.height / 2,
+        cargado: img.complete && img.naturalWidth > 0,
+      };
     }),
   );
 }
@@ -172,31 +180,62 @@ for (const [ancho, alto] of [
   [390, 844],
   [430, 932],
 ] as const) {
-  test(`pie a ${ancho}x${alto}: Flame, UCV y MUN UCV en orden, en el 85% y a 12px de los botones`, async ({ page }) => {
+  test(`pie a ${ancho}x${alto}: Flame y UCV en negro, centrados como grupo, en el 85% y a 12px de los botones`, async ({ page }) => {
     await page.setViewportSize({ width: ancho, height: alto });
     await abrir(page, 0);
     await expect.poll(async () => (await logosPie(page)).every((l) => l.cargado)).toBe(true);
     const logos = await logosPie(page);
-    expect(logos.map((l) => l.nombre)).toEqual(["flame", "ucv", "mun-ucv"]);
-    // Sin solaparse entre si, centrados como grupo y alineados al centro vertical.
+    // Exactamente dos, Flame a la izquierda y UCV a la derecha; MUN UCV no.
+    expect(logos.map((l) => l.nombre)).toEqual(["flame", "ucv"]);
+    for (const l of logos) expect(l.src).toMatch(/-negro\.webp$/);
+    await expect(page.locator("img[src*='mun']")).toHaveCount(0);
+    // Sin solaparse y alineados al centro vertical (Flame va 1px arriba a
+    // proposito: sus letras caen mas abajo que el centro del sello).
     expect(logos[0].der).toBeLessThanOrEqual(logos[1].izq);
-    expect(logos[1].der).toBeLessThanOrEqual(logos[2].izq);
-    expect(Math.abs(logos[0].izq - (ancho - logos[2].der))).toBeLessThanOrEqual(1);
-    for (const l of logos) expect(Math.abs(l.centro - logos[1].centro)).toBeLessThanOrEqual(0.5);
-    expect(logos[2].der - logos[0].izq).toBeLessThanOrEqual(ancho * 0.85 + 0.5);
-    // Separacion: 24px (16px por debajo de 360 de ancho).
-    expect(Math.round(logos[1].izq - logos[0].der)).toBe(ancho < 360 ? 16 : 24);
+    expect(Math.abs(logos[0].centro - logos[1].centro)).toBeLessThanOrEqual(1);
+    // El grupo, centrado en la pantalla y como mucho en el 85% del ancho.
+    expect(Math.abs((logos[0].izq + logos[1].der) / 2 - ancho / 2)).toBeLessThanOrEqual(1);
+    expect(logos[1].der - logos[0].izq).toBeLessThanOrEqual(ancho * 0.85 + 0.5);
+    // Separacion: 28px (20px a 320 de ancho o menos).
+    expect(Math.round(logos[1].izq - logos[0].der)).toBe(ancho <= 320 ? 20 : 28);
+    // Puntos, botones y rotulo, en el mismo eje que el par de logos.
+    const ejes = await page.evaluate(() => {
+      const centro = (el: Element) => {
+        const r = el.getBoundingClientRect();
+        return r.left + r.width / 2 - innerWidth / 2;
+      };
+      const rotulo = document.querySelector(".bienvenida-pie__rotulo")!;
+      let letras: number | null = null;
+      if (getComputedStyle(rotulo).display !== "none") {
+        // El centro de las letras, sin el letter-spacing que queda tras la ultima.
+        const rango = document.createRange();
+        rango.selectNodeContents(rotulo);
+        const cajas = Array.from(rango.getClientRects());
+        const espacio = parseFloat(getComputedStyle(rotulo).letterSpacing);
+        const izq = Math.min(...cajas.map((c) => c.left));
+        const der = Math.max(...cajas.map((c) => c.right)) - espacio;
+        letras = (izq + der) / 2 - innerWidth / 2;
+      }
+      const botones = document.querySelectorAll("[data-boton-deslizar]");
+      return {
+        puntos: centro(document.querySelector(".bienvenida-puntos")!),
+        b1: centro(botones[0]),
+        b2: centro(botones[1]),
+        letras,
+      };
+    });
+    for (const [k, v] of Object.entries(ejes)) if (v !== null) expect(Math.abs(v), k).toBeLessThanOrEqual(1);
     // Legibles: el wordmark de Flame, el mas bajo, nunca por debajo de 20px.
     expect(logos[0].alto).toBeGreaterThanOrEqual(20);
     if (alto >= 700) {
-      expect(logos.map((l) => Math.round(l.alto))).toEqual([24, 36, 32]);
+      expect(logos.map((l) => Math.round(l.alto))).toEqual([28, 44]);
       await expect(page.locator(".bienvenida-pie__rotulo")).toBeVisible();
       await expect(page.locator(".bienvenida-pie__rotulo")).toHaveCSS("font-size", "10px");
       await expect(page.locator(".bienvenida-pie__rotulo")).toHaveCSS("color", "rgb(86, 94, 109)");
     } else {
       await expect(page.locator(".bienvenida-pie__rotulo")).toBeHidden();
     }
-    // Su color efectivo no es blanco ni transparente sobre el crema.
+    // Su color efectivo (negro) no es blanco ni transparente sobre el crema.
     for (const l of logos) expect(await colorDe(page, l.nombre), l.nombre).toBeGreaterThan(150);
     const m = await page.evaluate(() => ({
       scroll: document.documentElement.scrollHeight,

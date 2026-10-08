@@ -251,7 +251,7 @@ test.describe("ilustraciones del Inicio", () => {
     await expect
       .poll(() =>
         page.evaluate(
-          (lista) => caches.open("latidos-shell-v12").then((c) => Promise.all(lista.map((r) => c.match(r).then(Boolean)))),
+          (lista) => caches.open("latidos-shell-v13").then((c) => Promise.all(lista.map((r) => c.match(r).then(Boolean)))),
           rutas,
         ),
       )
