@@ -61,7 +61,7 @@ export function TarjetaExito({
 
       {modoEventoActivo ? (
         <p className="mt-5 text-[15px] text-texto-secundario">
-          Sigue escaneando, hay mas marcas cerca.
+          Sigue escaneando, hay más marcas cerca.
         </p>
       ) : null}
 

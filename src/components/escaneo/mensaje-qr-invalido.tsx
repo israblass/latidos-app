@@ -14,8 +14,8 @@ export function MensajeQRInvalido({ acciones }: { acciones: ReactNode }) {
   return (
     <MensajeFriccion
       icono={<IconoEstado nombre="icono-codigo-inactivo" />}
-      titulo="No pudimos leer el codigo"
-      detalle="Asegurate de enfocar bien el codigo y vuelve a intentar."
+      titulo="No pudimos leer el código"
+      detalle="Asegúrate de enfocar bien el código y vuelve a intentar."
       acciones={acciones}
     />
   );
