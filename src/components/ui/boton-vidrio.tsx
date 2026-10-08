@@ -1,20 +1,19 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-import { CirculoFlecha } from "@/components/ui/circulo-flecha";
-
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   /** Tinte del vidrio: amarillo (accion principal) o blanco. */
   tono?: "amarillo" | "blanco";
-  /** Mientras espera respuesta: queda deshabilitado y el circulo gira. */
+  /** Mientras espera respuesta: queda deshabilitado y sin flecha. */
   cargando?: boolean;
 }
 
 /**
- * Boton TAP de vidrio (constitution §2, v2.10.2): 64px de alto, etiqueta a la
- * izquierda y el circulo navy de 48px con flecha a la derecha. Es el
- * "Continuar" del registro y su "Crear cuenta". No se desliza: deslizar queda
- * para la bienvenida, Escanear QR y confirmar canje (BotonDeslizar).
+ * Boton TAP de vidrio (constitution §2, v2.10.3): pildora de 64px de alto,
+ * texto centrado y una flecha pequeña justo a su derecha. SIN el circulo navy
+ * con flecha: ese circulo es la manija de BotonDeslizar (bienvenida,
+ * Escanear QR y confirmar canje) y aqui haria creer que el boton se desliza.
+ * Es el "Continuar" del registro y su "Crear cuenta".
  */
 export function BotonVidrio({
   children,
@@ -33,12 +32,21 @@ export function BotonVidrio({
       className={`vidrio ${tono === "amarillo" ? "vidrio-amarillo" : ""} boton-vidrio ${className}`}
     >
       <span>{children}</span>
-      {cargando ? (
-        <span aria-hidden="true" className="circulo-flecha" style={{ width: 48, height: 48 }}>
-          <span className="girador" />
-        </span>
-      ) : (
-        <CirculoFlecha tamano={48} />
+      {cargando ? null : (
+        <svg
+          aria-hidden="true"
+          data-flecha-boton=""
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
       )}
     </button>
   );

@@ -849,17 +849,24 @@
   }
 
   /*
-   * Boton tap de vidrio (v2.10.2): 64px de alto, etiqueta a la izquierda y el
-   * circulo navy de 48px con flecha a la derecha. Lleva .vidrio (la receta) y
-   * un modificador de tinte (.vidrio-amarillo). No se desliza: se toca.
+   * Boton tap de vidrio (v2.10.3): pildora de 64px, texto centrado en DM Sans
+   * 700 de 17px navy y una flecha de 22px a 10px del texto. Sin circulo: el
+   * circulo navy con flecha es exclusivo de BotonDeslizar. Lleva .vidrio (la
+   * receta) y un modificador de tinte (.vidrio-amarillo). Se toca, no se
+   * desliza; toda la pildora es zona tocable.
    */
   .boton-vidrio {
-    @apply flex w-full items-center justify-between text-left text-[17px] font-bold text-texto-principal;
+    @apply flex w-full items-center justify-center text-center text-[17px] font-bold text-texto-principal;
+    gap: 10px;
     min-height: 64px;
-    padding: 8px 8px 8px 24px;
+    padding: 8px 24px;
     isolation: isolate;
     touch-action: manipulation;
     transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+  }
+
+  .boton-vidrio svg {
+    flex: none;
   }
 
   /* Mas especifico que .vidrio (definido abajo), que trae el radio de tarjeta. */
@@ -1091,7 +1098,6 @@
    * chevron de los acordeones. Es el unico lugar donde el amarillo es color de
    * trazo, y siempre sobre navy (15:1), nunca sobre crema ni blanco.
    */
-  .boton-vidrio .circulo-flecha,
   .boton-primario .circulo-flecha,
   .boton-secundario .circulo-flecha,
   .circulo-navy {

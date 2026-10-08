@@ -182,7 +182,7 @@ export default function PasoContrasena() {
 
         <div className="mt-auto pt-6">
           <BotonVidrio type="submit" disabled={!valida} cargando={enviando}>
-            {enviando ? "Creando cuenta…" : "Crear cuenta"}
+            {enviando ? "Creando…" : "Crear cuenta"}
           </BotonVidrio>
         </div>
       </form>
