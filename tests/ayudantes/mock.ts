@@ -125,3 +125,6 @@ export const objetosDeStorage = (): Promise<Array<{ clave: string; tipo: string;
 /** La fila de `usuarios` tal como la tiene el mock. */
 export const perfilDelMock = (id: string): Promise<{ avatar_path?: string | null } | null> =>
   pedir(`/prueba/perfil?id=${id}`);
+
+/** Pone `avatar_path` en el perfil del mock sin subir ningun archivo. */
+export const ponerAvatarPath = (id: string, ruta: string | null) => enviar("/prueba/avatar", { id, ruta });

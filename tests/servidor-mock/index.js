@@ -299,6 +299,14 @@ const servidor = http.createServer((req, res) => {
       else fallas.delete(rpc);
       return json(200, { fallas: [...fallas] });
     }
+    // Pone avatar_path directo (sin subir nada): para probar una ruta cuyo
+    // archivo no existe.
+    if (url.pathname === "/prueba/avatar" && req.method === "POST") {
+      const { id, ruta } = JSON.parse(cuerpo);
+      const p = perfiles.get(id);
+      if (p) p.avatar_path = ruta;
+      return json(200, { ok: Boolean(p) });
+    }
     if (url.pathname === "/prueba/objetos" && req.method === "GET") {
       return json(200, [...objetos.entries()].map(([clave, o]) => ({ clave, tipo: o.tipo, tamano: o.bytes.length })));
     }

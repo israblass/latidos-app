@@ -363,7 +363,7 @@ test.describe("cerrar sesion", () => {
     await expect(numeroDeBeats(page)).toBeVisible();
 
     const copia = await page.evaluate(async () => {
-      const cache = await caches.open("latidos-shell-v20");
+      const cache = await caches.open("latidos-shell-v21");
       const respuesta = await cache.match("/beats");
       return respuesta ? respuesta.text() : null;
     });
@@ -372,7 +372,7 @@ test.describe("cerrar sesion", () => {
     expect(copia).not.toContain(datos.nombre);
     // Y ninguna otra respuesta guardada es una pantalla con sesion.
     const guardadas = await page.evaluate(async () =>
-      (await (await caches.open("latidos-shell-v20")).keys()).map((r) => new URL(r.url).pathname),
+      (await (await caches.open("latidos-shell-v21")).keys()).map((r) => new URL(r.url).pathname),
     );
     expect(guardadas.filter((ruta) => /^\/(inicio|perfil|onboarding|escanear|api|auth)/.test(ruta))).toEqual(
       [],

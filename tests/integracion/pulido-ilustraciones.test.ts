@@ -252,7 +252,7 @@ test.describe("ilustraciones del Inicio", () => {
     await expect
       .poll(() =>
         page.evaluate(
-          (lista) => caches.open("latidos-shell-v20").then((c) => Promise.all(lista.map((r) => c.match(r).then(Boolean)))),
+          (lista) => caches.open("latidos-shell-v21").then((c) => Promise.all(lista.map((r) => c.match(r).then(Boolean)))),
           rutas,
         ),
       )
