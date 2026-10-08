@@ -11,7 +11,6 @@ import { QueEsLatidos } from "@/components/inicio/que-es-latidos";
 import { SaldoInicio } from "@/components/inicio/saldo-inicio";
 import { Acordeon } from "@/components/ui/acordeon";
 import { BotonDeslizar } from "@/components/ui/boton-deslizar";
-import { CirculoFlecha } from "@/components/ui/circulo-flecha";
 import { useActividadReciente } from "@/hooks/use-actividad-reciente";
 import { beatsDeLaSemana, movimientosRecientes } from "@/lib/beats/actividad";
 import { ILUSTRACIONES } from "@/lib/ilustraciones";
@@ -158,10 +157,14 @@ export function PanelInicio({
           ) : (
             <p className="py-2 text-[14px] text-texto-secundario">Aún no hay movimientos</p>
           )}
-          <Link href="/beats" className="boton-oscuro boton--flecha mt-1.5 min-h-12 h-12 text-[15px] font-bold">
-            Ver historial
-            <CirculoFlecha tamano={32} />
-          </Link>
+          {/* Lleva el circulo con flecha, asi que se desliza (v2.13.0); tambien se toca. */}
+          <BotonDeslizar
+            href="/beats"
+            label="Ver historial"
+            variante="navy"
+            ariaLabel="Desliza para ver tu historial"
+            className="mt-1.5"
+          />
         </Acordeon>
 
         <Acordeon titulo="Qué es Latidos" subtitulo="El programa y sus 3 fases" icono={<IconoCorazon />}>
