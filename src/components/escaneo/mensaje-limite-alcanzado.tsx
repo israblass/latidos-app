@@ -14,7 +14,7 @@ export function MensajeLimiteAlcanzado({ acciones }: { acciones: ReactNode }) {
   return (
     <MensajeFriccion
       icono={<IconoEstado nombre="icono-codigo-inactivo" />}
-      titulo="Este codigo ya no esta activo"
+      titulo="Este código ya no está activo"
       detalle="Busca otro QR de marca para seguir sumando."
       acciones={acciones}
     />

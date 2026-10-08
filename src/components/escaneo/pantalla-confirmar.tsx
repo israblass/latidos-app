@@ -26,18 +26,18 @@ type Estado =
 const MENSAJES_FALLO: Record<MotivoCanjeFallido, { titulo: string; detalle: string }> = {
   ya_escaneado_hoy: {
     titulo: "Ya sumaste con esta marca hoy",
-    detalle: "Vuelve manana y suma otra vez.",
+    detalle: "Vuelve mañana y suma otra vez.",
   },
   limite_alcanzado: {
-    titulo: "Este codigo ya no esta activo",
+    titulo: "Este código ya no está activo",
     detalle: "Busca otro QR de marca para seguir sumando.",
   },
   qr_invalido: {
-    titulo: "Este codigo ya no esta activo",
+    titulo: "Este código ya no está activo",
     detalle: "Busca otro QR de marca para seguir sumando.",
   },
   sesion_invalida: {
-    titulo: "Tu sesion se cerro",
+    titulo: "Tu sesión se cerró",
     detalle: "Vuelve a entrar para seguir sumando.",
   },
 };
@@ -184,7 +184,7 @@ export function PantallaConfirmar({ idQR, marca, beatsEnJuego, balanceActual }: 
 
       {!enLinea ? (
         <p role="status" className="mt-5 text-[14px] text-alerta-texto">
-          Estas sin conexion. Conectate para confirmar el canje.
+          Estás sin conexión. Conéctate para confirmar el canje.
         </p>
       ) : null}
 

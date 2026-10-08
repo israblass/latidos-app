@@ -74,7 +74,7 @@ export function PromptIOS({ onCerrar }: Props) {
         </div>
 
         <p className="mt-2 text-texto-secundario">
-          Usa Latidos como una app en tu telefono.
+          Usa Latidos como una app en tu teléfono.
         </p>
 
         <ol className="mt-5 flex flex-col gap-4">

@@ -178,7 +178,7 @@ export function PantallaEscaneo({ contenidoInicial }: { contenidoInicial?: strin
                   {/* Sin el giro, el cambio de texto parece que la pantalla se
                       colgo justo en el momento de mas tension del flujo. */}
                   <span className="girador" aria-hidden="true" />
-                  Validando el codigo...
+                  Validando el código...
                 </>
               ) : (
                 "Enfoca el QR de la marca."
@@ -191,8 +191,8 @@ export function PantallaEscaneo({ contenidoInicial }: { contenidoInicial?: strin
                 className="mt-4 rounded-control border-l-[3px] border-alerta bg-fondo-alterno px-4 py-3 text-[14px] text-texto-secundario"
               >
                 {aviso === "qr_invalido" && enLinea
-                  ? "Ese codigo no esta activo. Busca otro QR de marca y vuelve a intentar."
-                  : "Te quedaste sin señal. Intenta de nuevo cuando tengas conexion."}
+                  ? "Ese código no está activo. Busca otro QR de marca y vuelve a intentar."
+                  : "Te quedaste sin señal. Intenta de nuevo cuando tengas conexión."}
               </div>
             ) : null}
           </div>

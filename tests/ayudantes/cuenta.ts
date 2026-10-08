@@ -36,7 +36,7 @@ export function datosDeRegistro(ajustes: Partial<DatosDeRegistro> = {}): DatosDe
 export async function completarRegistro(page: Page, datos = datosDeRegistro()) {
   await page.goto("/registro/paso-1");
 
-  await page.getByLabel("Cedula").fill(datos.cedula);
+  await page.getByLabel("Cédula").fill(datos.cedula);
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-2");
 
@@ -45,7 +45,7 @@ export async function completarRegistro(page: Page, datos = datosDeRegistro()) {
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-3");
 
-  await page.getByLabel("Telefono").fill(datos.telefono);
+  await page.getByLabel("Teléfono").fill(datos.telefono);
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-4");
 
@@ -57,7 +57,7 @@ export async function completarRegistro(page: Page, datos = datosDeRegistro()) {
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.waitForURL("**/paso-6");
 
-  await page.getByLabel("Contrasena").fill(datos.contrasena);
+  await page.getByLabel("Contraseña", { exact: true }).fill(datos.contrasena);
   await page.getByRole("button", { name: "Crear cuenta" }).click();
   await page.waitForURL("**/confirma-tu-correo");
 

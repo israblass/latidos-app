@@ -119,7 +119,7 @@ test("con modo evento activo, el cierre invita a seguir escaneando", async ({ pa
   await page.getByRole("button", { name: "Confirmar canje" }).click();
 
   await expect(page.getByText(/Sumaste 5 Beats de Pepsi/)).toBeVisible();
-  await expect(page.getByText(/hay mas marcas cerca/)).toBeVisible();
+  await expect(page.getByText(/hay más marcas cerca/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Seguir escaneando" })).toBeVisible();
 });
 
@@ -132,7 +132,7 @@ test("con modo evento apagado, el cierre es simple", async ({ page }) => {
   await page.getByRole("button", { name: "Confirmar canje" }).click();
   await expect(page.getByText(/Sumaste 10 Beats/)).toBeVisible();
 
-  await expect(page.getByText(/hay mas marcas cerca/)).toHaveCount(0);
+  await expect(page.getByText(/hay más marcas cerca/)).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Seguir escaneando" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Volver a Inicio" })).toBeVisible();
 });

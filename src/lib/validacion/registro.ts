@@ -16,9 +16,9 @@ import { TIPOS_USUARIO } from "@/types/usuario";
 export const cedulaSchema = z
   .string()
   .trim()
-  .min(1, "Escribe tu cedula")
+  .min(1, "Escribe tu cédula")
   // Texto libre a proposito: solo se acota el largo para descartar pegados accidentales.
-  .max(30, "Revisa tu cedula");
+  .max(30, "Revisa tu cédula");
 
 export const nombreSchema = z
   .string()
@@ -35,9 +35,9 @@ export const apellidoSchema = z
 export const telefonoSchema = z
   .string()
   .trim()
-  .min(1, "Escribe tu telefono")
+  .min(1, "Escribe tu teléfono")
   // Sintaxis basica: digitos, con separadores comunes permitidos.
-  .regex(/^[+\d][\d\s()-]{6,19}$/, "Escribe tu telefono solo con numeros");
+  .regex(/^[+\d][\d\s()-]{6,19}$/, "Escribe tu teléfono solo con números");
 
 export const correoSchema = z
   .string()
@@ -48,7 +48,7 @@ export const correoSchema = z
   .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Revisa tu correo");
 
 export const tipoUsuarioSchema = z.enum(TIPOS_USUARIO, {
-  message: "Elige una opcion",
+  message: "Elige una opción",
 });
 
 export const contrasenaSchema = z

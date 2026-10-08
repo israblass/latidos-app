@@ -762,6 +762,214 @@
     }
   }
 
+  /*
+   * Registro (v2.10.2): el lenguaje de la bienvenida. Fondo crema con los
+   * circulos del pulso muy suaves arriba, trazo ECG de progreso, titulo en
+   * Anton, campos en una tarjeta de vidrio blanco y el boton tap de vidrio
+   * amarillo. Capas con desenfoque por pantalla: la tarjeta y el boton (dos);
+   * el chip "Aliado" lleva el tinte del vidrio pero sin desenfoque.
+   */
+  .registro {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    min-height: 100vh;
+    min-height: 100dvh;
+    flex-direction: column;
+    padding: max(16px, env(safe-area-inset-top, 0px)) 20px max(24px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+  }
+
+  /* Los circulos del pulso, al 20% y con una mascara corta. */
+  .registro-arte {
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: -1;
+    height: 360px;
+    overflow: hidden;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(180deg, #fff 0, #fff 45%, transparent 100%);
+    mask-image: linear-gradient(180deg, #fff 0, #fff 45%, transparent 100%);
+  }
+
+  .registro-arte img {
+    position: absolute;
+    top: -150px;
+    left: 50%;
+    width: 560px;
+    max-width: none;
+    height: auto;
+    transform: translateX(-50%);
+    opacity: 0.2;
+  }
+
+  /* Trazo ECG de progreso: 6 tramos; hechos en navy, el activo en azul y mas
+     grueso, los que faltan en navy al 18%. */
+  .registro-ecg {
+    display: block;
+    width: 100%;
+    height: 28px;
+    overflow: visible;
+  }
+
+  .registro-ecg path {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke: rgba(26, 35, 50, 0.18);
+    transition: stroke 0.3s ease-out;
+  }
+
+  .registro-ecg path[data-estado="hecho"] {
+    stroke: theme("colors.texto.principal");
+  }
+
+  .registro-ecg path[data-estado="activo"] {
+    stroke: theme("colors.secundario");
+    stroke-width: 3;
+  }
+
+  .registro-titulo {
+    @apply font-display uppercase text-texto-principal;
+    font-size: 34px;
+    line-height: 1.02;
+  }
+
+  .registro-subtitulo {
+    @apply text-texto-secundario;
+    margin-top: 8px;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  /* Tarjeta de vidrio blanco que lleva los campos. */
+  .registro-tarjeta {
+    @apply flex flex-col gap-4;
+    padding: 18px 16px;
+  }
+
+  /*
+   * Boton tap de vidrio (v2.10.2): 64px de alto, etiqueta a la izquierda y el
+   * circulo navy de 48px con flecha a la derecha. Lleva .vidrio (la receta) y
+   * un modificador de tinte (.vidrio-amarillo). No se desliza: se toca.
+   */
+  .boton-vidrio {
+    @apply flex w-full items-center justify-between text-left text-[17px] font-bold text-texto-principal;
+    min-height: 64px;
+    padding: 8px 8px 8px 24px;
+    isolation: isolate;
+    touch-action: manipulation;
+    transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+  }
+
+  /* Mas especifico que .vidrio (definido abajo), que trae el radio de tarjeta. */
+  .vidrio.boton-vidrio {
+    border-radius: 9999px;
+  }
+
+  .boton-vidrio:active {
+    transform: scale(0.98);
+  }
+
+  .boton-vidrio:disabled,
+  .boton-vidrio[aria-disabled="true"] {
+    opacity: 0.4;
+    transform: none;
+    cursor: default;
+  }
+
+  .boton-vidrio:focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-secundario;
+  }
+
+  /* Opciones del tipo de usuario: blancas; la elegida, vidrio amarillo con
+     aro navy de 2px y check navy. */
+  .registro-opcion {
+    @apply flex w-full items-center gap-3 text-left;
+    min-height: 72px;
+    padding: 12px 14px;
+    border-radius: theme("borderRadius.card");
+  }
+
+  .registro-opcion[aria-checked="true"] {
+    box-shadow: var(--vidrio-sombra), 0 0 0 2px theme("colors.texto.principal");
+  }
+
+  .registro-opcion-icono {
+    @apply flex shrink-0 items-center justify-center rounded-full bg-secundario/[0.12] text-texto-principal;
+    width: 44px;
+    height: 44px;
+  }
+
+  .registro-opcion[aria-checked="true"] .registro-opcion-icono {
+    @apply bg-superficie/70;
+  }
+
+  /* Medidor de fuerza de la contrasena: 4 tramos. */
+  .medidor-fuerza {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .medidor-fuerza span {
+    height: 6px;
+    border-radius: 9999px;
+    background: rgba(26, 35, 50, 0.12);
+    transition: background-color 0.2s ease-out;
+  }
+
+  .medidor-fuerza span[data-lleno] {
+    @apply bg-secundario;
+  }
+
+  /*
+   * Banners "Aliado" (v2.10.2): imagen 1200x600 mostrada a ~330x165, radio
+   * 26px y un chip "Aliado" en la esquina. Se ocultan con el teclado abierto
+   * (data-teclado, lo pone BannerAliado) y en pantallas de menos de 700px de
+   * alto, para no empujar el boton fuera de la zona tocable.
+   */
+  .banner-aliado {
+    position: relative;
+    width: 100%;
+    max-width: 330px;
+    margin-inline: auto;
+    aspect-ratio: 2 / 1;
+    overflow: hidden;
+    border-radius: 26px;
+    box-shadow: 0 10px 24px rgba(26, 35, 50, 0.14), 0 2px 6px rgba(26, 35, 50, 0.08);
+  }
+
+  .banner-aliado img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .banner-aliado[data-teclado] {
+    display: none;
+  }
+
+  @media (max-height: 699px) {
+    .banner-aliado {
+      display: none;
+    }
+  }
+
+  /* Chip con el tinte del vidrio, sin desenfoque (no suma capas). */
+  .chip-aliado {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 2px 6px rgba(26, 35, 50, 0.12);
+    @apply text-[10px] font-bold uppercase tracking-etiqueta text-texto-principal;
+  }
+
   .titulo-pantalla {
     @apply font-display text-[28px] uppercase leading-tight text-texto-principal;
   }
@@ -883,6 +1091,7 @@
    * chevron de los acordeones. Es el unico lugar donde el amarillo es color de
    * trazo, y siempre sobre navy (15:1), nunca sobre crema ni blanco.
    */
+  .boton-vidrio .circulo-flecha,
   .boton-primario .circulo-flecha,
   .boton-secundario .circulo-flecha,
   .circulo-navy {
@@ -926,6 +1135,26 @@
 
   .campo-error {
     @apply border-error focus:border-error;
+  }
+
+  /*
+   * Autocompletado (v2.10.2): iOS y Chrome pintan el campo de amarillo o azul
+   * claro, fuera de la paleta. Se tapa con una sombra interior del mismo fondo
+   * del campo y el texto queda navy; la transicion larga evita el destello.
+   */
+  .campo:-webkit-autofill,
+  .campo:-webkit-autofill:hover,
+  .campo:-webkit-autofill:focus {
+    -webkit-text-fill-color: theme("colors.texto.principal");
+    caret-color: theme("colors.texto.principal");
+    -webkit-box-shadow: 0 0 0 1000px theme("colors.fondo-alterno") inset;
+    box-shadow: 0 0 0 1000px theme("colors.fondo-alterno") inset;
+    transition: background-color 9999s ease-out 0s;
+  }
+
+  .campo:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px theme("colors.superficie") inset;
+    box-shadow: 0 0 0 1000px theme("colors.superficie") inset;
   }
 
   /*
@@ -1043,8 +1272,11 @@
     overflow: visible;
   }
 
-  /* Tinte amarillo de la paleta: el minimo da AA de sobra con el navy. */
-  .deslizar--vidrio-amarillo {
+  /* Tinte amarillo de la paleta: el minimo da AA de sobra con el navy.
+     .vidrio-amarillo es el mismo tinte para cualquier pieza de vidrio (los
+     botones tap y la opcion elegida del registro, v2.10.2). */
+  .deslizar--vidrio-amarillo,
+  .vidrio-amarillo {
     --vidrio-tinte-arriba: rgba(253, 251, 5, 0.92);
     --vidrio-tinte-abajo: rgba(253, 251, 5, 0.82);
   }
@@ -1130,7 +1362,8 @@
       --vidrio-tinte-abajo: rgba(255, 255, 255, 0.92);
     }
     /* El boton amarillo de vidrio sigue amarillo, casi solido. */
-    .deslizar--vidrio-amarillo {
+    .deslizar--vidrio-amarillo,
+    .vidrio-amarillo {
       --vidrio-tinte-arriba: rgba(253, 251, 5, 0.96);
       --vidrio-tinte-abajo: rgba(253, 251, 5, 0.96);
     }
@@ -1147,7 +1380,8 @@
       backdrop-filter: none;
     }
     /* El boton amarillo de vidrio pasa a amarillo solido. */
-    .deslizar--vidrio-amarillo {
+    .deslizar--vidrio-amarillo,
+    .vidrio-amarillo {
       --vidrio-tinte-arriba: #fdfb05;
       --vidrio-tinte-abajo: #fdfb05;
     }

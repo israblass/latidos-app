@@ -21,7 +21,7 @@ export function MensajeYaEscaneado({
     <MensajeFriccion
       icono={<IconoEstado nombre="icono-ya-escaneado" />}
       titulo={`Ya sumaste con ${marca} hoy`}
-      detalle="Vuelve manana y suma otra vez con esta marca."
+      detalle="Vuelve mañana y suma otra vez con esta marca."
       acciones={acciones}
     />
   );

@@ -10,7 +10,7 @@
  * rompe peticiones que sin el funcionarian perfectamente.
  */
 
-const VERSION = "v13";
+const VERSION = "v14";
 // v3: el manifest cambio de colores con el nuevo design system, asi que el
 // shell precacheado se renueva.
 // v4: la pantalla de Beats guarda una copia de su HTML para abrirse sin señal
@@ -39,6 +39,8 @@ const VERSION = "v13";
 // instalar. Los logos del pie tampoco: se guardan la primera vez que se ven.
 // v13: CSS nuevo de la bienvenida (pie con dos logos en negro, reserva del
 // logo LATIDOS en el arte): misma razon que la v7.
+// v14: CSS nuevo del registro (vidrio, trazo ECG, banners "Aliado") y
+// textos con tildes: misma razon que la v7.
 const CACHE_SHELL = `latidos-shell-${VERSION}`;
 const RUTA_SIN_CONEXION = "/sin-conexion";
 

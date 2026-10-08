@@ -133,18 +133,18 @@ export function LectorQR({ onLeer, activo, onEstado }: Props) {
         className="h-full w-full object-cover"
         playsInline
         muted
-        aria-label="Camara para escanear el codigo"
+        aria-label="Cámara para escanear el código"
       />
 
       {estado !== "activa" ? (
         <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
           <p className="text-sm text-white/80">
-            {estado === "iniciando" ? "Abriendo la camara..." : null}
+            {estado === "iniciando" ? "Abriendo la cámara..." : null}
             {estado === "sin-permiso"
-              ? "Habilita la camara desde la configuracion de tu navegador para escanear."
+              ? "Habilita la cámara desde la configuración de tu navegador para escanear."
               : null}
             {estado === "sin-camara"
-              ? "Este dispositivo no tiene camara disponible."
+              ? "Este dispositivo no tiene cámara disponible."
               : null}
           </p>
         </div>

@@ -14,7 +14,7 @@ export function MensajeSinConexion({ acciones }: { acciones: ReactNode }) {
     <MensajeFriccion
       icono={<IlustracionSinSenal ancho={180} />}
       titulo="Te quedaste sin señal"
-      detalle="Intenta de nuevo cuando tengas conexion."
+      detalle="Intenta de nuevo cuando tengas conexión."
       acciones={acciones}
     />
   );

@@ -53,7 +53,7 @@ test.describe("2. el QR alcanzo su limite total", () => {
     await cuentaEnInicio(page);
     await page.goto(`/escanear/confirmar?qr=${QR.agotado}`);
 
-    await expect(page.getByText(/Este codigo ya no esta activo/)).toBeVisible();
+    await expect(page.getByText(/Este código ya no está activo/)).toBeVisible();
     await expect(page.getByRole("button", { name: "Confirmar canje" })).toHaveCount(0);
 
     // Solo el texto visible: textContent del body arrastraria el payload RSC
@@ -126,7 +126,7 @@ test.describe("4. sin conexion", () => {
     await context.setOffline(true);
     await page.getByRole("button", { name: "Confirmar canje" }).click();
 
-    await expect(page.getByText(/conexion/i).first()).toBeVisible();
+    await expect(page.getByText(/conexión/i).first()).toBeVisible();
     // La interfaz sigue respondiendo: hay salida.
     await expect(page.getByRole("button", { name: "Reintentar" })).toBeEnabled();
 

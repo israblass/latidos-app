@@ -56,7 +56,7 @@ export default function PantallaCierre() {
               Avisos del programa
             </p>
             <p className="text-xs text-texto-secundario">
-              Nuevas jornadas, artistas confirmados y novedades. Nada mas.
+              Nuevas jornadas, artistas confirmados y novedades. Nada más.
             </p>
           </div>
         </div>
@@ -78,7 +78,7 @@ export default function PantallaCierre() {
 
         {estado === "denegado" ? (
           <p className="mt-4 text-sm text-texto-secundario">
-            Sin avisos por ahora. Puedes activarlos desde la configuracion de tu
+            Sin avisos por ahora. Puedes activarlos desde la configuración de tu
             navegador cuando quieras.
           </p>
         ) : null}
